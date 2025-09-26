@@ -1,10 +1,15 @@
 package event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneOffset;
 
 public class AirQualityEvent {
+
+    private static final Logger logger = LoggerFactory.getLogger(AirQualityEvent.class);
 
     private LocalDateTime eventTime;
     private double coLevel;
@@ -46,7 +51,7 @@ public class AirQualityEvent {
 
             return new AirQualityEvent(timestamp, coValue);
         } catch (Exception e) {
-            System.err.println("!!! ERROR parsing line: '" + line + "'");
+            logger.warn("Error parsing line: '{}'", line, e);
             return null;
         }
     }
@@ -57,7 +62,7 @@ public class AirQualityEvent {
 
     @Override
     public String toString() {
-        return "AirQualityEvent{" +
+        return "{" +
                 "eventTime=" + eventTime +
                 ", coLevel=" + coLevel +
                 '}';
