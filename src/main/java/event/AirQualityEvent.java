@@ -2,38 +2,28 @@ package event;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 
-public class Event {
+public class AirQualityEvent {
 
     private LocalDateTime eventTime;
     private double coLevel;
 
-    public Event(LocalDateTime eventTime, double coLevel) {
+    public AirQualityEvent(LocalDateTime eventTime, double coLevel) {
         this.eventTime = eventTime;
         this.coLevel = coLevel;
     }
 
-    public LocalDateTime getEventTime() {
-        return eventTime;
-    }
+    public LocalDateTime getEventTime() {return eventTime;}
+    public void setEventTime(LocalDateTime eventTime) {this.eventTime = eventTime;}
+    public double getCoLevel() {return coLevel;}
+    public void setCoLevel(double coLevel) {this.coLevel = coLevel;}
 
-    public void setEventTime(LocalDateTime eventTime) {
-        this.eventTime = eventTime;
-    }
-
-    public double getCoLevel() {
-        return coLevel;
-    }
-
-    public void setCoLevel(double coLevel) {
-        this.coLevel = coLevel;
-    }
-
-    // Formatter per il timestamp nel formato "DD/MM/YYYY HH.mm.ss"
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH.mm.ss");
+    // Formatter per il timestamp nel formato "DD/MM/YYYY HH:mm:ss"
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     // Method to create an event from a row in the CSV file
-    public static Event fromString(String line) {
+    public static AirQualityEvent eventCreation(String line) {
         try {
             String[] tokens = line.split(";", -1);
             if (tokens.length < 3) {
@@ -54,11 +44,15 @@ public class Event {
                 return null;
             }
 
-            return new Event(timestamp, coValue);
+            return new AirQualityEvent(timestamp, coValue);
         } catch (Exception e) {
-            // Ignore rows that we cannot parse
+            System.err.println("!!! ERROR parsing line: '" + line + "'");
             return null;
         }
+    }
+
+    public long getTimestamp() {
+        return this.eventTime.toEpochSecond(ZoneOffset.UTC) * 1000;
     }
 
     @Override
