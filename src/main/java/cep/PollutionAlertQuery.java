@@ -79,7 +79,6 @@ public class PollutionAlertQuery {
 
         int sequenceCount = 0;
         try (FileWriter writer = new FileWriter(outputFilePath)) {
-            writer.write("matched_sequence\n"); // Aggiungo un header al CSV per chiarezza
 
             while(alertsIterator.hasNext()) {
                 List<AirQualityEvent> sequence = alertsIterator.next();
