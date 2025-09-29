@@ -7,25 +7,25 @@ import java.net.URL;
 import java.util.Objects;
 
 public class StreamFactory {
-    // Creates a DataDtream by reading from the CSV file in resources
 
+    // Create a DataDtream by reading from the CSV file in resources
     public static DataStream<AirQualityEvent> createStream(StreamExecutionEnvironment env, String filePath) {
-        //Looks for the CSV file in the directory resources
+
         URL fileURL = StreamFactory.class.getClassLoader().getResource(filePath);
         if(fileURL == null){
             throw new RuntimeException("File not found");
         }
 
         DataStream<AirQualityEvent> dataStream = env.readTextFile(fileURL.getPath())
-                .filter(line -> !line.startsWith("Date;Time;CO(GT)")) // Skips the header
-                .map(AirQualityEvent::eventCreation) // Creation of an event from a row
-                .filter(Objects::nonNull); // Skips invalid line
+                .filter(line -> !line.startsWith("Date;Time;CO(GT)")) // Skip the header
+                .map(AirQualityEvent::eventCreation) // Create an event from a line
+                .filter(Objects::nonNull); // Skip invalid line
 
         // Assign watermark
         return dataStream.assignTimestampsAndWatermarks(new AirQualityWatermarkStrategy());
     }
 
-    // Class to extract timestamp and generate watermarks
+    // Extract timestamp and generate watermarks
     private static class AirQualityWatermarkStrategy implements WatermarkStrategy<AirQualityEvent> {
 
         @Override
@@ -44,7 +44,7 @@ public class StreamFactory {
                     maxTimestampSeen = Math.max(maxTimestampSeen, eventTimestamp);
                 }
 
-                // Emits a watermark based on the max timestamp seen
+                // Emit a watermark based on the max timestamp seen
                 @Override
                 public void onPeriodicEmit(WatermarkOutput output) {
                     output.emitWatermark(new Watermark(maxTimestampSeen));

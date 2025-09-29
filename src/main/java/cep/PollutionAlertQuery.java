@@ -2,12 +2,14 @@ package cep;
 
 import event.AirQualityEvent;
 import event.StreamFactory;
+import utils.Writer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternSelectFunction;
 import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.cep.pattern.conditions.SimpleCondition;
+import org.apache.flink.cep.nfa.aftermatch.AfterMatchSkipStrategy;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -23,19 +25,31 @@ import org.slf4j.LoggerFactory;
 public class PollutionAlertQuery {
 
     private static final Logger logger = LoggerFactory.getLogger(PollutionAlertQuery.class);
+
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        // Apply CEP query to the original Dataset
         DataStream<AirQualityEvent> eventStream = StreamFactory.createStream(env, "datasets/airQuality.csv");
         Pattern<AirQualityEvent, ?> pollutionPattern = createHighCoPattern();
-        findAndProcessAlerts(eventStream, pollutionPattern);
+        String filePath = "/targetDataset.csv";
+        findAndProcessAlerts(eventStream, pollutionPattern, filePath);
+
+        // Apply CEP query to the anonymized Dataset
+        DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStream(env, "datasets/anonymizedDataset.csv");
+        Pattern<AirQualityEvent, ?> pollutionPatternAnon = createHighCoPattern();
+        String filePathAnon = "/targetAnonymizedDataset.csv";
+        findAndProcessAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
+
     }
 
 
     public static Pattern<AirQualityEvent, ?> createHighCoPattern() {
-        // Definition of CEP Pattern
-        Pattern<AirQualityEvent, ?> highCO = Pattern.<AirQualityEvent>begin("start")
+        AfterMatchSkipStrategy skipStrategy = AfterMatchSkipStrategy.skipToFirst("end");
+
+        // Define the CEP Pattern
+        Pattern<AirQualityEvent, ?> highCO = Pattern.<AirQualityEvent>begin("start", skipStrategy)
                 .where(new SimpleCondition<AirQualityEvent>() {
                     @Override
                     public boolean filter(AirQualityEvent airQualityEvent) {
@@ -43,12 +57,21 @@ public class PollutionAlertQuery {
                     }
                 })
                 // Search for one or more consecutive occurrences
-                .oneOrMore().consecutive();
+                .oneOrMore().consecutive()
+                // The sequence ends when a tuple has COLevel <= 5.0
+                .followedBy("end")
+                .where(new SimpleCondition<AirQualityEvent>() {
+                    @Override
+                    public boolean filter(AirQualityEvent airQualityEvent) {
+                        return airQualityEvent.getCoLevel() <= 5.0;
+                    }
+                });
         return highCO;
     }
 
-    public static void findAndProcessAlerts(DataStream<AirQualityEvent> eventStream, Pattern<AirQualityEvent, ?> highCOPattern) throws Exception {
-        // Applying the pattern and selecting the results
+    public static void findAndProcessAlerts(DataStream<AirQualityEvent> eventStream, Pattern<AirQualityEvent, ?> highCOPattern, String filePath) throws Exception {
+
+        // Apply the pattern and selecting the results
         DataStream<List<AirQualityEvent>> alertStream = CEP.pattern(eventStream, highCOPattern)
                 .select(new PatternSelectFunction<AirQualityEvent, List<AirQualityEvent>>() {
                     @Override
@@ -62,7 +85,7 @@ public class PollutionAlertQuery {
                         return null;
                     }
                 })
-                .filter(Objects::nonNull); // Skips matches that did not generate an alert (< 2 hours)
+                .filter(Objects::nonNull); // Skip matches that did not generate an alert (< 2 hours)
 
         Iterator<List<AirQualityEvent>> alertsIterator = alertStream.executeAndCollect();
 
@@ -74,7 +97,7 @@ public class PollutionAlertQuery {
 
         // Prepare output file
         String outputDir = "src/main/resources/datasets/target";
-        String outputFilePath = outputDir + "/targetDataset.csv";
+        String outputFilePath = outputDir + filePath;
         new File(outputDir).mkdirs();
 
         int sequenceCount = 0;
@@ -85,7 +108,7 @@ public class PollutionAlertQuery {
 
                 // Format and write the sequence on the file
                 String rawSequenceLine = sequence.stream()
-                        .map(Object::toString)
+                        .map(Writer::writeToCSV)
                         .collect(Collectors.joining("|"));
                 writer.write(rawSequenceLine + "\n");
 
@@ -93,7 +116,7 @@ public class PollutionAlertQuery {
                 AirQualityEvent firstEvent = sequence.get(0);
                 double avgCO = sequence.stream().mapToDouble(AirQualityEvent::getCoLevel).average().orElse(0.0);
                 String alertString = String.format(
-                        "*** ALLERT: CO2 pollution episode detected! ***\n" +
+                        "*** ALLERT: CO pollution episode detected! ***\n" +
                                 "\t- Start: %s\n" +
                                 "\t- Duration: %d hours\n" +
                                 "\t- Average CO Level Medio CO: %.2f mg/m^3\n",

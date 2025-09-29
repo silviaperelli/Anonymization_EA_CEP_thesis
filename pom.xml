@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.example</groupId>
     <artifactId>Anonymization_EA_CEP_thesis</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -21,27 +20,45 @@
             <artifactId>flink-streaming-java</artifactId>
             <version>1.18.1</version>
         </dependency>
-
         <!-- Flink cep Library -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-cep</artifactId>
             <version>1.18.1</version>
         </dependency>
-
         <!-- Flink Client -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients</artifactId>
             <version>1.18.1</version>
         </dependency>
-
+        <!-- Log4j 2 + SLF4J binding -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.36</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+        <!-- Liebre -->
+        <dependency>
+            <groupId>com.vincenzogulisano</groupId>
+            <artifactId>liebre</artifactId>
+            <version>0.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
-
 </project>
