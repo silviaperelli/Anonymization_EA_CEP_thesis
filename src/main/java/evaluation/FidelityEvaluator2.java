@@ -21,7 +21,9 @@ public class FidelityEvaluator2 {
     public static void main(String[] args) {
         // Modifica questi percorsi per puntare ai tuoi file CSV
         Path originalFilePath = Paths.get("src/main/resources/datasets/target/targetDataset.csv");
-        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
+
+        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
+        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDatasetNoise.csv");
 
         try {
             List<Sequence> originalSequences = parseSequencesFromFile(originalFilePath);

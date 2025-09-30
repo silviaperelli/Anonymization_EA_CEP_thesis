@@ -42,6 +42,12 @@ public class PollutionAlertQuery {
         String filePathAnon = "/targetAnonymizedDataset.csv";
         findAndProcessAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
 
+        // Apply CEP query to the anonymized Dataset
+        DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStream(env, "datasets/anonymizedDatasetNoise.csv");
+        Pattern<AirQualityEvent, ?> pollutionPatternNoise = createHighCoPattern();
+        String filePathNoise = "/targetAnonymizedDatasetNoise.csv";
+        findAndProcessAlerts(anonymizedStreamNoise, pollutionPatternNoise, filePathNoise);
+
     }
 
 

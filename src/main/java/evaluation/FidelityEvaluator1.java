@@ -16,14 +16,16 @@ public class FidelityEvaluator1 {
 
     // Threshold to define a match (at least 50% of their total union)
     // if we want a IOU Threshold less restrictive 0.3 (at least 30% of their total union --> we have more or less an intersection that is 50% of the size of a sequence)
-    private static final double IOU_THRESHOLD = 0.3;
+    private static final double IOU_THRESHOLD = 0.5;
 
     private static final Logger logger = LoggerFactory.getLogger(FidelityEvaluator1.class);
 
     public static void main(String[] args) {
         // Modifica questi percorsi per puntare ai tuoi file CSV
         Path originalFilePath = Paths.get("src/main/resources/datasets/target/targetDataset.csv");
-        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
+
+        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
+        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDatasetNoise.csv");
 
         try {
             List<Sequence> originalSequences = parseSequencesFromFile(originalFilePath);
