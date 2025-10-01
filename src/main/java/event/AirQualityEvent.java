@@ -1,5 +1,6 @@
 package event;
 
+import common.tuple.BaseRichTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.Locale;
 import utils.Writer;
 import static java.lang.Integer.parseInt;
 
-public class AirQualityEvent {
+public class AirQualityEvent extends BaseRichTuple{
 
     private static final Logger logger = LoggerFactory.getLogger(AirQualityEvent.class);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -30,6 +31,7 @@ public class AirQualityEvent {
     private double ah;    // AH
 
     public AirQualityEvent(LocalDateTime eventTime, double coLevel, int pt08s1, int nmhc, double c6h6, int pt08s2, int nox, int pt08s3, int no2, int pt08s4, int pt08s5, double t, double rh, double ah) {
+        super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, "1");
         this.eventTime = eventTime;
         this.coLevel = coLevel;
         this.pt08s1 = pt08s1;
@@ -48,8 +50,9 @@ public class AirQualityEvent {
 
     // Add a copying constructor
     public AirQualityEvent(AirQualityEvent other) {
-        this.eventTime = other.eventTime;
+        super(other.timestamp, other.key);
         this.coLevel = other.coLevel;
+        this.eventTime = other.eventTime;
         this.pt08s1 = other.pt08s1;
         this.nmhc = other.nmhc;
         this.c6h6 = other.c6h6;
@@ -64,15 +67,19 @@ public class AirQualityEvent {
         this.ah = other.ah;
     }
 
+    // Add a constructor for the output tuple of the Average Window
+    public AirQualityEvent(AirQualityEvent other, double newCoLevel) {
+        this(other);
+        this.setCoLevel(newCoLevel);
+    }
+
     public LocalDateTime getEventTime() {return eventTime;}
     public void setEventTime(LocalDateTime eventTime) {this.eventTime = eventTime;}
 
     public double getCoLevel() {return coLevel;}
     public void setCoLevel(double coLevel) {this.coLevel = coLevel;}
 
-    public long getTimestamp() {
-        return this.eventTime.toEpochSecond(ZoneOffset.UTC) * 1000;
-    }
+    public long getTimestamp() { return timestamp;}
 
     // Create an event from a line in the CSV file
     public static AirQualityEvent eventCreation(String line) {
