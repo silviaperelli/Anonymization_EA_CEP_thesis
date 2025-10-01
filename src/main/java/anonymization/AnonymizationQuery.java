@@ -43,12 +43,23 @@ public class AnonymizationQuery {
                             return keep;
                         });
 
+        /*
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
         final long WINDOW_SLIDE = 1 * 60 * 60 * 1000;
 
         // Operator to aggregate the colevel in a window of 3 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator =
+        Operator<AirQualityEvent, AirQualityEvent> average =
                 anonymizationQuery.addTimeAggregateOperator("average", WINDOW_SIZE, WINDOW_SLIDE, new AverageWindow());
+
+        */
+
+        // Window of 2 hours
+        long windowSize = 2 * 60 * 60 * 1000;
+
+        // Operator to replace the colevel with the average between the value and the level in the previous 2 hours
+        AverageMap averageFunction = new AverageMap(windowSize);
+        Operator<AirQualityEvent, AirQualityEvent> average =
+                anonymizationQuery.addMapOperator("average", tuple -> averageFunction.apply(tuple));
 
         // Finale sink to print in a CSV file
         Sink<AirQualityEvent> outputSink =
@@ -56,8 +67,8 @@ public class AnonymizationQuery {
 
         anonymizationQuery.connect(inputSource, inputReader)
                 .connect(inputReader, filter)
-                .connect(filter, aggregateOperator)
-                .connect(aggregateOperator, outputSink);
+                .connect(filter, average)
+                .connect(average, outputSink);
 
         logger.info("*** Anonymization query activated ***");
         anonymizationQuery.activate();
