@@ -60,5 +60,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- JGEA -->
+        <dependency>
+            <groupId>io.github.ericmedvet</groupId>
+            <artifactId>jgea.core</artifactId>
+            <version>2.7.0</version>
+        </dependency>
     </dependencies>
 </project>
