@@ -1,0 +1,5 @@
+<pipeline> ::= <filter> | <filter> <pipeline>
+<filter> ::= <attribute> <operator> <value>
+<attribute> ::= 'CO' | 'PT08.S1' | 'NMHC' | 'C6H6' | 'PT08.S2' | 'NOx' | 'PT08.S3' | 'NO2' | 'PT08.S4' | 'PT08.S5' | 'T' | 'RH' | 'AH'
+<operator> ::= lt | le | gt | ge | eq
+<value> ::= <double>
