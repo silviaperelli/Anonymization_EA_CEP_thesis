@@ -30,7 +30,8 @@ public class ExampleEA {
 
         // Define generic operator
         Map<GeneticOperator<Tree<String>>, Double> operators = Map.of(
-                //new GrammarBasedSubtreeCrossover(grammar), 0.8,
+                // Crossover
+                new SameRootSubtreeCrossover<>(12), 0.8,
                 // Mutation based on the grammar
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );

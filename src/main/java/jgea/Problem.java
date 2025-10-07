@@ -49,7 +49,7 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
                         operators.add(operatorNode);
                     }
                 } catch (Exception e) {
-                    System.err.println("[Mapper] Error while parsing a filter: " + e.getMessage());
+                    System.err.println("[Mapper] Error while parsing the filter: " + e.getMessage());
                 }
             }
             return new PipelineRepresentation(operators);
