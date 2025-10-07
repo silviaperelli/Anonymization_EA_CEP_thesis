@@ -12,7 +12,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.Predicate;
+
+import static jgea.utils.TreeUtils.findAllNodes;
+import static jgea.utils.TreeUtils.findFirstTerminal;
 
 public class Problem implements GrammarBasedProblem<String, PipelineRepresentation>, TotalOrderQualityBasedProblem<PipelineRepresentation, Double> {
 
@@ -96,32 +98,6 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
         }
     }
 
-    // Find first terminal node in a subtree recursively
-    private String findFirstTerminal(Tree<String> tree) {
-        if (tree.isLeaf()) {
-            return tree.content();
-        }
-        for (Tree<String> child : tree) {
-            String terminal = findFirstTerminal(child);
-            if (terminal != null) {
-                return terminal;
-            }
-        }
-        return null;
-    }
-
-    // Find all nodes that match a condition
-    private List<Tree<String>> findAllNodes(Tree<String> tree, Predicate<Tree<String>> condition) {
-        List<Tree<String>> foundNodes = new ArrayList<>();
-        if (condition.test(tree)) {
-            foundNodes.add(tree);
-        }
-        for (Tree<String> child : tree) {
-            foundNodes.addAll(findAllNodes(child, condition));
-        }
-        return foundNodes;
-    }
-
     @Override
     public Comparator<Double> totalOrderComparator() {
         return Comparator.reverseOrder(); // Maximize fitness
@@ -130,7 +106,7 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
     @Override
     public Function<PipelineRepresentation, Double> qualityFunction() {
         // The fitness function only assigns a random number to each pipeline created
-        return pipeline -> RANDOM.nextDouble();
+        return pipeline -> new Random().nextDouble();
     }
 
 

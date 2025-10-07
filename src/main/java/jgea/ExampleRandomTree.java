@@ -3,6 +3,7 @@ package jgea;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrowGrammarTreeFactory;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
+import jgea.utils.CSVHeaderReader;
 
 import java.io.FileInputStream;
 import java.io.InputStream;

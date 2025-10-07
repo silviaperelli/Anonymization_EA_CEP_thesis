@@ -9,6 +9,7 @@ import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
+import jgea.utils.CSVHeaderReader;
 
 import java.io.IOException;
 import java.util.*;
