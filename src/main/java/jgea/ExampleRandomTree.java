@@ -29,10 +29,7 @@ public class ExampleRandomTree {
 
             // Parameters for the tree generation
             final int MAX_TREE_DEPTH = 12;
-            int TARGET_DEPTH = 3;
-
-            System.out.println("Loaded Grammar: ");
-            System.out.println(grammar);
+            int TARGET_DEPTH = 7;
 
             // Tree generation with a factory
             GrowGrammarTreeFactory<String> treeFactory = new GrowGrammarTreeFactory<>(MAX_TREE_DEPTH, grammar);
@@ -50,8 +47,6 @@ public class ExampleRandomTree {
 
                 System.out.println("\n********** Mapped PipelineRepresentation (Phenotype) **********");
                 System.out.println(pipelineRepresentation);
-
-                // TO DO: Mapping from a Pipeline Representation to an executable Liebre object
 
             } else {
                 System.out.println("Random Tree generation returned null.");

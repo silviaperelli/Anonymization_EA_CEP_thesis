@@ -1,13 +1,9 @@
 package jgea.utils;
 
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
-import jgea.PipelineRepresentation;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class TreeUtils {
@@ -37,6 +33,4 @@ public class TreeUtils {
         }
         return foundNodes;
     }
-
-
 }

@@ -3,3 +3,7 @@
 <attribute> ::= 'CO' | 'PT08.S1' | 'NMHC' | 'C6H6' | 'PT08.S2' | 'NOx' | 'PT08.S3' | 'NO2' | 'PT08.S4' | 'PT08.S5' | 'T' | 'RH' | 'AH'
 <operator> ::= lt | le | gt | ge | eq
 <value> ::= <double>
+<double> ::= <intPart> | <intPart> . <fracPart>
+<intPart> ::= <digit> | <digit> <digit> | <digit> <digit> <digit> | <digit> <digit> <digit> <digit>
+<fracPart> ::= <digit> | <digit> <digit> | <digit> <digit> <digit> | <digit> <digit> <digit> <digit>
+<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9

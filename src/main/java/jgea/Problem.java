@@ -13,13 +13,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
-import static jgea.utils.TreeUtils.findAllNodes;
-import static jgea.utils.TreeUtils.findFirstTerminal;
+import static jgea.utils.TreeUtils.*;
 
 public class Problem implements GrammarBasedProblem<String, PipelineRepresentation>, TotalOrderQualityBasedProblem<PipelineRepresentation, Double> {
 
     private final StringGrammar<String> grammar;
-    private static final Random RANDOM = new Random();
 
     // Constructor that loads the grammar
     public Problem(String grammarPath) throws IOException {
@@ -60,40 +58,39 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
     private PipelineRepresentation.OperatorNode parseFilterNode(Tree<String> filtroNode) {
         String attribute = null;
         String opString = null;
-        String valueString = null;
+        Tree<String> valueNode = null;
 
         // Look for the children in the node
         for (Tree<String> child : filtroNode) {
             switch (child.content()) {
                 case "<attribute>" -> attribute = findFirstTerminal(child);
                 case "<operator>" -> opString = findFirstTerminal(child);
-                case "<value>" -> valueString = findFirstTerminal(child);
+                case "<value>" -> valueNode = child;
             }
         }
 
-        if (attribute == null || opString == null || valueString == null) {
+        if (attribute == null || opString == null || valueNode == null) {
             return null;
         }
 
         // Mapping from tree to Pipeline Representation
         try {
+            // Collect all the leaves (digit and .) under the node <value>
+            List<String> leaves = valueNode.visitLeaves();
+
+            // Join the leaves to reconstruct the number
+            String valueString = String.join("", leaves);
+            double value = Double.parseDouble(valueString);
+
             attribute = attribute.replace("'", "");
-
-            // Generate a random value for the threshold
-            double value;
-            if (valueString.equals("<double>")) {
-                value = RANDOM.nextDouble() * 1000;
-            } else {
-                value = Double.parseDouble(valueString);
-            }
-
-            PipelineRepresentation.Operator operator = PipelineRepresentation.fromString(opString.replace("\"", ""));
-            PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, operator, value);
+            opString = opString.replace("\"", "");
+            PipelineRepresentation.Operator operatore = PipelineRepresentation.fromString(opString);
+            PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, operatore, value);
 
             return new PipelineRepresentation.OperatorNode("FILTER", condition);
 
         } catch (IllegalArgumentException e) {
-            System.err.printf("[Parser] Filter discarded for format error: %s", e.getMessage());
+            System.err.printf("[Parser] Filter discarded for format error: %s\n", e.getMessage());
             return null;
         }
     }
@@ -108,6 +105,4 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
         // The fitness function only assigns a random number to each pipeline created
         return pipeline -> new Random().nextDouble();
     }
-
-
 }

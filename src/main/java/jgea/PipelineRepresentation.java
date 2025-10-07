@@ -37,8 +37,6 @@ public record PipelineRepresentation(
         return "Pipeline { " + ops + " }";
     }
 
-
-
     // Represents a single operator node in the pipeline (in this case we only have filters)
     public record OperatorNode(
             String type, // Es. "FILTER", "AGGREGATE"
@@ -66,7 +64,8 @@ public record PipelineRepresentation(
                 case GREATER_OR_EQUAL -> ">=";
                 case EQUAL -> "==";
             };
-            String valueString = (value instanceof Double) ? String.format("%.2f", value) : value.toString();
+
+            String valueString = (value instanceof Double) ? String.format("%.4f", value) : value.toString();
             return String.format("%s %s %s", variable, opString, valueString);
         }
     }

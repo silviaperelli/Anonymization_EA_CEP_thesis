@@ -36,7 +36,6 @@ public class ExampleEA {
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );
 
-
         // Solver configuration
         GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
         StandardEvolver<Tree<String>, PipelineRepresentation, Double> solver = new StandardEvolver<>(
