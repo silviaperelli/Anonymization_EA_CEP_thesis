@@ -4,12 +4,13 @@ import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarBasedSubtreeMutation;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarRampedHalfAndHalf;
-import io.github.ericmedvet.jgea.core.representation.tree.*;
+import io.github.ericmedvet.jgea.core.representation.tree.SameRootSubtreeCrossover;
+import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
-import jgea.utils.CSVHeaderReader;
+import jgea.utils.CSVAnalyzer;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,12 +20,15 @@ import java.util.concurrent.Executors;
 
 // Launch a small genetic algorithm to test the evolutionary process with a small population
 public class ExampleEA {
+
     public static void main(String[] args) throws IOException {
-        // Grammar generation and loading
         final String CsvPath = "datasets/airQuality.csv";
         final String GrammarPath = "generated-grammar.bnf";
-        List<String> CsvAttributes = CSVHeaderReader.extractAttributes(CsvPath);
-        GrammarGenerator.generateGrammar(CsvAttributes, GrammarPath);
+
+        // Grammar generation based on numerical bounds and loading
+        List<String> attributes = CSVAnalyzer.extractAttributes(CsvPath);
+        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(CsvPath);
+        GrammarGenerator.generateGrammar(attributes, statsMap, GrammarPath);
         Problem problem = new Problem(GrammarPath);
         StringGrammar<String> grammar = problem.grammar();
 
@@ -35,6 +39,7 @@ public class ExampleEA {
                 // Mutation based on the grammar
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );
+
 
         // Solver configuration
         GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
@@ -72,6 +77,5 @@ public class ExampleEA {
         } finally {
             executor.shutdown();
         }
-
     }
 }

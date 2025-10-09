@@ -3,11 +3,12 @@ package jgea;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrowGrammarTreeFactory;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
-import jgea.utils.CSVHeaderReader;
+import jgea.utils.CSVAnalyzer;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -17,13 +18,14 @@ public class ExampleRandomTree {
         try {
             // Grammar generation and loading
             final String CsvPath = "datasets/airQuality.csv";
-            final String GrammarPath = "generated-grammar.bnf";
-            List<String> CsvAttributes = CSVHeaderReader.extractAttributes(CsvPath);
-            GrammarGenerator.generateGrammar(CsvAttributes, GrammarPath);
+            final String grammarPath = "generated-grammar.bnf";
+            List<String> attributes = CSVAnalyzer.extractAttributes(CsvPath);
+            Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(CsvPath);
+            GrammarGenerator.generateGrammar(attributes, statsMap, grammarPath);
 
             // Loading grammar from file
             StringGrammar<String> grammar;
-            try (InputStream grammarStream = new FileInputStream(GrammarPath)) {
+            try (InputStream grammarStream = new FileInputStream(grammarPath)) {
                 grammar = StringGrammar.load(grammarStream);
             }
 
@@ -41,7 +43,7 @@ public class ExampleRandomTree {
 
                 System.out.println("\n********** Applying Tree-to-Representation mapper... **********");
                 // Mapping from a tree to a Pipeline Representation
-                Problem problem = new Problem(GrammarPath);
+                Problem problem = new Problem(grammarPath);
                 Function<Tree<String>, PipelineRepresentation> toRepresentationMapper = problem.solutionMapper();
                 PipelineRepresentation pipelineRepresentation = toRepresentationMapper.apply(randomTree);
 

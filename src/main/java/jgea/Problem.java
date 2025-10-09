@@ -7,15 +7,13 @@ import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 
 import static jgea.utils.TreeUtils.*;
 
-public class Problem implements GrammarBasedProblem<String, PipelineRepresentation>, TotalOrderQualityBasedProblem<PipelineRepresentation, Double> {
+public class Problem implements GrammarBasedProblem<String, PipelineRepresentation>,
+        TotalOrderQualityBasedProblem<PipelineRepresentation, Double> {
 
     private final StringGrammar<String> grammar;
 
@@ -47,50 +45,50 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
                         operators.add(operatorNode);
                     }
                 } catch (Exception e) {
-                    System.err.println("[Mapper] Error while parsing the filter: " + e.getMessage());
+                    System.err.println("[Mapper] Error while parsing filter: " + e.getMessage());
                 }
             }
+
             return new PipelineRepresentation(operators);
         };
     }
 
     // Parse a single filter node
-    private PipelineRepresentation.OperatorNode parseFilterNode(Tree<String> filtroNode) {
+    private PipelineRepresentation.OperatorNode parseFilterNode(Tree<String> filterNode) {
         String attribute = null;
-        String opString = null;
+        String operatorString = null;
         Tree<String> valueNode = null;
 
         // Look for the children in the node
-        for (Tree<String> child : filtroNode) {
+        for (Tree<String> child : filterNode) {
             switch (child.content()) {
                 case "<attribute>" -> attribute = findFirstTerminal(child);
-                case "<operator>" -> opString = findFirstTerminal(child);
+                case "<operator>" -> operatorString = findFirstTerminal(child);
                 case "<value>" -> valueNode = child;
             }
         }
 
-        if (attribute == null || opString == null || valueNode == null) {
+        if (attribute == null || operatorString == null || valueNode == null)
             return null;
-        }
 
         // Mapping from tree to Pipeline Representation
         try {
-            // Collect all the leaves (digit and .) under the node <value>
+            // Collect all the leaves (digit and .) under the node <value> and join them to reconstruct the number
             List<String> leaves = valueNode.visitLeaves();
-
-            // Join the leaves to reconstruct the number
-            String valueString = String.join("", leaves);
-            double value = Double.parseDouble(valueString);
-
+            StringBuilder sb = new StringBuilder();
+            for (String leaf : leaves) {
+                if (leaf.matches("[0-9]") || leaf.equals(".")) {
+                    sb.append(leaf);
+                }
+            }
+            double value = Double.parseDouble(sb.toString());
             attribute = attribute.replace("'", "");
-            opString = opString.replace("\"", "");
-            PipelineRepresentation.Operator operatore = PipelineRepresentation.fromString(opString);
-            PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, operatore, value);
+            PipelineRepresentation.Operator op = PipelineRepresentation.fromString(operatorString);
+            PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, op, value);
 
             return new PipelineRepresentation.OperatorNode("FILTER", condition);
-
-        } catch (IllegalArgumentException e) {
-            System.err.printf("[Parser] Filter discarded for format error: %s\n", e.getMessage());
+        } catch (Exception e) {
+            System.err.printf("[Parser] Error parsing filter node: %s\n", e.getMessage());
             return null;
         }
     }
