@@ -70,7 +70,7 @@ public class ExampleEA {
             if (!solutions.isEmpty()) {
                 PipelineRepresentation bestSolution = solutions.iterator().next();
                 System.out.println("\n--- Best solution found ---");
-                System.out.println("Phenotype: " + bestSolution);
+                System.out.println(bestSolution);
             }
         } catch (Exception e) {
             e.printStackTrace();

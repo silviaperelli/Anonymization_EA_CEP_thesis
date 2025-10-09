@@ -33,25 +33,44 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
     public Function<Tree<String>, PipelineRepresentation> solutionMapper() {
         return (Tree<String> tree) -> {
             List<PipelineRepresentation.OperatorNode> operators = new ArrayList<>();
-
-            // Find all filter nodes in the tree
-            List<Tree<String>> filterNodes = findAllNodes(tree, node -> node.content().equals("<filter>"));
-
-            // Parse each filter node
-            for (Tree<String> filterNode : filterNodes) {
-                try {
-                    PipelineRepresentation.OperatorNode operatorNode = parseFilterNode(filterNode);
-                    if (operatorNode != null) {
-                        operators.add(operatorNode);
-                    }
-                } catch (Exception e) {
-                    System.err.println("[Mapper] Error while parsing filter: " + e.getMessage());
-                }
-            }
-
+            // Start recursive parsing from the root of the tree
+            parsePipelineNode(tree, operators);
             return new PipelineRepresentation(operators);
         };
     }
+
+    // Parse a node <pipeline> recursively, add found operators to a list
+    private void parsePipelineNode(Tree<String> pipelineNode, List<PipelineRepresentation.OperatorNode> operators) {
+
+        // Look for the child node <filter> and <pipeline>
+        Tree<String> filterNode = null;
+        Tree<String> nextPipelineNode = null;
+
+        for (Tree<String> child : pipelineNode) {
+            if ("<filter>".equals(child.content())) {
+                filterNode = child;
+            } else if ("<pipeline>".equals(child.content())) {
+                nextPipelineNode = child;
+            }
+        }
+
+        // The tree is invalid if there isn't a node <filter>
+        if (filterNode == null) {
+            return;
+        }
+
+        // Parse filter node
+        PipelineRepresentation.OperatorNode operator = parseFilterNode(filterNode);
+        if (operator != null) {
+            operators.add(operator);
+        }
+
+        // Check if the pipeline is finished otherwise recursively calls the method and continue parsing the pipeline
+        if (nextPipelineNode != null) {
+            parsePipelineNode(nextPipelineNode, operators);
+        }
+    }
+
 
     // Parse a single filter node
     private PipelineRepresentation.OperatorNode parseFilterNode(Tree<String> filterNode) {
@@ -75,13 +94,8 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
         try {
             // Collect all the leaves (digit and .) under the node <value> and join them to reconstruct the number
             List<String> leaves = valueNode.visitLeaves();
-            StringBuilder sb = new StringBuilder();
-            for (String leaf : leaves) {
-                if (leaf.matches("[0-9]") || leaf.equals(".")) {
-                    sb.append(leaf);
-                }
-            }
-            double value = Double.parseDouble(sb.toString());
+            String valueString = String.join("", leaves);
+            double value = Double.parseDouble(valueString);
             attribute = attribute.replace("'", "");
             PipelineRepresentation.Operator op = PipelineRepresentation.fromString(operatorString);
             PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, op, value);
