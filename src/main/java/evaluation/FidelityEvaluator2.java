@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+
 import static utils.Evaluator.parseSequencesFromFile;
 
 // Evaluation made with Overlapping Coefficient
@@ -85,29 +87,19 @@ public class FidelityEvaluator2 {
 
     // Calculate Overlap Coefficiente between two sequences
     private static double calculateOverlapCoefficient(Sequence s1, Sequence s2) {
-        // Find the intersection in the two sequences
-        LocalDateTime intersectionStart = s1.startTime().isAfter(s2.startTime()) ? s1.startTime() : s2.startTime();
-        LocalDateTime intersectionEnd = s1.endTime().isBefore(s2.endTime()) ? s1.endTime() : s2.endTime();
+        Set<Long> intersection = s1.intersection(s2);
 
-        // Calculate the duration of the intersection
-        long intersectionDuration = 0;
-        if (intersectionEnd.isAfter(intersectionStart)) {
-            intersectionDuration = Duration.between(intersectionStart, intersectionEnd).toSeconds();
-        }
-
-        if (intersectionDuration == 0) {
+        if (intersection.isEmpty()) {
             return 0.0;
         }
 
-        // Calculate the minimum duration between the two sequences
-        long duration1 = Duration.between(s1.startTime(), s1.endTime()).toSeconds();
-        long duration2 = Duration.between(s2.startTime(), s2.endTime()).toSeconds();
-        long minDuration = Math.min(duration1, duration2);
+        // Il denominatore è la dimensione della sequenza più piccola.
+        int minSize = Math.min(s1.tupleIds().size(), s2.tupleIds().size());
 
-        if (minDuration == 0) {
+        if (minSize == 0) {
             return 0.0;
         }
 
-        return (double) intersectionDuration / minDuration;
+        return (double) intersection.size() / minSize;
     }
 }

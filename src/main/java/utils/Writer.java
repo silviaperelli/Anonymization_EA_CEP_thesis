@@ -19,6 +19,7 @@ public class Writer {
     // Write target sequences in the CSV file
     public static String writeToCSV(AirQualityEvent event) {
         return "{" +
+                "tupleID=" + event.getTupleId() +
                 "eventTime=" + event.getEventTime() +
                 ", coLevel=" + event.getCoLevel() +
                 '}';

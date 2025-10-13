@@ -23,19 +23,40 @@ public class Evaluator {
                 }
                 // Divide the line in different events using '|' as delimiter
                 String[] events = line.split("\\|");
-                if (events.length > 0) {
-                    // Extract the hour of the first and last event in the sequence to calculate the start and end time of the sequence
-                    LocalDateTime startTime = parseDateTimeFromEvent(events[0]);
-                    LocalDateTime lastEventTime = parseDateTimeFromEvent(events[events.length - 1]);
-                    LocalDateTime endTime = (lastEventTime != null) ? lastEventTime.plusHours(1) : null;
+                List<Long> idsInSequence = new ArrayList<>();
 
-                    if (startTime != null && endTime != null) {
-                        sequences.add(new Sequence(startTime, endTime));
+                for (String eventString : events) {
+                    // Extract the tuple ID from each event
+                    long id = parseIdFromEvent(eventString);
+                    if (id != -1) {
+                        idsInSequence.add(id);
                     }
+                }
+
+                if (!idsInSequence.isEmpty()) {
+                    sequences.add(new Sequence(idsInSequence));
                 }
             }
         }
         return sequences;
+    }
+
+    // In utils/Evaluator.java
+    private static long parseIdFromEvent(String eventString) {
+        try {
+            // Cerca la stringa "tupleId="
+            String idTag = "tupleId=";
+            int startIndex = eventString.indexOf(idTag) + idTag.length();
+            int endIndex = eventString.indexOf(",", startIndex); // Trova la virgola successiva
+            if (endIndex == -1) {
+                endIndex = eventString.indexOf("}", startIndex); // Se è l'ultimo elemento
+            }
+            String idStr = eventString.substring(startIndex, endIndex);
+            return Long.parseLong(idStr);
+        } catch (Exception e) {
+            System.err.println("Error parsing ID from event string: " + eventString);
+            return -1;
+        }
     }
 
     // Helper to extract the LocalDateTime from an event

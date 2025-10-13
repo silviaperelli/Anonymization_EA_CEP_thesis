@@ -102,7 +102,7 @@ public class PollutionAlertQuery {
         }
 
         // Prepare output file
-        String outputDir = "src/main/resources/datasets/target";
+        String outputDir = "src/main/resources/datasets/results";
         String outputFilePath = outputDir + filePath;
         new File(outputDir).mkdirs();
 

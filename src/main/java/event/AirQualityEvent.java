@@ -14,6 +14,7 @@ public class AirQualityEvent extends BaseRichTuple{
     private static final Logger logger = LoggerFactory.getLogger(AirQualityEvent.class);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
+    private long tupleId;
     private LocalDateTime eventTime;
     private double coLevel; // CO(GT)
     private double pt08s1; // PT08.S1(CO)
@@ -29,8 +30,9 @@ public class AirQualityEvent extends BaseRichTuple{
     private double rh;    // RH
     private double ah;    // AH
 
-    public AirQualityEvent(LocalDateTime eventTime, double coLevel, double pt08s1, double nmhc, double c6h6, double pt08s2, double nox, double pt08s3, double no2, double pt08s4, double pt08s5, double t, double rh, double ah) {
-        super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, "1");
+    public AirQualityEvent(long tupleId, LocalDateTime eventTime, double coLevel, double pt08s1, double nmhc, double c6h6, double pt08s2, double nox, double pt08s3, double no2, double pt08s4, double pt08s5, double t, double rh, double ah) {
+        super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, String.valueOf(tupleId));
+        this.tupleId = tupleId;
         this.eventTime = eventTime;
         this.coLevel = coLevel;
         this.pt08s1 = pt08s1;
@@ -50,6 +52,7 @@ public class AirQualityEvent extends BaseRichTuple{
     // Add a copying constructor
     public AirQualityEvent(AirQualityEvent other) {
         super(other.timestamp, other.key);
+        this.tupleId = other.tupleId;
         this.coLevel = other.coLevel;
         this.eventTime = other.eventTime;
         this.pt08s1 = other.pt08s1;
@@ -72,6 +75,8 @@ public class AirQualityEvent extends BaseRichTuple{
         this.setCoLevel(newCoLevel);
     }
 
+    public long getTupleId() {return tupleId;}
+
     public LocalDateTime getEventTime() {return eventTime;}
     public void setEventTime(LocalDateTime eventTime) {this.eventTime = eventTime;}
 
@@ -84,31 +89,34 @@ public class AirQualityEvent extends BaseRichTuple{
     public static AirQualityEvent eventCreation(String line) {
         try {
             String[] tokens = line.split(";", -1);
-            if (tokens.length < 15) {
+            if (tokens.length < 16) {
                 return null;
             }
 
+            // Parse tuple ID in the first column
+            long id = Long.parseLong(tokens[0].trim());
+
             // Combine date and time and create a single timestamp
-            String date = tokens[0];
-            String time = tokens[1].replace('.', ':');
+            String date = tokens[1];
+            String time = tokens[2].replace('.', ':');
             LocalDateTime timestamp = LocalDateTime.parse(date + " " + time, formatter);
 
             // Parse all the features
-            double coValue = Writer.formatDouble(tokens[2]);
-            double pt08s1Val = Writer.formatDouble(tokens[3]);
-            double nmhcVal = Writer.formatDouble(tokens[4]);
-            double c6h6Val = Writer.formatDouble(tokens[5]);
-            double pt08s2Val = Writer.formatDouble(tokens[6]);
-            double noxVal = Writer.formatDouble(tokens[7]);
-            double pt08s3Val = Writer.formatDouble(tokens[8]);
-            double no2Val = Writer.formatDouble(tokens[9]);
-            double pt08s4Val = Writer.formatDouble(tokens[10]);
-            double pt08s5Val = Writer.formatDouble(tokens[11]);
-            double tVal = Writer.formatDouble(tokens[12]);
-            double rhVal = Writer.formatDouble(tokens[13]);
-            double ahVal = Writer.formatDouble(tokens[14]);
+            double coValue = Writer.formatDouble(tokens[3]);
+            double pt08s1Val = Writer.formatDouble(tokens[4]);
+            double nmhcVal = Writer.formatDouble(tokens[5]);
+            double c6h6Val = Writer.formatDouble(tokens[6]);
+            double pt08s2Val = Writer.formatDouble(tokens[7]);
+            double noxVal = Writer.formatDouble(tokens[8]);
+            double pt08s3Val = Writer.formatDouble(tokens[9]);
+            double no2Val = Writer.formatDouble(tokens[10]);
+            double pt08s4Val = Writer.formatDouble(tokens[11]);
+            double pt08s5Val = Writer.formatDouble(tokens[12]);
+            double tVal = Writer.formatDouble(tokens[13]);
+            double rhVal = Writer.formatDouble(tokens[14]);
+            double ahVal = Writer.formatDouble(tokens[15]);
 
-            return new AirQualityEvent(timestamp, coValue, pt08s1Val, nmhcVal, c6h6Val, pt08s2Val, noxVal, pt08s3Val, no2Val, pt08s4Val, pt08s5Val, tVal, rhVal, ahVal);
+            return new AirQualityEvent(id, timestamp, coValue, pt08s1Val, nmhcVal, c6h6Val, pt08s2Val, noxVal, pt08s3Val, no2Val, pt08s4Val, pt08s5Val, tVal, rhVal, ahVal);
 
         } catch (Exception e) {
             logger.warn("Error parsing line: '{}'", line, e);
@@ -119,7 +127,8 @@ public class AirQualityEvent extends BaseRichTuple{
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "%s;%s;%.6f;%.0f;%.0f;%.1f;%.0f;%.0f;%.0f;%.0f;%.0f;%.0f;%.1f;%.1f;%.4f",
+                "%d;%s;%s;%.6f;%.0f;%.0f;%.1f;%.0f;%.0f;%.0f;%.0f;%.0f;%.0f;%.1f;%.1f;%.4f",
+                tupleId,
                 eventTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 eventTime.format(DateTimeFormatter.ofPattern("HH.mm.ss")),
                 coLevel, pt08s1, nmhc, c6h6, pt08s2, nox, pt08s3, no2, pt08s4, pt08s5, t, rh, ah

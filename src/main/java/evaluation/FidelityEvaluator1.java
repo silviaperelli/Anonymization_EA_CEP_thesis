@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+
 import static utils.Evaluator.parseSequencesFromFile;
 
 // Evaluation made with Intersection Over Union
@@ -86,27 +88,18 @@ public class FidelityEvaluator1 {
     }
 
     // Calculate Intersection over Union (IoU) between two sequences
+
     private static double calculateIoU(Sequence s1, Sequence s2) {
-        // Find the intersection in the two sequences
-        LocalDateTime intersectionStart = s1.startTime().isAfter(s2.startTime()) ? s1.startTime() : s2.startTime();
-        LocalDateTime intersectionEnd = s1.endTime().isBefore(s2.endTime()) ? s1.endTime() : s2.endTime();
+        // Calcola l'intersezione e l'unione usando i metodi che abbiamo aggiunto a Sequence.
+        Set<Long> intersection = s1.intersection(s2);
+        Set<Long> union = s1.union(s2);
 
-        // Calculate the duration of the intersection
-        long intersectionDuration = 0;
-        if (intersectionEnd.isAfter(intersectionStart)) {
-            intersectionDuration = Duration.between(intersectionStart, intersectionEnd).toSeconds();
-        }
-
-        // Calculate the total duration of the union
-        long duration1 = Duration.between(s1.startTime(), s1.endTime()).toSeconds();
-        long duration2 = Duration.between(s2.startTime(), s2.endTime()).toSeconds();
-        long unionDuration = duration1 + duration2 - intersectionDuration;
-
-        if (unionDuration == 0) {
+        if (union.isEmpty()) {
             return 0.0;
         }
 
-        return (double) intersectionDuration / unionDuration;
+        // IoU è la dimensione dell'intersezione divisa per la dimensione dell'unione.
+        return (double) intersection.size() / union.size();
     }
     
 }
