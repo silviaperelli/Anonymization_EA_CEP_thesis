@@ -5,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,15 +39,14 @@ public class Evaluator {
         return sequences;
     }
 
-    // In utils/Evaluator.java
+    // Helper method to extract the tuple ID from an event
     private static long parseIdFromEvent(String eventString) {
         try {
-            // Cerca la stringa "tupleId="
-            String idTag = "tupleId=";
+            String idTag = "tupleID=";
             int startIndex = eventString.indexOf(idTag) + idTag.length();
-            int endIndex = eventString.indexOf(",", startIndex); // Trova la virgola successiva
+            int endIndex = eventString.indexOf(",", startIndex);
             if (endIndex == -1) {
-                endIndex = eventString.indexOf("}", startIndex); // Se è l'ultimo elemento
+                endIndex = eventString.indexOf("}", startIndex);
             }
             String idStr = eventString.substring(startIndex, endIndex);
             return Long.parseLong(idStr);
@@ -59,16 +56,4 @@ public class Evaluator {
         }
     }
 
-    // Helper to extract the LocalDateTime from an event
-    private static LocalDateTime parseDateTimeFromEvent(String eventString) {
-        try {
-            int startIndex = eventString.indexOf("=") + 1;
-            int endIndex = eventString.indexOf(",");
-            String dateTimeStr = eventString.substring(startIndex, endIndex);
-            return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (Exception e) {
-            System.err.println("Errore nel parsing dell'evento: " + eventString);
-            return null;
-        }
-    }
 }

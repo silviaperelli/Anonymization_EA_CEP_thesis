@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -21,11 +19,10 @@ public class FidelityEvaluator2 {
     private static final double OVERLAP_THRESHOLD = 0.5;
 
     public static void main(String[] args) {
-        // Modifica questi percorsi per puntare ai tuoi file CSV
-        Path originalFilePath = Paths.get("src/main/resources/datasets/target/targetDataset.csv");
 
-        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
-        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDatasetNoise.csv");
+        Path originalFilePath = Paths.get("src/main/resources/datasets/results/targetDataset.csv");
+        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/results/targetAnonymizedDataset.csv");
+        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/results/targetAnonymizedDatasetNoise.csv");
 
         try {
             List<Sequence> originalSequences = parseSequencesFromFile(originalFilePath);
@@ -93,7 +90,7 @@ public class FidelityEvaluator2 {
             return 0.0;
         }
 
-        // Il denominatore è la dimensione della sequenza più piccola.
+        // The denominator is the size of the smallest sequence
         int minSize = Math.min(s1.tupleIds().size(), s2.tupleIds().size());
 
         if (minSize == 0) {

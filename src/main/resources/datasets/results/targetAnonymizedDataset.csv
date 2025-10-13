@@ -1,70 +1,70 @@
-{eventTime=2004-09-30T18:00, coLevel=5.566667}|{eventTime=2004-09-30T19:00, coLevel=6.166667}|{eventTime=2004-09-30T20:00, coLevel=5.466667}
-{eventTime=2004-11-26T15:00, coLevel=5.2}|{eventTime=2004-11-26T16:00, coLevel=5.633333}|{eventTime=2004-11-26T17:00, coLevel=6.333333}|{eventTime=2004-11-26T18:00, coLevel=8.0}|{eventTime=2004-11-26T19:00, coLevel=8.066667}|{eventTime=2004-11-26T20:00, coLevel=8.066667}|{eventTime=2004-11-26T21:00, coLevel=7.4}|{eventTime=2004-11-26T22:00, coLevel=6.833333}|{eventTime=2004-11-26T23:00, coLevel=5.7}
-{eventTime=2004-12-17T10:00, coLevel=5.133333}|{eventTime=2004-12-17T11:00, coLevel=5.466667}
-{eventTime=2005-02-02T10:00, coLevel=5.433333}|{eventTime=2005-02-02T11:00, coLevel=5.533333}
-{eventTime=2005-03-21T20:00, coLevel=5.633333}|{eventTime=2005-03-21T21:00, coLevel=5.4}
-{eventTime=2004-03-15T19:00, coLevel=5.633333}|{eventTime=2004-03-15T20:00, coLevel=6.866667}|{eventTime=2004-03-15T21:00, coLevel=6.233333}
-{eventTime=2004-11-22T19:00, coLevel=5.733333}|{eventTime=2004-11-22T20:00, coLevel=6.566667}|{eventTime=2004-11-22T21:00, coLevel=5.566667}
-{eventTime=2004-12-13T18:00, coLevel=6.766667}|{eventTime=2004-12-13T19:00, coLevel=7.566667}|{eventTime=2004-12-13T20:00, coLevel=7.033333}
-{eventTime=2005-01-17T18:00, coLevel=5.3}|{eventTime=2005-01-17T19:00, coLevel=7.1}|{eventTime=2005-01-17T20:00, coLevel=6.966667}|{eventTime=2005-01-17T21:00, coLevel=5.1}
-{eventTime=2004-03-18T09:00, coLevel=5.65}|{eventTime=2004-03-18T10:00, coLevel=5.266667}
-{eventTime=2004-09-29T19:00, coLevel=5.3}|{eventTime=2004-09-29T20:00, coLevel=5.533333}
-{eventTime=2004-11-04T18:00, coLevel=8.7}|{eventTime=2004-11-04T19:00, coLevel=7.25}|{eventTime=2004-11-04T20:00, coLevel=6.266667}
-{eventTime=2004-11-26T09:00, coLevel=5.05}|{eventTime=2004-11-26T10:00, coLevel=5.233333}|{eventTime=2004-11-26T11:00, coLevel=5.133333}
-{eventTime=2004-12-16T16:00, coLevel=5.266667}|{eventTime=2004-12-16T17:00, coLevel=5.166667}|{eventTime=2004-12-16T18:00, coLevel=6.066667}|{eventTime=2004-12-16T19:00, coLevel=7.1}|{eventTime=2004-12-16T20:00, coLevel=8.4}|{eventTime=2004-12-16T21:00, coLevel=8.766667}|{eventTime=2004-12-16T22:00, coLevel=7.7}|{eventTime=2004-12-16T23:00, coLevel=6.1}
-{eventTime=2005-01-31T19:00, coLevel=5.666667}|{eventTime=2005-01-31T20:00, coLevel=6.566667}|{eventTime=2005-01-31T21:00, coLevel=5.766667}
-{eventTime=2004-03-11T20:00, coLevel=5.933333}|{eventTime=2004-03-11T21:00, coLevel=5.633333}
-{eventTime=2004-09-21T19:00, coLevel=5.333333}|{eventTime=2004-09-21T20:00, coLevel=5.133333}
-{eventTime=2004-10-26T16:00, coLevel=5.2}|{eventTime=2004-10-26T17:00, coLevel=6.5}|{eventTime=2004-10-26T18:00, coLevel=7.9}|{eventTime=2004-10-26T19:00, coLevel=8.033333}|{eventTime=2004-10-26T20:00, coLevel=6.9}
-{eventTime=2004-11-19T09:00, coLevel=5.35}|{eventTime=2004-11-19T10:00, coLevel=5.433333}
-{eventTime=2004-12-03T18:00, coLevel=5.533333}|{eventTime=2004-12-03T19:00, coLevel=5.633333}|{eventTime=2004-12-03T20:00, coLevel=5.366667}|{eventTime=2004-12-03T21:00, coLevel=5.733333}|{eventTime=2004-12-03T22:00, coLevel=5.1}
-{eventTime=2005-01-12T20:00, coLevel=5.333333}|{eventTime=2005-01-12T21:00, coLevel=5.733333}|{eventTime=2005-01-12T22:00, coLevel=5.033333}
-{eventTime=2005-02-12T20:00, coLevel=5.1}|{eventTime=2005-02-12T21:00, coLevel=5.3}|{eventTime=2005-02-12T22:00, coLevel=5.3}
-{eventTime=2004-03-17T19:00, coLevel=5.033333}|{eventTime=2004-03-17T20:00, coLevel=6.433333}|{eventTime=2004-03-17T21:00, coLevel=6.666667}|{eventTime=2004-03-17T22:00, coLevel=5.066667}
-{eventTime=2004-04-29T19:00, coLevel=5.6}|{eventTime=2004-04-29T20:00, coLevel=5.4}
-{eventTime=2004-09-28T19:00, coLevel=6.333333}|{eventTime=2004-09-28T20:00, coLevel=6.233333}
-{eventTime=2004-11-02T12:00, coLevel=5.033333}|{eventTime=2004-11-02T13:00, coLevel=5.266667}|{eventTime=2004-11-02T14:00, coLevel=5.833333}|{eventTime=2004-11-02T15:00, coLevel=6.133333}|{eventTime=2004-11-02T16:00, coLevel=6.4}|{eventTime=2004-11-02T17:00, coLevel=6.166667}|{eventTime=2004-11-02T18:00, coLevel=6.866667}|{eventTime=2004-11-02T19:00, coLevel=7.566667}|{eventTime=2004-11-02T20:00, coLevel=8.366667}|{eventTime=2004-11-02T21:00, coLevel=7.7}|{eventTime=2004-11-02T22:00, coLevel=6.266667}
-{eventTime=2004-11-24T19:00, coLevel=5.8}|{eventTime=2004-11-24T20:00, coLevel=7.1}|{eventTime=2004-11-24T21:00, coLevel=6.833333}|{eventTime=2004-11-24T22:00, coLevel=6.066667}
-{eventTime=2004-12-15T17:00, coLevel=5.1}|{eventTime=2004-12-15T18:00, coLevel=6.2}|{eventTime=2004-12-15T19:00, coLevel=5.833333}
-{eventTime=2005-03-15T20:00, coLevel=5.866667}|{eventTime=2005-03-15T21:00, coLevel=6.466667}|{eventTime=2005-03-15T22:00, coLevel=5.133333}
-{eventTime=2004-04-16T18:00, coLevel=5.2}|{eventTime=2004-04-16T19:00, coLevel=5.766667}|{eventTime=2004-04-16T20:00, coLevel=5.866667}|{eventTime=2004-04-16T21:00, coLevel=5.266667}
-{eventTime=2004-09-21T07:00, coLevel=5.6}|{eventTime=2004-09-21T08:00, coLevel=6.45}|{eventTime=2004-09-21T09:00, coLevel=6.066667}|{eventTime=2004-09-21T10:00, coLevel=5.666667}
-{eventTime=2004-10-25T17:00, coLevel=5.7}|{eventTime=2004-10-25T18:00, coLevel=7.1}|{eventTime=2004-10-25T19:00, coLevel=8.1}|{eventTime=2004-10-25T20:00, coLevel=7.6}|{eventTime=2004-10-25T21:00, coLevel=5.966667}
-{eventTime=2004-11-18T10:00, coLevel=5.233333}|{eventTime=2004-11-18T11:00, coLevel=5.3}
-{eventTime=2004-12-02T18:00, coLevel=5.533333}|{eventTime=2004-12-02T19:00, coLevel=7.333333}|{eventTime=2004-12-02T20:00, coLevel=8.3}|{eventTime=2004-12-02T21:00, coLevel=7.933333}|{eventTime=2004-12-02T22:00, coLevel=6.366667}|{eventTime=2004-12-02T23:00, coLevel=5.366667}
-{eventTime=2005-01-07T20:00, coLevel=5.233333}|{eventTime=2005-01-07T21:00, coLevel=5.166667}
-{eventTime=2005-02-11T14:00, coLevel=5.166667}|{eventTime=2005-02-11T15:00, coLevel=5.766667}|{eventTime=2005-02-11T16:00, coLevel=6.333333}|{eventTime=2005-02-11T17:00, coLevel=6.6}|{eventTime=2005-02-11T18:00, coLevel=6.733333}|{eventTime=2005-02-11T19:00, coLevel=6.733333}|{eventTime=2005-02-11T20:00, coLevel=6.166667}|{eventTime=2005-02-11T21:00, coLevel=5.333333}
-{eventTime=2004-03-15T09:00, coLevel=5.266667}|{eventTime=2004-03-15T10:00, coLevel=6.466667}|{eventTime=2004-03-15T11:00, coLevel=6.033333}
-{eventTime=2004-10-28T17:00, coLevel=5.3}|{eventTime=2004-10-28T18:00, coLevel=5.8}|{eventTime=2004-10-28T19:00, coLevel=5.033333}
-{eventTime=2004-11-19T16:00, coLevel=5.133333}|{eventTime=2004-11-19T17:00, coLevel=6.033333}|{eventTime=2004-11-19T18:00, coLevel=6.766667}|{eventTime=2004-11-19T19:00, coLevel=7.666667}|{eventTime=2004-11-19T20:00, coLevel=8.033333}|{eventTime=2004-11-19T21:00, coLevel=7.066667}|{eventTime=2004-11-19T22:00, coLevel=5.166667}
-{eventTime=2004-12-12T18:00, coLevel=5.2}|{eventTime=2004-12-12T19:00, coLevel=5.3}
-{eventTime=2005-01-14T19:00, coLevel=5.5}|{eventTime=2005-01-14T20:00, coLevel=5.766667}|{eventTime=2005-01-14T21:00, coLevel=5.533333}
-{eventTime=2004-04-06T08:00, coLevel=5.35}|{eventTime=2004-04-06T09:00, coLevel=5.033333}
-{eventTime=2004-10-20T17:00, coLevel=6.35}|{eventTime=2004-10-20T18:00, coLevel=6.8}|{eventTime=2004-10-20T19:00, coLevel=7.5}|{eventTime=2004-10-20T20:00, coLevel=6.833333}|{eventTime=2004-10-20T21:00, coLevel=5.833333}
-{eventTime=2004-11-29T10:00, coLevel=5.466667}|{eventTime=2004-11-29T11:00, coLevel=6.266667}|{eventTime=2004-11-29T12:00, coLevel=5.966667}
-{eventTime=2004-12-24T10:00, coLevel=5.833333}|{eventTime=2004-12-24T11:00, coLevel=6.4}|{eventTime=2004-12-24T12:00, coLevel=6.366667}|{eventTime=2004-12-24T13:00, coLevel=6.466667}|{eventTime=2004-12-24T14:00, coLevel=6.933333}|{eventTime=2004-12-24T15:00, coLevel=6.966667}|{eventTime=2004-12-24T16:00, coLevel=6.9}|{eventTime=2004-12-24T17:00, coLevel=6.533333}|{eventTime=2004-12-24T18:00, coLevel=6.733333}|{eventTime=2004-12-24T19:00, coLevel=6.633333}|{eventTime=2004-12-24T20:00, coLevel=6.633333}|{eventTime=2004-12-24T21:00, coLevel=6.266667}|{eventTime=2004-12-24T22:00, coLevel=5.933333}|{eventTime=2004-12-24T23:00, coLevel=5.4}|{eventTime=2004-12-25T00:00, coLevel=5.5}|{eventTime=2004-12-25T01:00, coLevel=5.566667}|{eventTime=2004-12-25T02:00, coLevel=5.666667}|{eventTime=2004-12-25T03:00, coLevel=5.433333}
-{eventTime=2005-02-03T19:00, coLevel=5.166667}|{eventTime=2005-02-03T20:00, coLevel=5.666667}
-{eventTime=2005-03-24T20:00, coLevel=5.366667}|{eventTime=2005-03-24T21:00, coLevel=6.133333}|{eventTime=2005-03-24T22:00, coLevel=5.5}
-{eventTime=2004-04-15T19:00, coLevel=6.133333}|{eventTime=2004-04-15T20:00, coLevel=6.433333}|{eventTime=2004-04-15T21:00, coLevel=6.0}
-{eventTime=2004-09-20T19:00, coLevel=5.7}|{eventTime=2004-09-20T20:00, coLevel=5.4}
-{eventTime=2004-10-22T18:00, coLevel=6.433333}|{eventTime=2004-10-22T19:00, coLevel=6.866667}|{eventTime=2004-10-22T20:00, coLevel=6.566667}
-{eventTime=2004-11-17T17:00, coLevel=5.3}|{eventTime=2004-11-17T18:00, coLevel=7.366667}|{eventTime=2004-11-17T19:00, coLevel=8.2}|{eventTime=2004-11-17T20:00, coLevel=7.033333}|{eventTime=2004-11-17T21:00, coLevel=5.266667}
-{eventTime=2004-12-01T16:00, coLevel=5.433333}|{eventTime=2004-12-01T17:00, coLevel=5.6}|{eventTime=2004-12-01T18:00, coLevel=6.433333}|{eventTime=2004-12-01T19:00, coLevel=5.566667}
-{eventTime=2005-01-05T12:00, coLevel=5.3}|{eventTime=2005-01-05T13:00, coLevel=5.666667}
-{eventTime=2005-02-11T10:00, coLevel=5.033333}|{eventTime=2005-02-11T11:00, coLevel=5.333333}
-{eventTime=2004-04-29T08:00, coLevel=6.05}|{eventTime=2004-04-29T09:00, coLevel=5.2}
-{eventTime=2004-11-23T10:00, coLevel=5.6}|{eventTime=2004-11-23T11:00, coLevel=5.766667}|{eventTime=2004-11-23T12:00, coLevel=5.633333}|{eventTime=2004-11-23T13:00, coLevel=5.233333}|{eventTime=2004-11-23T14:00, coLevel=6.0}|{eventTime=2004-11-23T15:00, coLevel=5.933333}|{eventTime=2004-11-23T16:00, coLevel=5.9}|{eventTime=2004-11-23T17:00, coLevel=5.9}|{eventTime=2004-11-23T18:00, coLevel=7.6}|{eventTime=2004-11-23T19:00, coLevel=9.8}|{eventTime=2004-11-23T20:00, coLevel=11.2}|{eventTime=2004-11-23T21:00, coLevel=10.566667}|{eventTime=2004-11-23T22:00, coLevel=8.166667}|{eventTime=2004-11-23T23:00, coLevel=5.666667}
-{eventTime=2004-12-14T17:00, coLevel=5.266667}|{eventTime=2004-12-14T18:00, coLevel=7.266667}|{eventTime=2004-12-14T19:00, coLevel=8.033333}|{eventTime=2004-12-14T20:00, coLevel=7.333333}|{eventTime=2004-12-14T21:00, coLevel=5.6}
-{eventTime=2005-03-14T19:00, coLevel=5.1}|{eventTime=2005-03-14T20:00, coLevel=6.133333}|{eventTime=2005-03-14T21:00, coLevel=5.666667}
-{eventTime=2004-09-15T19:00, coLevel=5.366667}|{eventTime=2004-09-15T20:00, coLevel=5.733333}
-{eventTime=2004-10-21T20:00, coLevel=5.133333}|{eventTime=2004-10-21T21:00, coLevel=5.1}
-{eventTime=2004-11-11T10:00, coLevel=5.1}|{eventTime=2004-11-11T11:00, coLevel=5.566667}
-{eventTime=2004-11-30T20:00, coLevel=6.1}|{eventTime=2004-11-30T21:00, coLevel=5.733333}
-{eventTime=2004-12-25T20:00, coLevel=5.2}|{eventTime=2004-12-25T21:00, coLevel=5.2}|{eventTime=2004-12-25T22:00, coLevel=5.1}
-{eventTime=2005-02-10T20:00, coLevel=6.266667}|{eventTime=2005-02-10T21:00, coLevel=6.366667}|{eventTime=2005-02-10T22:00, coLevel=5.2}
-{eventTime=2005-03-25T20:00, coLevel=5.366667}|{eventTime=2005-03-25T21:00, coLevel=5.033333}
-{eventTime=2004-10-07T19:00, coLevel=5.8}|{eventTime=2004-10-07T20:00, coLevel=6.333333}|{eventTime=2004-10-07T21:00, coLevel=5.5}|{eventTime=2004-10-08T07:00, coLevel=5.7}
-{eventTime=2004-11-05T17:00, coLevel=5.8}|{eventTime=2004-11-05T18:00, coLevel=7.033333}|{eventTime=2004-11-05T19:00, coLevel=6.566667}
-{eventTime=2004-12-23T18:00, coLevel=6.466667}|{eventTime=2004-12-23T19:00, coLevel=7.933333}|{eventTime=2004-12-23T20:00, coLevel=8.766667}|{eventTime=2004-12-23T21:00, coLevel=8.333333}|{eventTime=2004-12-23T22:00, coLevel=7.1}|{eventTime=2004-12-23T23:00, coLevel=5.466667}
-{eventTime=2005-02-02T20:00, coLevel=5.5}|{eventTime=2005-02-02T21:00, coLevel=5.266667}
-{eventTime=2005-03-23T20:00, coLevel=5.766667}|{eventTime=2005-03-23T21:00, coLevel=5.766667}
+{tupleID=866, eventTime=2004-04-15T19:00, coLevel=6.133333}|{tupleID=867, eventTime=2004-04-15T20:00, coLevel=6.433333}|{tupleID=868, eventTime=2004-04-15T21:00, coLevel=6.0}
+{tupleID=4658, eventTime=2004-09-20T19:00, coLevel=5.7}|{tupleID=4659, eventTime=2004-09-20T20:00, coLevel=5.4}
+{tupleID=5425, eventTime=2004-10-22T18:00, coLevel=6.433333}|{tupleID=5426, eventTime=2004-10-22T19:00, coLevel=6.866667}|{tupleID=5427, eventTime=2004-10-22T20:00, coLevel=6.566667}
+{tupleID=6048, eventTime=2004-11-17T17:00, coLevel=5.3}|{tupleID=6049, eventTime=2004-11-17T18:00, coLevel=7.366667}|{tupleID=6050, eventTime=2004-11-17T19:00, coLevel=8.2}|{tupleID=6051, eventTime=2004-11-17T20:00, coLevel=7.033333}|{tupleID=6052, eventTime=2004-11-17T21:00, coLevel=5.266667}
+{tupleID=6383, eventTime=2004-12-01T16:00, coLevel=5.433333}|{tupleID=6384, eventTime=2004-12-01T17:00, coLevel=5.6}|{tupleID=6385, eventTime=2004-12-01T18:00, coLevel=6.433333}|{tupleID=6386, eventTime=2004-12-01T19:00, coLevel=5.566667}
+{tupleID=7219, eventTime=2005-01-05T12:00, coLevel=5.3}|{tupleID=7220, eventTime=2005-01-05T13:00, coLevel=5.666667}
+{tupleID=8105, eventTime=2005-02-11T10:00, coLevel=5.033333}|{tupleID=8106, eventTime=2005-02-11T11:00, coLevel=5.333333}
+{tupleID=112, eventTime=2004-03-15T09:00, coLevel=5.266667}|{tupleID=113, eventTime=2004-03-15T10:00, coLevel=6.466667}|{tupleID=114, eventTime=2004-03-15T11:00, coLevel=6.033333}
+{tupleID=5568, eventTime=2004-10-28T17:00, coLevel=5.3}|{tupleID=5569, eventTime=2004-10-28T18:00, coLevel=5.8}|{tupleID=5570, eventTime=2004-10-28T19:00, coLevel=5.033333}
+{tupleID=6095, eventTime=2004-11-19T16:00, coLevel=5.133333}|{tupleID=6096, eventTime=2004-11-19T17:00, coLevel=6.033333}|{tupleID=6097, eventTime=2004-11-19T18:00, coLevel=6.766667}|{tupleID=6098, eventTime=2004-11-19T19:00, coLevel=7.666667}|{tupleID=6099, eventTime=2004-11-19T20:00, coLevel=8.033333}|{tupleID=6100, eventTime=2004-11-19T21:00, coLevel=7.066667}|{tupleID=6101, eventTime=2004-11-19T22:00, coLevel=5.166667}
+{tupleID=6649, eventTime=2004-12-12T18:00, coLevel=5.2}|{tupleID=6650, eventTime=2004-12-12T19:00, coLevel=5.3}
+{tupleID=7442, eventTime=2005-01-14T19:00, coLevel=5.5}|{tupleID=7443, eventTime=2005-01-14T20:00, coLevel=5.766667}|{tupleID=7444, eventTime=2005-01-14T21:00, coLevel=5.533333}
+{tupleID=4538, eventTime=2004-09-15T19:00, coLevel=5.366667}|{tupleID=4539, eventTime=2004-09-15T20:00, coLevel=5.733333}
+{tupleID=5403, eventTime=2004-10-21T20:00, coLevel=5.133333}|{tupleID=5404, eventTime=2004-10-21T21:00, coLevel=5.1}
+{tupleID=5897, eventTime=2004-11-11T10:00, coLevel=5.1}|{tupleID=5898, eventTime=2004-11-11T11:00, coLevel=5.566667}
+{tupleID=6363, eventTime=2004-11-30T20:00, coLevel=6.1}|{tupleID=6364, eventTime=2004-11-30T21:00, coLevel=5.733333}
+{tupleID=6963, eventTime=2004-12-25T20:00, coLevel=5.2}|{tupleID=6964, eventTime=2004-12-25T21:00, coLevel=5.2}|{tupleID=6965, eventTime=2004-12-25T22:00, coLevel=5.1}
+{tupleID=8091, eventTime=2005-02-10T20:00, coLevel=6.266667}|{tupleID=8092, eventTime=2005-02-10T21:00, coLevel=6.366667}|{tupleID=8093, eventTime=2005-02-10T22:00, coLevel=5.2}
+{tupleID=9123, eventTime=2005-03-25T20:00, coLevel=5.366667}|{tupleID=9124, eventTime=2005-03-25T21:00, coLevel=5.033333}
+{tupleID=122, eventTime=2004-03-15T19:00, coLevel=5.633333}|{tupleID=123, eventTime=2004-03-15T20:00, coLevel=6.866667}|{tupleID=124, eventTime=2004-03-15T21:00, coLevel=6.233333}
+{tupleID=6170, eventTime=2004-11-22T19:00, coLevel=5.733333}|{tupleID=6171, eventTime=2004-11-22T20:00, coLevel=6.566667}|{tupleID=6172, eventTime=2004-11-22T21:00, coLevel=5.566667}
+{tupleID=6673, eventTime=2004-12-13T18:00, coLevel=6.766667}|{tupleID=6674, eventTime=2004-12-13T19:00, coLevel=7.566667}|{tupleID=6675, eventTime=2004-12-13T20:00, coLevel=7.033333}
+{tupleID=7513, eventTime=2005-01-17T18:00, coLevel=5.3}|{tupleID=7514, eventTime=2005-01-17T19:00, coLevel=7.1}|{tupleID=7515, eventTime=2005-01-17T20:00, coLevel=6.966667}|{tupleID=7516, eventTime=2005-01-17T21:00, coLevel=5.1}
+{tupleID=4897, eventTime=2004-09-30T18:00, coLevel=5.566667}|{tupleID=4898, eventTime=2004-09-30T19:00, coLevel=6.166667}|{tupleID=4899, eventTime=2004-09-30T20:00, coLevel=5.466667}
+{tupleID=6262, eventTime=2004-11-26T15:00, coLevel=5.2}|{tupleID=6263, eventTime=2004-11-26T16:00, coLevel=5.633333}|{tupleID=6264, eventTime=2004-11-26T17:00, coLevel=6.333333}|{tupleID=6265, eventTime=2004-11-26T18:00, coLevel=8.0}|{tupleID=6266, eventTime=2004-11-26T19:00, coLevel=8.066667}|{tupleID=6267, eventTime=2004-11-26T20:00, coLevel=8.066667}|{tupleID=6268, eventTime=2004-11-26T21:00, coLevel=7.4}|{tupleID=6269, eventTime=2004-11-26T22:00, coLevel=6.833333}|{tupleID=6270, eventTime=2004-11-26T23:00, coLevel=5.7}
+{tupleID=6761, eventTime=2004-12-17T10:00, coLevel=5.133333}|{tupleID=6762, eventTime=2004-12-17T11:00, coLevel=5.466667}
+{tupleID=7889, eventTime=2005-02-02T10:00, coLevel=5.433333}|{tupleID=7890, eventTime=2005-02-02T11:00, coLevel=5.533333}
+{tupleID=9027, eventTime=2005-03-21T20:00, coLevel=5.633333}|{tupleID=9028, eventTime=2005-03-21T21:00, coLevel=5.4}
+{tupleID=5066, eventTime=2004-10-07T19:00, coLevel=5.8}|{tupleID=5067, eventTime=2004-10-07T20:00, coLevel=6.333333}|{tupleID=5068, eventTime=2004-10-07T21:00, coLevel=5.5}|{tupleID=5078, eventTime=2004-10-08T07:00, coLevel=5.7}
+{tupleID=5760, eventTime=2004-11-05T17:00, coLevel=5.8}|{tupleID=5761, eventTime=2004-11-05T18:00, coLevel=7.033333}|{tupleID=5762, eventTime=2004-11-05T19:00, coLevel=6.566667}
+{tupleID=6913, eventTime=2004-12-23T18:00, coLevel=6.466667}|{tupleID=6914, eventTime=2004-12-23T19:00, coLevel=7.933333}|{tupleID=6915, eventTime=2004-12-23T20:00, coLevel=8.766667}|{tupleID=6916, eventTime=2004-12-23T21:00, coLevel=8.333333}|{tupleID=6917, eventTime=2004-12-23T22:00, coLevel=7.1}|{tupleID=6918, eventTime=2004-12-23T23:00, coLevel=5.466667}
+{tupleID=7899, eventTime=2005-02-02T20:00, coLevel=5.5}|{tupleID=7900, eventTime=2005-02-02T21:00, coLevel=5.266667}
+{tupleID=9075, eventTime=2005-03-23T20:00, coLevel=5.766667}|{tupleID=9076, eventTime=2005-03-23T21:00, coLevel=5.766667}
+{tupleID=27, eventTime=2004-03-11T20:00, coLevel=5.933333}|{tupleID=28, eventTime=2004-03-11T21:00, coLevel=5.633333}
+{tupleID=4682, eventTime=2004-09-21T19:00, coLevel=5.333333}|{tupleID=4683, eventTime=2004-09-21T20:00, coLevel=5.133333}
+{tupleID=5519, eventTime=2004-10-26T16:00, coLevel=5.2}|{tupleID=5520, eventTime=2004-10-26T17:00, coLevel=6.5}|{tupleID=5521, eventTime=2004-10-26T18:00, coLevel=7.9}|{tupleID=5522, eventTime=2004-10-26T19:00, coLevel=8.033333}|{tupleID=5523, eventTime=2004-10-26T20:00, coLevel=6.9}
+{tupleID=6088, eventTime=2004-11-19T09:00, coLevel=5.35}|{tupleID=6089, eventTime=2004-11-19T10:00, coLevel=5.433333}
+{tupleID=6433, eventTime=2004-12-03T18:00, coLevel=5.533333}|{tupleID=6434, eventTime=2004-12-03T19:00, coLevel=5.633333}|{tupleID=6435, eventTime=2004-12-03T20:00, coLevel=5.366667}|{tupleID=6436, eventTime=2004-12-03T21:00, coLevel=5.733333}|{tupleID=6437, eventTime=2004-12-03T22:00, coLevel=5.1}
+{tupleID=7395, eventTime=2005-01-12T20:00, coLevel=5.333333}|{tupleID=7396, eventTime=2005-01-12T21:00, coLevel=5.733333}|{tupleID=7397, eventTime=2005-01-12T22:00, coLevel=5.033333}
+{tupleID=8139, eventTime=2005-02-12T20:00, coLevel=5.1}|{tupleID=8140, eventTime=2005-02-12T21:00, coLevel=5.3}|{tupleID=8141, eventTime=2005-02-12T22:00, coLevel=5.3}
+{tupleID=889, eventTime=2004-04-16T18:00, coLevel=5.2}|{tupleID=890, eventTime=2004-04-16T19:00, coLevel=5.766667}|{tupleID=891, eventTime=2004-04-16T20:00, coLevel=5.866667}|{tupleID=892, eventTime=2004-04-16T21:00, coLevel=5.266667}
+{tupleID=4670, eventTime=2004-09-21T07:00, coLevel=5.6}|{tupleID=4671, eventTime=2004-09-21T08:00, coLevel=6.45}|{tupleID=4672, eventTime=2004-09-21T09:00, coLevel=6.066667}|{tupleID=4673, eventTime=2004-09-21T10:00, coLevel=5.666667}
+{tupleID=5496, eventTime=2004-10-25T17:00, coLevel=5.7}|{tupleID=5497, eventTime=2004-10-25T18:00, coLevel=7.1}|{tupleID=5498, eventTime=2004-10-25T19:00, coLevel=8.1}|{tupleID=5499, eventTime=2004-10-25T20:00, coLevel=7.6}|{tupleID=5500, eventTime=2004-10-25T21:00, coLevel=5.966667}
+{tupleID=6065, eventTime=2004-11-18T10:00, coLevel=5.233333}|{tupleID=6066, eventTime=2004-11-18T11:00, coLevel=5.3}
+{tupleID=6409, eventTime=2004-12-02T18:00, coLevel=5.533333}|{tupleID=6410, eventTime=2004-12-02T19:00, coLevel=7.333333}|{tupleID=6411, eventTime=2004-12-02T20:00, coLevel=8.3}|{tupleID=6412, eventTime=2004-12-02T21:00, coLevel=7.933333}|{tupleID=6413, eventTime=2004-12-02T22:00, coLevel=6.366667}|{tupleID=6414, eventTime=2004-12-02T23:00, coLevel=5.366667}
+{tupleID=7275, eventTime=2005-01-07T20:00, coLevel=5.233333}|{tupleID=7276, eventTime=2005-01-07T21:00, coLevel=5.166667}
+{tupleID=8109, eventTime=2005-02-11T14:00, coLevel=5.166667}|{tupleID=8110, eventTime=2005-02-11T15:00, coLevel=5.766667}|{tupleID=8111, eventTime=2005-02-11T16:00, coLevel=6.333333}|{tupleID=8112, eventTime=2005-02-11T17:00, coLevel=6.6}|{tupleID=8113, eventTime=2005-02-11T18:00, coLevel=6.733333}|{tupleID=8114, eventTime=2005-02-11T19:00, coLevel=6.733333}|{tupleID=8115, eventTime=2005-02-11T20:00, coLevel=6.166667}|{tupleID=8116, eventTime=2005-02-11T21:00, coLevel=5.333333}
+{tupleID=639, eventTime=2004-04-06T08:00, coLevel=5.35}|{tupleID=640, eventTime=2004-04-06T09:00, coLevel=5.033333}
+{tupleID=5376, eventTime=2004-10-20T17:00, coLevel=6.35}|{tupleID=5377, eventTime=2004-10-20T18:00, coLevel=6.8}|{tupleID=5378, eventTime=2004-10-20T19:00, coLevel=7.5}|{tupleID=5379, eventTime=2004-10-20T20:00, coLevel=6.833333}|{tupleID=5380, eventTime=2004-10-20T21:00, coLevel=5.833333}
+{tupleID=6329, eventTime=2004-11-29T10:00, coLevel=5.466667}|{tupleID=6330, eventTime=2004-11-29T11:00, coLevel=6.266667}|{tupleID=6331, eventTime=2004-11-29T12:00, coLevel=5.966667}
+{tupleID=6929, eventTime=2004-12-24T10:00, coLevel=5.833333}|{tupleID=6930, eventTime=2004-12-24T11:00, coLevel=6.4}|{tupleID=6931, eventTime=2004-12-24T12:00, coLevel=6.366667}|{tupleID=6932, eventTime=2004-12-24T13:00, coLevel=6.466667}|{tupleID=6933, eventTime=2004-12-24T14:00, coLevel=6.933333}|{tupleID=6934, eventTime=2004-12-24T15:00, coLevel=6.966667}|{tupleID=6935, eventTime=2004-12-24T16:00, coLevel=6.9}|{tupleID=6936, eventTime=2004-12-24T17:00, coLevel=6.533333}|{tupleID=6937, eventTime=2004-12-24T18:00, coLevel=6.733333}|{tupleID=6938, eventTime=2004-12-24T19:00, coLevel=6.633333}|{tupleID=6939, eventTime=2004-12-24T20:00, coLevel=6.633333}|{tupleID=6940, eventTime=2004-12-24T21:00, coLevel=6.266667}|{tupleID=6941, eventTime=2004-12-24T22:00, coLevel=5.933333}|{tupleID=6942, eventTime=2004-12-24T23:00, coLevel=5.4}|{tupleID=6943, eventTime=2004-12-25T00:00, coLevel=5.5}|{tupleID=6944, eventTime=2004-12-25T01:00, coLevel=5.566667}|{tupleID=6945, eventTime=2004-12-25T02:00, coLevel=5.666667}|{tupleID=6946, eventTime=2004-12-25T03:00, coLevel=5.433333}
+{tupleID=7922, eventTime=2005-02-03T19:00, coLevel=5.166667}|{tupleID=7923, eventTime=2005-02-03T20:00, coLevel=5.666667}
+{tupleID=9099, eventTime=2005-03-24T20:00, coLevel=5.366667}|{tupleID=9100, eventTime=2005-03-24T21:00, coLevel=6.133333}|{tupleID=9101, eventTime=2005-03-24T22:00, coLevel=5.5}
+{tupleID=1191, eventTime=2004-04-29T08:00, coLevel=6.05}|{tupleID=1192, eventTime=2004-04-29T09:00, coLevel=5.2}
+{tupleID=6185, eventTime=2004-11-23T10:00, coLevel=5.6}|{tupleID=6186, eventTime=2004-11-23T11:00, coLevel=5.766667}|{tupleID=6187, eventTime=2004-11-23T12:00, coLevel=5.633333}|{tupleID=6188, eventTime=2004-11-23T13:00, coLevel=5.233333}|{tupleID=6189, eventTime=2004-11-23T14:00, coLevel=6.0}|{tupleID=6190, eventTime=2004-11-23T15:00, coLevel=5.933333}|{tupleID=6191, eventTime=2004-11-23T16:00, coLevel=5.9}|{tupleID=6192, eventTime=2004-11-23T17:00, coLevel=5.9}|{tupleID=6193, eventTime=2004-11-23T18:00, coLevel=7.6}|{tupleID=6194, eventTime=2004-11-23T19:00, coLevel=9.8}|{tupleID=6195, eventTime=2004-11-23T20:00, coLevel=11.2}|{tupleID=6196, eventTime=2004-11-23T21:00, coLevel=10.566667}|{tupleID=6197, eventTime=2004-11-23T22:00, coLevel=8.166667}|{tupleID=6198, eventTime=2004-11-23T23:00, coLevel=5.666667}
+{tupleID=6696, eventTime=2004-12-14T17:00, coLevel=5.266667}|{tupleID=6697, eventTime=2004-12-14T18:00, coLevel=7.266667}|{tupleID=6698, eventTime=2004-12-14T19:00, coLevel=8.033333}|{tupleID=6699, eventTime=2004-12-14T20:00, coLevel=7.333333}|{tupleID=6700, eventTime=2004-12-14T21:00, coLevel=5.6}
+{tupleID=8858, eventTime=2005-03-14T19:00, coLevel=5.1}|{tupleID=8859, eventTime=2005-03-14T20:00, coLevel=6.133333}|{tupleID=8860, eventTime=2005-03-14T21:00, coLevel=5.666667}
+{tupleID=184, eventTime=2004-03-18T09:00, coLevel=5.65}|{tupleID=185, eventTime=2004-03-18T10:00, coLevel=5.266667}
+{tupleID=4874, eventTime=2004-09-29T19:00, coLevel=5.3}|{tupleID=4875, eventTime=2004-09-29T20:00, coLevel=5.533333}
+{tupleID=5737, eventTime=2004-11-04T18:00, coLevel=8.7}|{tupleID=5738, eventTime=2004-11-04T19:00, coLevel=7.25}|{tupleID=5739, eventTime=2004-11-04T20:00, coLevel=6.266667}
+{tupleID=6256, eventTime=2004-11-26T09:00, coLevel=5.05}|{tupleID=6257, eventTime=2004-11-26T10:00, coLevel=5.233333}|{tupleID=6258, eventTime=2004-11-26T11:00, coLevel=5.133333}
+{tupleID=6743, eventTime=2004-12-16T16:00, coLevel=5.266667}|{tupleID=6744, eventTime=2004-12-16T17:00, coLevel=5.166667}|{tupleID=6745, eventTime=2004-12-16T18:00, coLevel=6.066667}|{tupleID=6746, eventTime=2004-12-16T19:00, coLevel=7.1}|{tupleID=6747, eventTime=2004-12-16T20:00, coLevel=8.4}|{tupleID=6748, eventTime=2004-12-16T21:00, coLevel=8.766667}|{tupleID=6749, eventTime=2004-12-16T22:00, coLevel=7.7}|{tupleID=6750, eventTime=2004-12-16T23:00, coLevel=6.1}
+{tupleID=7850, eventTime=2005-01-31T19:00, coLevel=5.666667}|{tupleID=7851, eventTime=2005-01-31T20:00, coLevel=6.566667}|{tupleID=7852, eventTime=2005-01-31T21:00, coLevel=5.766667}
+{tupleID=170, eventTime=2004-03-17T19:00, coLevel=5.033333}|{tupleID=171, eventTime=2004-03-17T20:00, coLevel=6.433333}|{tupleID=172, eventTime=2004-03-17T21:00, coLevel=6.666667}|{tupleID=173, eventTime=2004-03-17T22:00, coLevel=5.066667}
+{tupleID=1202, eventTime=2004-04-29T19:00, coLevel=5.6}|{tupleID=1203, eventTime=2004-04-29T20:00, coLevel=5.4}
+{tupleID=4850, eventTime=2004-09-28T19:00, coLevel=6.333333}|{tupleID=4851, eventTime=2004-09-28T20:00, coLevel=6.233333}
+{tupleID=5683, eventTime=2004-11-02T12:00, coLevel=5.033333}|{tupleID=5684, eventTime=2004-11-02T13:00, coLevel=5.266667}|{tupleID=5685, eventTime=2004-11-02T14:00, coLevel=5.833333}|{tupleID=5686, eventTime=2004-11-02T15:00, coLevel=6.133333}|{tupleID=5687, eventTime=2004-11-02T16:00, coLevel=6.4}|{tupleID=5688, eventTime=2004-11-02T17:00, coLevel=6.166667}|{tupleID=5689, eventTime=2004-11-02T18:00, coLevel=6.866667}|{tupleID=5690, eventTime=2004-11-02T19:00, coLevel=7.566667}|{tupleID=5691, eventTime=2004-11-02T20:00, coLevel=8.366667}|{tupleID=5692, eventTime=2004-11-02T21:00, coLevel=7.7}|{tupleID=5693, eventTime=2004-11-02T22:00, coLevel=6.266667}
+{tupleID=6218, eventTime=2004-11-24T19:00, coLevel=5.8}|{tupleID=6219, eventTime=2004-11-24T20:00, coLevel=7.1}|{tupleID=6220, eventTime=2004-11-24T21:00, coLevel=6.833333}|{tupleID=6221, eventTime=2004-11-24T22:00, coLevel=6.066667}
+{tupleID=6720, eventTime=2004-12-15T17:00, coLevel=5.1}|{tupleID=6721, eventTime=2004-12-15T18:00, coLevel=6.2}|{tupleID=6722, eventTime=2004-12-15T19:00, coLevel=5.833333}
+{tupleID=8883, eventTime=2005-03-15T20:00, coLevel=5.866667}|{tupleID=8884, eventTime=2005-03-15T21:00, coLevel=6.466667}|{tupleID=8885, eventTime=2005-03-15T22:00, coLevel=5.133333}

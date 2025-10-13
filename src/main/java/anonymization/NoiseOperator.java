@@ -7,7 +7,7 @@ import java.util.Random;
 public class NoiseOperator implements MapFunction<AirQualityEvent, AirQualityEvent> {
 
     private final Random random;
-    private final double stdDev; // Deviazione standard: controlla l'intensità del rumore
+    private final double stdDev; // Standard deviation for noise intensity
 
     public NoiseOperator(double stdDev) {
         this.random = new Random();
@@ -20,18 +20,15 @@ public class NoiseOperator implements MapFunction<AirQualityEvent, AirQualityEve
             return null;
         }
 
-        // Genera un valore da una distribuzione Normale con media 0 e deviazione standard 'stdDev'
+        // Generate a value from a Normal distribution with mean 0 and standard deviation 'stdDev'
         double noise = random.nextGaussian() * stdDev;
 
         double originalCoLevel = airQualityEvent.getCoLevel();
+        // Add the noise to the original value
         double noisyCoLevel = originalCoLevel + noise;
-
-        // Assicurati che il valore non diventi negativo (improbabile ma possibile)
         noisyCoLevel = Math.max(0, noisyCoLevel);
 
-        // Clona l'evento e modifica solo il coLevel. Devi implementare un metodo per clonare
-        // o un costruttore di copia nella tua classe AirQualityEvent.
-        AirQualityEvent noisyEvent = new AirQualityEvent(airQualityEvent); // Ipotizzando un costruttore di copia
+        AirQualityEvent noisyEvent = new AirQualityEvent(airQualityEvent);
         noisyEvent.setCoLevel(noisyCoLevel);
 
         return noisyEvent;

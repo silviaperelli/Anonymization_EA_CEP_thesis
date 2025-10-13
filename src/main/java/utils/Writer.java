@@ -20,7 +20,7 @@ public class Writer {
     public static String writeToCSV(AirQualityEvent event) {
         return "{" +
                 "tupleID=" + event.getTupleId() +
-                "eventTime=" + event.getEventTime() +
+                ", eventTime=" + event.getEventTime() +
                 ", coLevel=" + event.getCoLevel() +
                 '}';
     }

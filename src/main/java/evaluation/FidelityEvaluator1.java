@@ -2,12 +2,9 @@ package evaluation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -18,16 +15,15 @@ public class FidelityEvaluator1 {
 
     // Threshold to define a match (at least 50% of their total union)
     // if we want a IOU Threshold less restrictive 0.3 (at least 30% of their total union --> we have more or less an intersection that is 50% of the size of a sequence)
-    private static final double IOU_THRESHOLD = 0.5;
+    private static final double IOU_THRESHOLD = 0.3;
 
     private static final Logger logger = LoggerFactory.getLogger(FidelityEvaluator1.class);
 
     public static void main(String[] args) {
-        // Modifica questi percorsi per puntare ai tuoi file CSV
-        Path originalFilePath = Paths.get("src/main/resources/datasets/target/targetDataset.csv");
 
-        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDataset.csv");
-        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/target/targetAnonymizedDatasetNoise.csv");
+        Path originalFilePath = Paths.get("src/main/resources/datasets/results/targetDataset.csv");
+        Path anonymizedFilePath = Paths.get("src/main/resources/datasets/results/targetAnonymizedDataset.csv");
+        //Path anonymizedFilePath = Paths.get("src/main/resources/datasets/results/targetAnonymizedDatasetNoise.csv");
 
         try {
             List<Sequence> originalSequences = parseSequencesFromFile(originalFilePath);
@@ -88,9 +84,7 @@ public class FidelityEvaluator1 {
     }
 
     // Calculate Intersection over Union (IoU) between two sequences
-
     private static double calculateIoU(Sequence s1, Sequence s2) {
-        // Calcola l'intersezione e l'unione usando i metodi che abbiamo aggiunto a Sequence.
         Set<Long> intersection = s1.intersection(s2);
         Set<Long> union = s1.union(s2);
 
@@ -98,8 +92,6 @@ public class FidelityEvaluator1 {
             return 0.0;
         }
 
-        // IoU è la dimensione dell'intersezione divisa per la dimensione dell'unione.
         return (double) intersection.size() / union.size();
     }
-    
 }

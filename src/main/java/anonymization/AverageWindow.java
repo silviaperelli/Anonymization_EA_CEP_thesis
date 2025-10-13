@@ -8,7 +8,7 @@ public class AverageWindow extends BaseTimeWindowAddRemove <AirQualityEvent, Air
 
     private int count = 0;
     private double sum = 0.0;
-    private AirQualityEvent lastEvent; //keeps track of the last event in the window
+    private AirQualityEvent lastEvent; // Keeps track of the last event in the window
     private long lastOutputTs = -1;
 
     @Override
