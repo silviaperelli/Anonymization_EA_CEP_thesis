@@ -4,6 +4,9 @@ import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.GrammarBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
+import jgea.representation.PipelineRepresentation;
+import jgea.representation.RepresentationToLiebreQuery;
+import query.Query;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,13 +15,15 @@ import java.util.function.Function;
 
 import static jgea.utils.TreeUtils.*;
 
-public class Problem implements GrammarBasedProblem<String, PipelineRepresentation>,
-        TotalOrderQualityBasedProblem<PipelineRepresentation, Double> {
+public class Problem implements GrammarBasedProblem<String, Query>,
+        TotalOrderQualityBasedProblem<Query, Double> {
 
     private final StringGrammar<String> grammar;
+    private final String inputCsvPath;
 
     // Constructor that loads the grammar
-    public Problem(String grammarPath) throws IOException {
+    public Problem(String grammarPath, String inputCsvPath) throws IOException {
+        this.inputCsvPath = inputCsvPath;
         try (FileInputStream fis = new FileInputStream(grammarPath)) {
             this.grammar = StringGrammar.load(fis);
         }
@@ -30,12 +35,23 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
     }
 
     @Override
-    public Function<Tree<String>, PipelineRepresentation> solutionMapper() {
+    public Function<Tree<String>, Query> solutionMapper() {
         return (Tree<String> tree) -> {
-            List<PipelineRepresentation.OperatorNode> operators = new ArrayList<>();
-            // Start recursive parsing from the root of the tree
-            parsePipelineNode(tree, operators);
-            return new PipelineRepresentation(operators);
+            try{
+                // First mapping from tree to PipelineRepresentation
+                List<PipelineRepresentation.OperatorNode> operators = new ArrayList<>();
+                // Start recursive parsing from the root of the tree
+                parsePipelineNode(tree, operators);
+                PipelineRepresentation intermediateRepr = new PipelineRepresentation(operators);
+
+                // Second mapping from PipelineRepresentation to Query Liebre
+                RepresentationToLiebreQuery mapper = new RepresentationToLiebreQuery();
+                String tempOutputFile = "src/main/resources/datasets/testBestQuery.csv";
+                return mapper.translate(intermediateRepr, this.inputCsvPath, tempOutputFile);
+            }catch(Exception e){
+                System.err.println(("Error during mapping process"));
+                return null;
+            }
         };
     }
 
@@ -113,8 +129,13 @@ public class Problem implements GrammarBasedProblem<String, PipelineRepresentati
     }
 
     @Override
-    public Function<PipelineRepresentation, Double> qualityFunction() {
+    public Function<Query, Double> qualityFunction() {
         // The fitness function only assigns a random number to each pipeline created
-        return pipeline -> new Random().nextDouble();
+        return query -> {
+            if (query == null){
+                return 0.0;
+            }
+            return new Random().nextDouble();
+        };
     }
 }

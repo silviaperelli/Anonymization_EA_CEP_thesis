@@ -32,11 +32,10 @@ public class GrammarGenerator {
 
         sb.append("<operator> ::= lt | le | gt | ge | eq\n");
 
-        // --- Selettore valore ---
         sb.append("<value> ::= ");
         StringJoiner valueJoiner = new StringJoiner(" | ");
         for (String attribute : attributes) {
-            String cleanAttr = attribute.replaceAll("[^a-zA-Z0-9_]", "_");
+            String cleanAttr = cleanAttribute(attribute);
             valueJoiner.add("<" + cleanAttr + "_value>");
         }
         sb.append(valueJoiner).append("\n");
@@ -46,7 +45,7 @@ public class GrammarGenerator {
             AttributeStats stats = statsMap.get(attribute);
             if (stats == null) continue;
 
-            String cleanAttr = attribute.replaceAll("[^a-zA-Z0-9_]", "_");
+            String cleanAttr = cleanAttribute(attribute);
 
             sb.append(String.format(
                     "<%s_value> ::= <%s_intPart> . <%s_fracPart>\n",
@@ -95,5 +94,13 @@ public class GrammarGenerator {
             digits.add("<digit>");
         }
         sb.append(digits).append("\n");
+    }
+
+    // Helper method to clean an attribute name
+    private static String cleanAttribute(String attributeName) {
+        // Replace invalid character with an underscore
+        String cleaned = attributeName.replaceAll("[^a-zA-Z0-9]+", "_");
+        // Remove underscore at the end or at the beginning of the string
+        return cleaned.replaceAll("^_+|_+$", "");
     }
 }

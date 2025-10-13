@@ -11,6 +11,7 @@ import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
 import jgea.utils.CSVAnalyzer;
+import query.Query;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,14 +23,14 @@ import java.util.concurrent.Executors;
 public class ExampleEA {
 
     public static void main(String[] args) throws IOException {
-        final String CsvPath = "datasets/airQuality.csv";
-        final String GrammarPath = "generated-grammar.bnf";
+        final String csvPath = "datasets/airQuality.csv";
+        final String grammarPath = "generated-grammar.bnf";
 
         // Grammar generation based on numerical bounds and loading
-        List<String> attributes = CSVAnalyzer.extractAttributes(CsvPath);
-        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(CsvPath);
-        GrammarGenerator.generateGrammar(attributes, statsMap, GrammarPath);
-        Problem problem = new Problem(GrammarPath);
+        List<String> attributes = CSVAnalyzer.extractAttributes(csvPath);
+        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(csvPath);
+        GrammarGenerator.generateGrammar(attributes, statsMap, grammarPath);
+        Problem problem = new Problem(grammarPath, csvPath);
         StringGrammar<String> grammar = problem.grammar();
 
         // Define generic operator
@@ -43,11 +44,11 @@ public class ExampleEA {
 
         // Solver configuration
         GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
-        StandardEvolver<Tree<String>, PipelineRepresentation, Double> solver = new StandardEvolver<>(
+        StandardEvolver<Tree<String>, Query, Double> solver = new StandardEvolver<>(
                 problem.solutionMapper(),
                 factory,
                 100,
-                StopConditions.nOfFitnessEvaluations(5000),
+                StopConditions.nOfFitnessEvaluations(1000),
                 operators,
                 new Tournament(5),
                 new Last(),
@@ -62,16 +63,19 @@ public class ExampleEA {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             System.out.println("Start of execution");
-            Collection<PipelineRepresentation> solutions = solver.solve(
+            Collection<Query> solutions = solver.solve(
                     problem, new Random(1), executor
             );
 
             System.out.println("Evolution finished");
             if (!solutions.isEmpty()) {
-                PipelineRepresentation bestSolution = solutions.iterator().next();
-                System.out.println("\n--- Best solution found ---");
-                System.out.println(bestSolution);
+                Query bestSolution = solutions.iterator().next();
+                System.out.println("\n--- Best solution found (Query object hash)---");
+                System.out.println(bestSolution.hashCode());
+                // Execution of the query to see if everything works
+                bestSolution.activate();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
