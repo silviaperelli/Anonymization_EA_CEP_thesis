@@ -27,7 +27,10 @@ public class CSVAnalyzer {
 
             return Arrays.stream(header.split(";"))
                     .map(String::trim) // Remove blank space
-                    .filter(h -> !h.isEmpty() && !h.equalsIgnoreCase("Date") && !h.equalsIgnoreCase("Time"))
+                    .filter(h -> !h.isEmpty() &&
+                            !h.equalsIgnoreCase("ID") &&
+                            !h.equalsIgnoreCase("Date") &&
+                            !h.equalsIgnoreCase("Time"))
                     .collect(Collectors.toList());
         }
     }
