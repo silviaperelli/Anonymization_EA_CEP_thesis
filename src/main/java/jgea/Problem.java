@@ -44,6 +44,8 @@ public class Problem implements GrammarBasedProblem<String, Query>,
                 parsePipelineNode(tree, operators);
                 PipelineRepresentation intermediateRepr = new PipelineRepresentation(operators);
 
+                System.out.println("[Pipeline Generated] " + intermediateRepr);
+
                 // Second mapping from PipelineRepresentation to Query Liebre
                 RepresentationToLiebreQuery mapper = new RepresentationToLiebreQuery();
                 String tempOutputFile = "src/main/resources/datasets/testBestQuery.csv";

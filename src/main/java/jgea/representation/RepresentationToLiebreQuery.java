@@ -46,45 +46,7 @@ public class RepresentationToLiebreQuery {
                 // Create a Filter Operator in Liebre
                 Operator<AirQualityEvent, AirQualityEvent> filterOperator = query.addFilterOperator(
                         operatorId,
-                        event -> {
-                            boolean keep = evaluateCondition(event, condition);
-                            // Just a print for debug
-                            if (event != null) {
-                                double eventValueForDebug;
-                                try {
-                                    switch (condition.variable()) {
-                                        case "CO(GT)": eventValueForDebug = event.getCoLevel(); break;
-                                        case "PT08.S1(CO)": eventValueForDebug = event.getPt08s1(); break;
-                                        case "NMHC(GT)": eventValueForDebug = event.getNmhc(); break;
-                                        case "C6H6(GT)": eventValueForDebug = event.getC6h6(); break;
-                                        case "PT08.S2(NMHC)": eventValueForDebug = event.getPt08s2(); break;
-                                        case "NOx(GT)": eventValueForDebug = event.getNox(); break;
-                                        case "PT08.S3(NOx)": eventValueForDebug = event.getPt08s3(); break;
-                                        case "NO2(GT)": eventValueForDebug = event.getNo2(); break;
-                                        case "PT08.S4(NO2)": eventValueForDebug = event.getPt08s4(); break;
-                                        case "PT08.S5(O3)": eventValueForDebug = event.getPt08s5(); break;
-                                        case "T": eventValueForDebug = event.getT(); break;
-                                        case "RH": eventValueForDebug = event.getRh(); break;
-                                        case "AH": eventValueForDebug = event.getAh(); break;
-                                        default: eventValueForDebug = Double.NaN;
-                                    }
-                                } catch (Exception e) {
-                                    eventValueForDebug = Double.NaN;
-                                }
-                                System.out.printf(
-                                        "[DEBUG-FILTER %-9s] Condition: %-25s | Event Value for '%s': %8.2f | Decision: %s%n",
-                                        operatorId,                 // es. "filter-0"
-                                        condition.toString(),       // es. "T > 20.0000"
-                                        condition.variable(),       // es. "T"
-                                        eventValueForDebug,         // es. 13.60
-                                        keep ? "KEEP" : "DROP"      // es. "DROP"
-                                );
-                            } else {
-                                System.out.printf("[DEBUG-FILTER %s] Received a null event. Decision: DROP%n", operatorId);
-                            }
-
-                            return keep;
-                        }
+                        event -> evaluateCondition(event, condition)
                 );
 
                 // Connect the output of the previous operator to the new filter
