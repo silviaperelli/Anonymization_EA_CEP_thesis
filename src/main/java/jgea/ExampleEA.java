@@ -60,7 +60,9 @@ public class ExampleEA {
         );
 
         // Execution
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+        System.out.println("Starting evolution with " + nThreads + " threads.");
+        ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         try {
             System.out.println("Start of execution");
             Collection<Query> solutions = solver.solve(
