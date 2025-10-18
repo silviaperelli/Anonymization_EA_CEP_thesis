@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 // Translate an abstract PipelineRepresentation into an executable Liebre Query
 public class RepresentationToLiebreQuery {
 
-    public Query translate(PipelineRepresentation representation, String inputFile, String outputFile) throws IOException {
+    public Query translate(QueryRepresentation representation, String inputFile, String outputFile) throws IOException {
 
 
         inputFile = RepresentationToLiebreQuery.class.getClassLoader().getResource(inputFile).getPath();
@@ -37,12 +37,12 @@ public class RepresentationToLiebreQuery {
         Operator<?, AirQualityEvent> lastOperatorInChain = reader;
         // Loop through each abstract operator node
         for (int i = 0; i < representation.operators().size(); i++) {
-            PipelineRepresentation.OperatorNode node = representation.operators().get(i);
+            QueryRepresentation.OperatorNode node = representation.operators().get(i);
             // Create a unique id for the Liebre operator (filter-0)
             String operatorId = node.type().toLowerCase() + "-" + i;
 
             if ("FILTER".equals(node.type())) {
-                PipelineRepresentation.Condition condition = node.condition();
+                QueryRepresentation.Condition condition = node.condition();
                 // Create a Filter Operator in Liebre
                 Operator<AirQualityEvent, AirQualityEvent> filterOperator = query.addFilterOperator(
                         operatorId,
@@ -65,7 +65,7 @@ public class RepresentationToLiebreQuery {
 
 
     // Helper method that evaluates if an event satisfies a given Condition
-    private boolean evaluateCondition(AirQualityEvent event, PipelineRepresentation.Condition condition) {
+    private boolean evaluateCondition(AirQualityEvent event, QueryRepresentation.Condition condition) {
         if (event == null) return false;
 
         double eventValue;

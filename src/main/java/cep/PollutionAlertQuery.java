@@ -31,21 +31,21 @@ public class PollutionAlertQuery {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Apply CEP query to the original Dataset
-        DataStream<AirQualityEvent> eventStream = StreamFactory.createStream(env, "datasets/airQuality.csv");
+        DataStream<AirQualityEvent> eventStream = StreamFactory.createStream(env,  "src/main/resources/datasets/airQuality.csv");
         Pattern<AirQualityEvent, ?> pollutionPattern = createHighCoPattern();
-        String filePath = "/targetDataset.csv";
+        String filePath = "/results/targetDataset.csv";
         findAndProcessAlerts(eventStream, pollutionPattern, filePath);
 
         // Apply CEP query to the anonymized Dataset
-        DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStream(env, "datasets/anonymizedDataset.csv");
+        DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDataset.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternAnon = createHighCoPattern();
-        String filePathAnon = "/targetAnonymizedDataset.csv";
+        String filePathAnon = "/results/targetAnonymizedDataset.csv";
         findAndProcessAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
 
         // Apply CEP query to the anonymized Dataset
-        DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStream(env, "datasets/anonymizedDatasetNoise.csv");
+        DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDatasetNoise.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternNoise = createHighCoPattern();
-        String filePathNoise = "/targetAnonymizedDatasetNoise.csv";
+        String filePathNoise = "/results/targetAnonymizedDatasetNoise.csv";
         findAndProcessAlerts(anonymizedStreamNoise, pollutionPatternNoise, filePathNoise);
 
     }
@@ -102,7 +102,7 @@ public class PollutionAlertQuery {
         }
 
         // Prepare output file
-        String outputDir = "src/main/resources/datasets/results";
+        String outputDir = "src/main/resources/datasets";
         String outputFilePath = outputDir + filePath;
         new File(outputDir).mkdirs();
 

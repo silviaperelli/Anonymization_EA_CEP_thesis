@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // Pipeline Representation (phenotype)
-public record PipelineRepresentation(
+public record QueryRepresentation(
         // Contains a sequence of operators
         List<OperatorNode> operators
 ) implements Serializable {

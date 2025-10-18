@@ -9,7 +9,7 @@ import static jgea.utils.TreeUtils.findFirstTerminal;
 public class TreeToRepresentation {
 
     // Parse a node <pipeline> recursively, add found operators to a list
-    public void parsePipelineNode(Tree<String> pipelineNode, List<PipelineRepresentation.OperatorNode> operators) {
+    public void parsePipelineNode(Tree<String> pipelineNode, List<QueryRepresentation.OperatorNode> operators) {
 
         // Look for the child node <filter> and <pipeline>
         Tree<String> filterNode = null;
@@ -29,7 +29,7 @@ public class TreeToRepresentation {
         }
 
         // Parse filter node
-        PipelineRepresentation.OperatorNode operator = parseFilterNode(filterNode);
+        QueryRepresentation.OperatorNode operator = parseFilterNode(filterNode);
         if (operator != null) {
             operators.add(operator);
         }
@@ -41,7 +41,7 @@ public class TreeToRepresentation {
     }
 
     // Parse a single filter node
-    private PipelineRepresentation.OperatorNode parseFilterNode(Tree<String> filterNode) {
+    private QueryRepresentation.OperatorNode parseFilterNode(Tree<String> filterNode) {
         String attribute = null;
         String operatorString = null;
         Tree<String> valueNode = null;
@@ -65,10 +65,10 @@ public class TreeToRepresentation {
             String valueString = String.join("", leaves);
             double value = Double.parseDouble(valueString);
             attribute = attribute.replace("'", "");
-            PipelineRepresentation.Operator op = PipelineRepresentation.fromString(operatorString);
-            PipelineRepresentation.Condition condition = new PipelineRepresentation.Condition(attribute, op, value);
+            QueryRepresentation.Operator op = QueryRepresentation.fromString(operatorString);
+            QueryRepresentation.Condition condition = new QueryRepresentation.Condition(attribute, op, value);
 
-            return new PipelineRepresentation.OperatorNode("FILTER", condition);
+            return new QueryRepresentation.OperatorNode("FILTER", condition);
         } catch (Exception e) {
             System.err.printf("[Parser] Error parsing filter node: %s\n", e.getMessage());
             return null;

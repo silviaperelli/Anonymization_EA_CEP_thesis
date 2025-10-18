@@ -10,8 +10,8 @@ import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
+import jgea.representation.QueryRepresentation;
 import jgea.utils.CSVAnalyzer;
-import query.Query;
 
 import java.io.IOException;
 import java.util.*;
@@ -42,19 +42,22 @@ public class ExampleEA {
         );
 
 
+        int populationSize = 100;
+        int nOfEvaluations = 1000;
+
         // Solver configuration
         GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
-        StandardEvolver<Tree<String>, Query, Double> solver = new StandardEvolver<>(
+        StandardEvolver<Tree<String>, QueryRepresentation, Double> solver = new StandardEvolver<>(
                 problem.solutionMapper(),
                 factory,
-                100,
-                StopConditions.nOfFitnessEvaluations(1000),
+                populationSize,
+                StopConditions.nOfFitnessEvaluations(nOfEvaluations),
                 operators,
                 new Tournament(5),
                 new Last(),
-                100,
+                populationSize,
                 true,
-                100,
+                populationSize,
                 false,
                 List.of()
         );
@@ -63,25 +66,29 @@ public class ExampleEA {
         int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
         System.out.println("Starting evolution with " + nThreads + " threads.");
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+
+        //ExecutorService executor = Executors.newSingleThreadExecutor();
+
         try {
             System.out.println("Start of execution");
-            Collection<Query> solutions = solver.solve(
+            Collection<QueryRepresentation> solutions = solver.solve(
                     problem, new Random(1), executor
             );
 
             System.out.println("Evolution finished");
             if (!solutions.isEmpty()) {
-                Query bestSolution = solutions.iterator().next();
+                QueryRepresentation bestSolution = solutions.iterator().next();
                 System.out.println("\n--- Best solution found (Query object hash)---");
                 System.out.println(bestSolution.hashCode());
                 // Execution of the query to see if everything works
-                bestSolution.activate();
+                //bestSolution.activate();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             executor.shutdown();
+            System.exit(0);
         }
     }
 }

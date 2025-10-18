@@ -3,6 +3,8 @@ package event;
 import org.apache.flink.api.common.eventtime.*;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 
@@ -11,12 +13,12 @@ public class StreamFactory {
     // Create a DataDtream by reading from the CSV file in resources
     public static DataStream<AirQualityEvent> createStream(StreamExecutionEnvironment env, String filePath) {
 
-        URL fileURL = StreamFactory.class.getClassLoader().getResource(filePath);
-        if(fileURL == null){
-            throw new RuntimeException("File not found");
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new RuntimeException("File not found: " + file.getAbsolutePath());
         }
 
-        DataStream<AirQualityEvent> dataStream = env.readTextFile(fileURL.getPath())
+        DataStream<AirQualityEvent> dataStream = env.readTextFile(file.getAbsolutePath())
                 .filter(line -> !line.startsWith("Date;Time;CO(GT)")) // Skip the header
                 .map(AirQualityEvent::eventCreation) // Create an event from a line
                 .filter(Objects::nonNull); // Skip invalid line
