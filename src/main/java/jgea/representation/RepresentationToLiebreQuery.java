@@ -1,5 +1,6 @@
 package jgea.representation;
 
+import common.util.Util;
 import event.AirQualityEvent;
 import query.Query;
 import component.operator.Operator;
@@ -7,19 +8,17 @@ import component.source.Source;
 import component.sink.Sink;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 // Translate an abstract PipelineRepresentation into an executable Liebre Query
 public class RepresentationToLiebreQuery {
 
-    public Query translate(QueryRepresentation representation, String inputFile, String outputFile) throws IOException {
+    public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
 
-
+        final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         inputFile = RepresentationToLiebreQuery.class.getClassLoader().getResource(inputFile).getPath();
-
-        Files.createDirectories(Paths.get(outputFile).getParent());
-
         Query query = new Query();
 
         // Define Source and CSV Reader (fixed part of the pipeline)
@@ -57,10 +56,17 @@ public class RepresentationToLiebreQuery {
         }
 
         // Define the final Sink
-        Sink<AirQualityEvent> sink = query.addTextFileSink("output-sink", outputFile, true);
+        Sink<AirQualityEvent> sink = query.addBaseSink("output-sink", event -> {
+            if (event != null) {
+                collectedEvents.add(event);
+            }
+        });
         query.connect(lastOperatorInChain, sink);
+        query.activate();
+        Util.sleep(30000);
+        query.deActivate();
 
-        return query;
+        return collectedEvents;
     }
 
 

@@ -2,9 +2,7 @@ package cep;
 
 import event.AirQualityEvent;
 import event.StreamFactory;
-import utils.Writer;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternSelectFunction;
 import org.apache.flink.cep.pattern.Pattern;
@@ -14,13 +12,13 @@ import org.apache.flink.cep.nfa.aftermatch.AfterMatchSkipStrategy;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.Writer;
 
 public class PollutionAlertQuery {
 
@@ -34,22 +32,21 @@ public class PollutionAlertQuery {
         DataStream<AirQualityEvent> eventStream = StreamFactory.createStream(env,  "src/main/resources/datasets/airQuality.csv");
         Pattern<AirQualityEvent, ?> pollutionPattern = createHighCoPattern();
         String filePath = "/results/targetDataset.csv";
-        findAndProcessAlerts(eventStream, pollutionPattern, filePath);
+        processAndSaveAlerts(eventStream, pollutionPattern, filePath);
 
         // Apply CEP query to the anonymized Dataset
         DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDataset.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternAnon = createHighCoPattern();
         String filePathAnon = "/results/targetAnonymizedDataset.csv";
-        findAndProcessAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
+        processAndSaveAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
 
         // Apply CEP query to the anonymized Dataset
         DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDatasetNoise.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternNoise = createHighCoPattern();
         String filePathNoise = "/results/targetAnonymizedDatasetNoise.csv";
-        findAndProcessAlerts(anonymizedStreamNoise, pollutionPatternNoise, filePathNoise);
+        processAndSaveAlerts(anonymizedStreamNoise, pollutionPatternNoise, filePathNoise);
 
     }
-
 
     public static Pattern<AirQualityEvent, ?> createHighCoPattern() {
         AfterMatchSkipStrategy skipStrategy = AfterMatchSkipStrategy.skipToFirst("end");
@@ -75,8 +72,39 @@ public class PollutionAlertQuery {
         return highCO;
     }
 
-    public static void findAndProcessAlerts(DataStream<AirQualityEvent> eventStream, Pattern<AirQualityEvent, ?> highCOPattern, String filePath) throws Exception {
+    public static List<List<AirQualityEvent>> processAlerts(DataStream<AirQualityEvent> eventStream) throws Exception {
 
+        Pattern<AirQualityEvent, ?> highCOPattern = createHighCoPattern();
+
+        // Apply the pattern and selecting the results
+        DataStream<List<AirQualityEvent>> alertStream = CEP.pattern(eventStream, highCOPattern)
+                .select(new PatternSelectFunction<AirQualityEvent, List<AirQualityEvent>>() {
+                    @Override
+                    public List<AirQualityEvent> select(Map<String, List<AirQualityEvent>> pattern) {
+                        List<AirQualityEvent> highCOEvents = pattern.get("start");
+
+                        //Minimum duration must be 2 hours
+                        if (highCOEvents != null && highCOEvents.size() >= 2) {
+                            return highCOEvents;
+                        }
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull); // Skip matches that did not generate an alert (< 2 hours)
+
+        Iterator<List<AirQualityEvent>> alertsIterator = alertStream.executeAndCollect();
+
+        // Return the list of all sequences found
+        List<List<AirQualityEvent>> results = new ArrayList<>();
+        while (alertsIterator.hasNext()) {
+            results.add(alertsIterator.next());
+        }
+
+        return results;
+    }
+
+
+    public static void processAndSaveAlerts(DataStream<AirQualityEvent> eventStream, Pattern<AirQualityEvent, ?> highCOPattern, String filePath) throws Exception {
         // Apply the pattern and selecting the results
         DataStream<List<AirQualityEvent>> alertStream = CEP.pattern(eventStream, highCOPattern)
                 .select(new PatternSelectFunction<AirQualityEvent, List<AirQualityEvent>>() {

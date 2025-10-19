@@ -5,7 +5,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.File;
-import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 public class StreamFactory {
@@ -26,6 +26,12 @@ public class StreamFactory {
         // Assign watermark
         return dataStream.assignTimestampsAndWatermarks(new AirQualityWatermarkStrategy());
     }
+
+    // Create a DataStream from a collection in memory
+    public static DataStream<AirQualityEvent> createStream(StreamExecutionEnvironment env, List<AirQualityEvent> events) {
+        return env.fromCollection(events).assignTimestampsAndWatermarks(new AirQualityWatermarkStrategy());
+    }
+
 
     // Extract timestamp and generate watermarks
     private static class AirQualityWatermarkStrategy implements WatermarkStrategy<AirQualityEvent> {
