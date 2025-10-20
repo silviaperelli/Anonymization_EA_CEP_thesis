@@ -31,7 +31,7 @@ public class AirQualityEvent extends BaseRichTuple{
     private double ah;    // AH
 
     public AirQualityEvent(long tupleId, LocalDateTime eventTime, double coLevel, double pt08s1, double nmhc, double c6h6, double pt08s2, double nox, double pt08s3, double no2, double pt08s4, double pt08s5, double t, double rh, double ah) {
-        super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, String.valueOf(tupleId));
+        super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, "1");
         this.tupleId = tupleId;
         this.eventTime = eventTime;
         this.coLevel = coLevel;
@@ -75,7 +75,15 @@ public class AirQualityEvent extends BaseRichTuple{
         this.setCoLevel(newCoLevel);
     }
 
+    // Add a constructor for the output tuple of the Aggregate Window
+    public AirQualityEvent(AirQualityEvent other, double newCoLevel, double newNoLevel) {
+        this(other);
+        this.setCoLevel(newCoLevel);
+        this.setNo2(newNoLevel);
+    }
+
     public long getTupleId() {return tupleId;}
+    public long getTimestamp() { return timestamp;}
 
     public LocalDateTime getEventTime() {return eventTime;}
     public void setEventTime(LocalDateTime eventTime) {this.eventTime = eventTime;}
@@ -83,7 +91,8 @@ public class AirQualityEvent extends BaseRichTuple{
     public double getCoLevel() {return coLevel;}
     public void setCoLevel(double coLevel) {this.coLevel = coLevel;}
 
-    public long getTimestamp() { return timestamp;}
+    public double getNo2() {return no2;}
+    public void setNo2(double no2) {this.no2 = no2;}
 
     // Create an event from a line in the CSV file
     public static AirQualityEvent eventCreation(String line) {
@@ -144,8 +153,6 @@ public class AirQualityEvent extends BaseRichTuple{
     public double getPt08s5() {return pt08s5;}
 
     public double getPt08s4() {return pt08s4;}
-
-    public double getNo2() {return no2;}
 
     public double getPt08s3() {return pt08s3;}
 

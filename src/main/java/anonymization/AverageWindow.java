@@ -30,7 +30,7 @@ public class AverageWindow extends BaseTimeWindowAddRemove <AirQualityEvent, Air
             return null;
         }
 
-        // Avoid duplicates due to the previous filter operatore in the pipeline
+        // Avoid duplicates due to the previous filter operator in the pipeline
         if (lastEvent.getTimestamp() == lastOutputTs) {
             return null;
         }
