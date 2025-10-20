@@ -62,12 +62,12 @@ public class RepresentationToLiebreQuery {
         });
         query.connect(lastOperatorInChain, sink);
         query.activate();
-        Util.sleep(30000);
+
+        Util.sleep(15000);
         query.deActivate();
 
         return collectedEvents;
     }
-
 
     // Helper method that evaluates if an event satisfies a given Condition
     private boolean evaluateCondition(AirQualityEvent event, QueryRepresentation.Condition condition) {

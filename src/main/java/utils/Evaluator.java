@@ -1,12 +1,15 @@
 package utils;
 
 import evaluation.Sequence;
+import event.AirQualityEvent;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Evaluator {
 
@@ -54,6 +57,25 @@ public class Evaluator {
             System.err.println("Error parsing ID from event string: " + eventString);
             return -1;
         }
+    }
+
+    // Convert the output from a Flink CEP query into a List of Sequence
+    public static List<Sequence> parseSequencesFromEvents(List<List<AirQualityEvent>> cepResultEvents) {
+
+        if (cepResultEvents == null) {
+            return new ArrayList<>();
+        }
+
+        return cepResultEvents.stream()
+                .map(eventList -> {
+                    // For each list of events (a sequence) extract a list of tuple ID
+                    List<Long> tupleIds = eventList.stream()
+                            .map(AirQualityEvent::getTupleId)
+                            .collect(Collectors.toList());
+                    // Create the sequence
+                    return new Sequence(tupleIds);
+                })
+                .collect(Collectors.toList());
     }
 
 }

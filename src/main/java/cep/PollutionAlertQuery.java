@@ -29,19 +29,19 @@ public class PollutionAlertQuery {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Apply CEP query to the original Dataset
-        DataStream<AirQualityEvent> eventStream = StreamFactory.createStream(env,  "src/main/resources/datasets/airQuality.csv");
+        DataStream<AirQualityEvent> eventStream = StreamFactory.createStreamfromFile(env,  "datasets/airQuality.csv");
         Pattern<AirQualityEvent, ?> pollutionPattern = createHighCoPattern();
         String filePath = "/results/targetDataset.csv";
         processAndSaveAlerts(eventStream, pollutionPattern, filePath);
 
         // Apply CEP query to the anonymized Dataset
-        DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDataset.csv");
+        DataStream<AirQualityEvent> anonymizedStream = StreamFactory.createStreamfromFile(env, "datasets/anonymizedDataset.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternAnon = createHighCoPattern();
         String filePathAnon = "/results/targetAnonymizedDataset.csv";
         processAndSaveAlerts(anonymizedStream, pollutionPatternAnon, filePathAnon);
 
         // Apply CEP query to the anonymized Dataset
-        DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStream(env, "src/main/resources/datasets/anonymizedDatasetNoise.csv");
+        DataStream<AirQualityEvent> anonymizedStreamNoise = StreamFactory.createStreamfromFile(env, "datasets/anonymizedDatasetNoise.csv");
         Pattern<AirQualityEvent, ?> pollutionPatternNoise = createHighCoPattern();
         String filePathNoise = "/results/targetAnonymizedDatasetNoise.csv";
         processAndSaveAlerts(anonymizedStreamNoise, pollutionPatternNoise, filePathNoise);

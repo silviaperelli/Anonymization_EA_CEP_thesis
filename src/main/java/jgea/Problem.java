@@ -3,6 +3,7 @@ package jgea;
 import cep.PollutionAlertQuery;
 import evaluation.Sequence;
 import event.AirQualityEvent;
+import event.StreamFactory;
 import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.GrammarBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
@@ -16,31 +17,43 @@ import utils.Evaluator;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class Problem implements GrammarBasedProblem<String, QueryRepresentation>,
         TotalOrderQualityBasedProblem<QueryRepresentation, Double> {
 
     private final StringGrammar<String> grammar;
     private final String inputCsvPath;
-
     private final List<Sequence> originalCepResults;
 
-    // Constructor that loads the grammar
+    // Constructor that process the original dataset with the query cep to generate ground truth
     public Problem(String grammarPath, String inputCsvPath) throws IOException {
         this.inputCsvPath = inputCsvPath;
         try (FileInputStream fis = new FileInputStream(grammarPath)) {
             this.grammar = StringGrammar.load(fis);
         }
-        System.out.println("Loading pre-calculated original CEP results (O)...");
-        Path originalResultsPath = Paths.get("src/main/resources/datasets/results/targetDataset.csv");
-        this.originalCepResults = Evaluator.parseSequencesFromFile(originalResultsPath);
-        System.out.println("Loaded " + this.originalCepResults.size() + " original sequences.");
+        System.out.println("Processing original dataset with CEP to generate ground truth...");
 
+        try {
+            StreamExecutionEnvironment flinkEnv = StreamExecutionEnvironment.createLocalEnvironment();
+
+            // Create a Flink dataStream from the original CSV file
+            DataStream<AirQualityEvent> originalStream = StreamFactory.createStreamfromFile(flinkEnv, inputCsvPath);
+
+            // Execute the CEP query
+            List<List<AirQualityEvent>> cepResultEvents = PollutionAlertQuery.processAlerts(originalStream);
+
+            // Converts results from Flink's format into List<Sequence> format
+            this.originalCepResults = Evaluator.parseSequencesFromEvents(cepResultEvents);
+
+            System.out.println("Ground truth generated successfully. Found " + this.originalCepResults.size() + " original sequences.");
+
+        } catch (Exception e) {
+            System.err.println("Error while executing the CEP query on original dataset.");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize ground truth CEP results", e);
+        }
     }
 
     @Override
@@ -57,10 +70,8 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
                 // Start recursive parsing from the root of the tree
                 TreeToRepresentation firstMapper = new TreeToRepresentation();
                 firstMapper.parsePipelineNode(tree, operators);
-                QueryRepresentation intermediateRepr = new QueryRepresentation(operators);
 
-                //System.out.println("[Pipeline Generated] " + intermediateRepr);
-                return intermediateRepr;
+                return new QueryRepresentation(operators);
             }catch(Exception e){
                 System.err.println(("Error during mapping process"));
                 return null;
@@ -92,12 +103,7 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
                 List<List<AirQualityEvent>> cepResultEvents = PollutionAlertQuery.processAlerts(modifiedStream);
 
                 // Compare the sequences found in the modified data with the original sequences (ground truth) to calculate the F1 score
-                List<Sequence> modifiedCepResults = cepResultEvents.stream()
-                        .map(eventList -> {
-                            List<Long> tupleIds = eventList.stream().map(AirQualityEvent::getTupleId).collect(Collectors.toList());
-                            return new Sequence(tupleIds);
-                        })
-                        .collect(Collectors.toList());
+                List<Sequence> modifiedCepResults = Evaluator.parseSequencesFromEvents(cepResultEvents);
 
                 return calculateF1Score(originalCepResults, modifiedCepResults);
 

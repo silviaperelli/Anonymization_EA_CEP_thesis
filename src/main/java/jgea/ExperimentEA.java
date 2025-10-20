@@ -17,12 +17,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 // Launch a small genetic algorithm to test the evolutionary process with a small population
 public class ExperimentEA {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         final String csvPath = "datasets/airQuality.csv";
         final String grammarPath = "generated-grammar.bnf";
 
@@ -70,7 +71,6 @@ public class ExperimentEA {
         int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
         System.out.println("Starting evolution with " + nThreads + " threads.");
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-
         //ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
@@ -83,13 +83,9 @@ public class ExperimentEA {
             if (!solutions.isEmpty()) {
                 QueryRepresentation bestSolution = solutions.iterator().next();
 
-                double bestFitness = problem.qualityFunction().apply(bestSolution);
-
                 System.out.println("\n--- Best Solution Found ---");
                 System.out.printf("Pipeline: %s%n", bestSolution);
-                System.out.printf("Fitness (F1-Score): %.4f%n", bestFitness);
                 System.out.println("---------------------------");
-
             } else {
                 System.out.println("\nNo solution found.");
             }
@@ -97,7 +93,19 @@ public class ExperimentEA {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            // Start the executor shutdown
             executor.shutdown();
+
+            // Wait for the evaluation tasks to finish
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                System.err.println("Evaluation tasks did not terminate within the expected time. Forcing shutdown");
+                executor.shutdownNow();
+            } else {
+                System.out.println("All evaluation tasks terminated successfully");
+            }
+
+            // JVM shutdown for any background threads
+            System.out.println("The process has terminated");
             System.exit(0);
         }
     }
