@@ -26,7 +26,7 @@ public class RepresentationToLiebreQuery {
         Operator<String, AirQualityEvent> reader = query.addMapOperator(
                 "csv-reader",
                 line -> {
-                    if (line.startsWith("Date;Time;CO(GT)")) return null;
+                    if (line.startsWith("ID;Date;Time;CO(GT)")) return null;
                     return AirQualityEvent.eventCreation(line);
                 }
         );
@@ -52,7 +52,6 @@ public class RepresentationToLiebreQuery {
                 query.connect(lastOperatorInChain, filterOperator);
                 lastOperatorInChain = filterOperator;
             }
-            // In the future we can add: else if ("AGGREGATE".equals(node.type())) { ... }
         }
 
         // Define the final Sink

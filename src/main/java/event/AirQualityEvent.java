@@ -136,7 +136,7 @@ public class AirQualityEvent extends BaseRichTuple{
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "%d;%s;%s;%.6f;%.0f;%.0f;%.1f;%.0f;%.0f;%.0f;%.0f;%.0f;%.0f;%.1f;%.1f;%.4f",
+                "%d;%s;%s;%.6f;%.0f;%.0f;%.1f;%.0f;%.0f;%.0f;%.6f;%.0f;%.0f;%.1f;%.1f;%.4f",
                 tupleId,
                 eventTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 eventTime.format(DateTimeFormatter.ofPattern("HH.mm.ss")),

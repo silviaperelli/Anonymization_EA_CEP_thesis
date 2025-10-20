@@ -1,9 +1,6 @@
 package jgea;
 
-import io.github.ericmedvet.jgea.core.listener.Listener;
-import io.github.ericmedvet.jgea.core.listener.TabularPrinter;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
-import io.github.ericmedvet.jgea.core.representation.NamedUnivariateRealFunction;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarBasedSubtreeMutation;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarRampedHalfAndHalf;
@@ -11,7 +8,6 @@ import io.github.ericmedvet.jgea.core.representation.tree.SameRootSubtreeCrossov
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
-import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
 import jgea.representation.QueryRepresentation;
@@ -22,12 +18,9 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static io.github.ericmedvet.jgea.core.solver.StopConditions.nOfBirths;
-import static io.github.ericmedvet.jgea.core.solver.StopConditions.nOfIterations;
-
 
 // Launch a small genetic algorithm to test the evolutionary process with a small population
-public class ExampleEA {
+public class ExperimentEA {
 
     public static void main(String[] args) throws IOException {
         final String csvPath = "datasets/airQuality.csv";
@@ -48,8 +41,8 @@ public class ExampleEA {
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );
 
-        int populationSize = 100;
-        int nOfEvaluations = 1000;
+        int populationSize = 20;
+        int nOfEvaluations = 100;
 
         System.out.println("--- JGEA Evolution Parameters ---");
         System.out.printf("Population size: %d%n", populationSize);
