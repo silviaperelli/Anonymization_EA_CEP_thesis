@@ -3,11 +3,13 @@ package event;
 import common.tuple.BaseRichTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneOffset;
 import java.util.Locale;
 import utils.Writer;
+import java.time.Instant;
 
 public class AirQualityEvent extends BaseRichTuple{
 
@@ -29,6 +31,7 @@ public class AirQualityEvent extends BaseRichTuple{
     private double t;     // T
     private double rh;    // RH
     private double ah;    // AH
+    private boolean isEmpty = false; // the event is invalid/empty
 
     public AirQualityEvent(long tupleId, LocalDateTime eventTime, double coLevel, double pt08s1, double nmhc, double c6h6, double pt08s2, double nox, double pt08s3, double no2, double pt08s4, double pt08s5, double t, double rh, double ah) {
         super(eventTime.toEpochSecond(ZoneOffset.UTC) * 1000, "1");
@@ -82,6 +85,22 @@ public class AirQualityEvent extends BaseRichTuple{
         this.setNo2(newNoLevel);
     }
 
+    // Factory for empty event
+    public static AirQualityEvent createEmptyEvent(long timestampMillis) {
+
+        LocalDateTime timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampMillis), ZoneOffset.UTC);
+        AirQualityEvent emptyEvent = new AirQualityEvent(
+                -1L, timestamp, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN
+        );
+
+        // Mark the event as empty
+        emptyEvent.setEmpty(true);
+
+        return emptyEvent;
+    }
+
     public long getTupleId() {return tupleId;}
     public long getTimestamp() { return timestamp;}
 
@@ -93,6 +112,9 @@ public class AirQualityEvent extends BaseRichTuple{
 
     public double getNo2() {return no2;}
     public void setNo2(double no2) {this.no2 = no2;}
+
+    public boolean isEmpty() {return isEmpty;}
+    public void setEmpty(boolean empty) {isEmpty = empty;}
 
     // Create an event from a line in the CSV file
     public static AirQualityEvent eventCreation(String line) {
@@ -132,6 +154,7 @@ public class AirQualityEvent extends BaseRichTuple{
             return null;
         }
     }
+
 
     @Override
     public String toString() {

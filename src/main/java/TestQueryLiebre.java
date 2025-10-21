@@ -30,7 +30,7 @@ public class TestQueryLiebre {
         Operator<AirQualityEvent, AirQualityEvent> filter1 = anonymizationQuery.addFilterOperator(
                 "filter1", tuple -> (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
 
-        // Window of 2 hours
+        // Window of 3 hours
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
@@ -60,7 +60,7 @@ public class TestQueryLiebre {
 
         @Override
         public void add(AirQualityEvent event) {
-            if (event != null && !Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
+            if (!Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
                 sumCO += event.getCoLevel();
                 sumNO2 += event.getNo2();
                 count++;
@@ -70,7 +70,7 @@ public class TestQueryLiebre {
 
         @Override
         public void remove(AirQualityEvent event) {
-            if (event != null && !Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
+            if (!Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
                 sumCO -= event.getCoLevel();
                 sumNO2 -= event.getNo2();
                 count--;
@@ -80,13 +80,13 @@ public class TestQueryLiebre {
         @Override
         public AirQualityEvent getAggregatedResult() {
             if (count == 0 || lastEvent == null) {
-                return null;
+                return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
 
             // Avoid duplicates due to the previous filter operator in the pipeline
             // If the last event in the window is the same as the one in the last output, ignore it
             if (lastEvent.getTimestamp() == lastOutputTs) {
-                return null;
+                return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
 
             double averageCO = sumCO / count;
