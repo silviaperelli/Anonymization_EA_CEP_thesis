@@ -17,13 +17,13 @@ public class TestQueryLiebre {
         // set metrics before any operators are added
         LiebreContext.setStreamMetrics(Metrics.file("src/main/resources"));
 
-        Query anonymizationQuery = new Query();
+        Query query = new Query();
 
         // Source from CSV file
-        Source<String> inputSource = anonymizationQuery.addTextFileSource("I1", inputFile);
+        Source<String> inputSource = query.addTextFileSource("I1", inputFile);
 
         // Operator to read and parse the line
-        Operator<String, AirQualityEvent> inputReader = anonymizationQuery.addMapOperator(
+        Operator<String, AirQualityEvent> inputReader = query.addMapOperator(
                 "reader", line -> {
                     if (line.startsWith("ID;Date;Time;CO(GT)")) {
                         return null;
@@ -32,7 +32,7 @@ public class TestQueryLiebre {
                 });
 
         // Operator to filter tuple with CO level >= 2.0 and NO2 level >= 40.0
-        Operator<AirQualityEvent, AirQualityEvent> filter1 = anonymizationQuery.addFilterOperator(
+        Operator<AirQualityEvent, AirQualityEvent> filter1 = query.addFilterOperator(
                 "filter1", tuple -> (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
 
         // Window of 3 hours
@@ -40,19 +40,19 @@ public class TestQueryLiebre {
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
         // Operator to aggregate the CO level and NO2 level in a window of 2 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = anonymizationQuery.addTimeAggregateOperator("average", WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
+        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average", WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
         // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
-        Operator<AirQualityEvent, AirQualityEvent> filter2 = anonymizationQuery.addFilterOperator(
+        Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
                 "filter2", tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Finale sink to print in a CSV file
-        Sink<AirQualityEvent> outputSink = anonymizationQuery.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
+        Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
 
-        anonymizationQuery.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator).connect(aggregateOperator, filter2).connect(filter2, outputSink);
+        query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator).connect(aggregateOperator, filter2).connect(filter2, outputSink);
 
         System.out.println("*** Anonymization query activated ***");
-        anonymizationQuery.activate();
+        query.activate();
     }
 
     private static class AggregateWindow extends BaseTimeWindowAddRemove<AirQualityEvent, AirQualityEvent> {

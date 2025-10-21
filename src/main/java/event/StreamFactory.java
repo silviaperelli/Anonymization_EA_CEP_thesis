@@ -28,7 +28,7 @@ public class StreamFactory {
     }
 
     // Create a DataStream from a collection in memory
-    public static DataStream<AirQualityEvent> createStream(StreamExecutionEnvironment env, List<AirQualityEvent> events) {
+    public static DataStream<AirQualityEvent> createStreamFromCollection(StreamExecutionEnvironment env, List<AirQualityEvent> events) {
         return env.fromCollection(events).assignTimestampsAndWatermarks(new AirQualityWatermarkStrategy());
     }
 
