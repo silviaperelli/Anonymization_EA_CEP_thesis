@@ -2,7 +2,9 @@ import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
 import component.operator.in1.aggregate.TimeWindowAddRemove;
 import component.sink.Sink;
 import component.source.Source;
+import query.LiebreContext;
 import query.Query;
+import common.metrics.Metrics;
 import component.operator.Operator;
 import event.AirQualityEvent;
 
@@ -11,6 +13,9 @@ public class TestQueryLiebre {
     public static void main(String[] args) {
 
         final String inputFile = "src/main/resources/datasets/airQuality.csv";
+
+        // set metrics before any operators are added
+        LiebreContext.setStreamMetrics(Metrics.file("src/main/resources"));
 
         Query anonymizationQuery = new Query();
 
