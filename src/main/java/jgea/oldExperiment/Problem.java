@@ -1,4 +1,4 @@
-package jgea;
+package jgea.oldExperiment;
 
 import cep.PollutionAlertQuery;
 import evaluation.Sequence;
@@ -8,9 +8,9 @@ import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.GrammarBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
-import jgea.representation.QueryRepresentation;
-import jgea.representation.RepresentationToLiebreQuery;
-import jgea.representation.TreeToRepresentation;
+import jgea.mappers.QueryRepresentation;
+import jgea.mappers.RepresentationToLiebreQuery;
+import jgea.mappers.TreeToRepresentation;
 import jgea.utils.Metrics;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -116,7 +116,4 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
         };
 
     }
-
-
-
 }

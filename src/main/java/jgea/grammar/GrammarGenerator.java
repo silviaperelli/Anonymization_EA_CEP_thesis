@@ -1,18 +1,28 @@
-package jgea;
+package jgea.grammar;
 
+import jgea.utils.CSVAnalyzer;
 import jgea.utils.CSVAnalyzer.AttributeStats;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-// Generate a grammar to define operators like filters as strings and save the grammar in a file
 public class GrammarGenerator {
 
     private static final int DECIMAL_PRECISION_DIGITS = 4;
 
+    public static void main(String[] args) throws IOException {
+        final String grammarPath = "generated-grammar.bnf";
+        final String csvPath = "datasets/airQuality.csv";
+        // Extract attributes and their numerical bounds from a CSV file
+        List<String> attributes = CSVAnalyzer.extractAttributes(csvPath);
+        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(csvPath);
+        // Grammar generation
+        generateGrammar(attributes, statsMap, grammarPath);
+    }
+
+    // Generate a grammar to define operators like filters as strings and save the grammar in a file
     public static void generateGrammar(List<String> attributes, Map<String, AttributeStats> statsMap, String filePath) {
         if (statsMap == null || statsMap.isEmpty()) {
             throw new IllegalArgumentException("Cannot generate grammar: stats map is empty or null.");

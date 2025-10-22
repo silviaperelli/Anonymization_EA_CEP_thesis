@@ -1,8 +1,6 @@
-package jgea.newProblem;
+package jgea.oldExperiment;
 
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
-import io.github.ericmedvet.jgea.core.problem.MultiObjectiveProblem;
-import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarBasedSubtreeMutation;
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarRampedHalfAndHalf;
@@ -10,72 +8,60 @@ import io.github.ericmedvet.jgea.core.representation.tree.SameRootSubtreeCrossov
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
-import io.github.ericmedvet.jgea.core.solver.NsgaII;
 import io.github.ericmedvet.jgea.core.solver.StandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
-import jgea.representation.QueryRepresentation;
+import jgea.mappers.QueryRepresentation;
 
-import java.io.FileInputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class NewExperimentEA {
 
-    public static void main(String[] args) throws Exception { // Aggiungi throws Exception
+// Launch a small genetic algorithm to test the evolutionary process with a small population
+public class ExperimentEA {
 
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        final String csvPath = "datasets/airQuality.csv";
         String grammarPath = "generated-grammar.bnf";
-        String inputCsvPath = "datasets/airQuality.csv";
-        int populationSize = 5;
-        int nOfEvaluations = 10;
 
-        // --- 2. CREA IL PROBLEMA ---
-        // (Nota: il costruttore del problema ora non ha più bisogno della grammatica)
-        SimpleMOProblem problem = new StreamAnonymizationProblem(inputCsvPath);
+        Problem problem = new Problem(grammarPath, csvPath);
+        StringGrammar<String> grammar = problem.grammar();
 
-        // --- 3. CREA IL MAPPER ---
-        // Crea un'istanza del tuo nuovo mapper.
-        TreeToQueryRepresentationMapper mapper = new TreeToQueryRepresentationMapper();
-
-        // --- 4. CARICA LA GRAMMATICA (necessaria per la factory e gli operatori) ---
-        StringGrammar<String> grammar;
-        try (FileInputStream fis = new FileInputStream(grammarPath)) {
-            grammar = StringGrammar.load(fis);
-        }
-
-        // --- 5. CONFIGURA IL SOLVER (StandardEvolver) ---
-        // Factory per creare la popolazione iniziale
-        GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
-
-        // Operatori genetici (crossover, mutazione)
+        // Define genetic operators
         Map<GeneticOperator<Tree<String>>, Double> operators = Map.of(
+                // Crossover
                 new SameRootSubtreeCrossover<>(12), 0.8,
+                // Mutation based on the grammar
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );
 
-        NsgaII<Tree<String>, QueryRepresentation, Map<String, Double>> solver = new NsgaII<>(
-                // Argomento 1: il mapper
-                mapper,
-                // Argomento 2: la factory
+        int populationSize = 20;
+        int nOfEvaluations = 100;
+
+        System.out.println("--- JGEA Evolution Parameters ---");
+        System.out.printf("Population size: %d%n", populationSize);
+        System.out.printf("Max evaluations: %d%n", nOfEvaluations);
+        System.out.println("---------------------------------");
+
+        // Solver configuration
+        GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
+        StandardEvolver<Tree<String>, QueryRepresentation, Double> solver = new StandardEvolver<>(
+                problem.solutionMapper(),
                 factory,
-                // Argomento 3: la dimensione della popolazione
                 populationSize,
-                // Argomento 4: la condizione di stop
                 StopConditions.nOfFitnessEvaluations(nOfEvaluations),
-                // Argomento 5: la mappa degli operatori genetici
                 operators,
-                // Argomento 6: tentativi massimi di unicità
-                100,
-                // Argomento 7: remap
+                new Tournament(5),
+                new Last(),
+                populationSize,
                 true,
-                // Argomento 8: comparatori addizionali (per ora, una lista vuota)
+                populationSize,
+                false,
                 List.of()
         );
-
 
         // Execution
         int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
@@ -88,6 +74,7 @@ public class NewExperimentEA {
             Collection<QueryRepresentation> solutions = solver.solve(
                     problem, new Random(1), executor
             );
+
             System.out.println("\nEvolution finished!");
             if (!solutions.isEmpty()) {
                 QueryRepresentation bestSolution = solutions.iterator().next();

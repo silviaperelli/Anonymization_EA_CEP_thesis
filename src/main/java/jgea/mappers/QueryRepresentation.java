@@ -1,4 +1,4 @@
-package jgea.representation;
+package jgea.mappers;
 
 import java.io.Serializable;
 import java.util.List;

@@ -1,4 +1,4 @@
-package jgea.representation;
+package jgea.mappers;
 
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 

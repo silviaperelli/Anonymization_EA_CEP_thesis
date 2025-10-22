@@ -1,4 +1,4 @@
-package jgea.representation;
+package jgea.mappers;
 
 import common.util.Util;
 import event.AirQualityEvent;
@@ -6,7 +6,6 @@ import query.Query;
 import component.operator.Operator;
 import component.source.Source;
 import component.sink.Sink;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,5 +107,4 @@ public class RepresentationToLiebreQuery {
             case EQUAL -> eventValue == conditionValue;
         };
     }
-
 }
