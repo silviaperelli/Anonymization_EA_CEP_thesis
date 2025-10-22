@@ -7,7 +7,7 @@ import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
 import jgea.mappers.RepresentationToLiebreQuery;
 import jgea.query.MainQuery;
-import jgea.utils.F1Score;
+import jgea.metrics.F1Score;
 import java.util.*;
 import java.util.function.Function;
 

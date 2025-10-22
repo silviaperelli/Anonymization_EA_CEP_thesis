@@ -22,8 +22,9 @@ public class MainQuery {
 
     public static List<AirQualityEvent> process(List<AirQualityEvent> inputStream) throws Exception{
 
-        Query query = new Query();
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
+        Query query = new Query();
+
         // Create and add a source that reads from the provided in-memory list
         SourceFunction<AirQualityEvent> collectionSource = createCollectionSource(inputStream);
         Source<AirQualityEvent> inputSource = query.addBaseSource("I1", collectionSource);
