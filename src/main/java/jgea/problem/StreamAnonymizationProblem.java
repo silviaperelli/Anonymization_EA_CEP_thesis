@@ -2,11 +2,12 @@ package jgea.problem;
 
 import event.AirQualityEvent;
 import event.StreamFactory;
+import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
 import jgea.mappers.RepresentationToLiebreQuery;
 import jgea.query.MainQuery;
-import jgea.utils.Metrics;
+import jgea.utils.F1Score;
 import java.util.*;
 import java.util.function.Function;
 
@@ -22,6 +23,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
             ));
 
 
+    private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
     private final String inputCsvPath;
     private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
 
@@ -63,11 +65,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 // Execute main query on the modified datastream
                 List<AirQualityEvent> resultEvents = MainQuery.process(modifiedEvents);
 
-                // Calculate F1 score
-                double f1Score = Metrics.calculateF1ScoreForEvents(originalResults, resultEvents);
-
-                // Populate the results map
-                qualities.put("results-similarity", f1Score);
+                // Populate the results map with F1 score
+                qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, resultEvents));
                 return qualities;
 
             } catch (Exception e) {

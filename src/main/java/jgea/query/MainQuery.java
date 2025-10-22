@@ -58,7 +58,7 @@ public class MainQuery {
 
         query.activate();
 
-        Util.sleep(1000);
+        Util.sleep(2000);
         query.deActivate();
 
         return collectedEvents;

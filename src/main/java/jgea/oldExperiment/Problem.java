@@ -11,7 +11,6 @@ import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import jgea.mappers.QueryRepresentation;
 import jgea.mappers.RepresentationToLiebreQuery;
 import jgea.mappers.TreeToRepresentation;
-import jgea.utils.Metrics;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import utils.Evaluator;
@@ -106,7 +105,7 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
                 // Compare the sequences found in the modified data with the original sequences (ground truth) to calculate the F1 score
                 List<Sequence> modifiedCepResults = Evaluator.parseSequencesFromEvents(cepResultEvents);
 
-                return Metrics.calculateF1Score(originalCepResults, modifiedCepResults);
+                return calculateF1Score(originalCepResults, modifiedCepResults);
 
             } catch (Exception e) {
                 System.err.printf("Error during fitness evaluation: %s", e.getMessage());
@@ -115,5 +114,40 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
             }
         };
 
+    }
+
+    private static double calculateF1Score(List<Sequence> groundTruth, List<Sequence> predictions) {
+        int truePositive = 0;
+        // Boolean array to mark predictions already matched to a ground truth sequence
+        boolean[] matchedPredictions = new boolean[predictions.size()];
+
+        // Search for an exact match in the prediction list
+        for (Sequence truthSeq : groundTruth) {
+            int bestMatchIndex = -1;
+            for (int i = 0; i < predictions.size(); i++) {
+                if (!matchedPredictions[i]) {
+                    if (truthSeq.tupleIds().equals(predictions.get(i).tupleIds())) {
+                        bestMatchIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // If a match is found, increment the true positive counter and mark the prediction as used
+            if (bestMatchIndex != -1) {
+                truePositive++;
+                matchedPredictions[bestMatchIndex] = true;
+            }
+        }
+
+        int falseNegative = groundTruth.size() - truePositive;
+        int falsePositive = predictions.size() - truePositive;
+
+        double precision = (truePositive + falsePositive > 0) ? (double) truePositive / (truePositive + falsePositive) : 0;
+        double recall = (truePositive + falseNegative > 0) ? (double) truePositive / (truePositive + falseNegative) : 0;
+
+        if (precision + recall == 0) return 0.0;
+
+        return 2 * (precision * recall) / (precision + recall);
     }
 }
