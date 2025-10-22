@@ -60,7 +60,7 @@ public class NewExperimentEA {
         // Solver configuration
         GrammarRampedHalfAndHalf<String> factory = new GrammarRampedHalfAndHalf<>(3, 8, grammar);
         NsgaII<Tree<String>, QueryRepresentation, Map<String, Double>> solver = new NsgaII<>(
-                mapper,
+                mapper.mapperFor(null),
                 factory,
                 populationSize,
                 StopConditions.nOfFitnessEvaluations(nOfEvaluations),
