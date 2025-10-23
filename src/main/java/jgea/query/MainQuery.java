@@ -14,6 +14,9 @@ import jgea.metrics.MetricsConsumer;
 import query.LiebreContext;
 import query.Query;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +30,16 @@ public class MainQuery {
     // Record to contain the final results events and the collected performance metrics
     public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {}
 
-    public static QueryResult process(List<AirQualityEvent> inputStream) {
+    public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
+
+        String metricsFilePath = "src/main/resources/" + queryId;
+
+        try {
+            Files.createDirectories(Paths.get(metricsFilePath));
+        } catch (IOException e) {
+            System.err.println("Error while creating the metrics directories: " + metricsFilePath);
+            throw e; // Rilancia l'eccezione per far fallire la valutazione
+        }
 
         if (inputStream == null || inputStream.isEmpty()) {
             return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0 , 0));
@@ -35,7 +47,7 @@ public class MainQuery {
 
         // Create a metric collector for the run
         MetricsConsumer consumer = new MetricsConsumer();
-        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", consumer.buildConsumers()));
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers()));
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();

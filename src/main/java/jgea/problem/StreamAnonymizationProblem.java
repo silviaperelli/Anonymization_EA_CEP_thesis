@@ -35,7 +35,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         List<AirQualityEvent> originalStream = StreamFactory.createListFromFile(inputCsvPath);
 
         // Execute the main query
-        MainQuery.QueryResult baselineOutcome = MainQuery.process(originalStream);
+        MainQuery.QueryResult baselineOutcome = MainQuery.process(originalStream, "original");
 
         this.originalResults = baselineOutcome.events();
         this.originalMetrics = baselineOutcome.metrics();
@@ -55,6 +55,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         return intermediateRepr -> {
             // Build the results map
             SequencedMap<String, Double> qualities = new TreeMap<>();
+            String queryId = String.valueOf(intermediateRepr.hashCode());
             try {
                 // Create an executable Liebre query and execute this anonymization query
                 RepresentationToLiebreQuery liebreExecutor = new RepresentationToLiebreQuery();
@@ -67,7 +68,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 }
 
                 // Execute the main query
-                MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents);
+                MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, queryId);
 
                 System.out.println(modifiedOutcome.metrics());
 
