@@ -1,7 +1,6 @@
 package jgea.query;
 
 import common.metrics.Metrics;
-import common.util.Util;
 import component.operator.Operator;
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
 import component.operator.in1.aggregate.TimeWindowAddRemove;
@@ -38,7 +37,7 @@ public class MainQuery {
             Files.createDirectories(Paths.get(metricsFilePath));
         } catch (IOException e) {
             System.err.println("Error while creating the metrics directories: " + metricsFilePath);
-            throw e; // Rilancia l'eccezione per far fallire la valutazione
+            throw e;
         }
 
         if (inputStream == null || inputStream.isEmpty()) {
@@ -90,7 +89,6 @@ public class MainQuery {
 
         while (sink.isEnabled()) {
             try {
-                // Stampa un messaggio PRIMA di entrare in sleep
                 System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
                 Thread.sleep(1000);
                 waitCycles++;
