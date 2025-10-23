@@ -4,6 +4,10 @@ import component.sink.Sink;
 import component.source.Source;
 import query.LiebreContext;
 import query.Query;
+
+import java.util.HashMap;
+import java.util.function.Consumer;
+
 import common.metrics.Metrics;
 import component.operator.Operator;
 import event.AirQualityEvent;
@@ -14,8 +18,25 @@ public class TestQueryLiebre {
 
         final String inputFile = "src/main/resources/datasets/airQuality.csv";
 
+        // You can define your own consumers for metrics collection
+        HashMap<String, Consumer<Object[]>> consumers = new HashMap<>();
+        // For each metric id (yes, you need to know the name) define the consumer that
+        // does what you want
+        // In this case it prints, but you can also store data if you want in a data
+        // structure, for instance
+        consumers.put("average_filter2.IN", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("average_filter2.OUT", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("filter1_average.IN", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("filter1_average.OUT", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("filter2_o1.IN", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("filter2_o1.OUT", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("I1_reader.IN", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("I1_reader.OUT", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("reader_filter1.IN", x -> System.out.println(x[0] + ", " + x[1]));
+        consumers.put("reader_filter1.OUT", x -> System.out.println(x[0] + ", " + x[1]));
+
         // set metrics before any operators are added
-        LiebreContext.setStreamMetrics(Metrics.file("src/main/resources"));
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", consumers));
 
         Query query = new Query();
 
@@ -40,16 +61,19 @@ public class TestQueryLiebre {
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
         // Operator to aggregate the CO level and NO2 level in a window of 2 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average", WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
+        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average",
+                WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
-        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
+        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2
+        // level >= 100.0
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
                 "filter2", tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Finale sink to print in a CSV file
         Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
 
-        query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator).connect(aggregateOperator, filter2).connect(filter2, outputSink);
+        query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator)
+                .connect(aggregateOperator, filter2).connect(filter2, outputSink);
 
         System.out.println("*** Anonymization query activated ***");
         query.activate();
@@ -89,7 +113,8 @@ public class TestQueryLiebre {
             }
 
             // Avoid duplicates due to the previous filter operator in the pipeline
-            // If the last event in the window is the same as the one in the last output, ignore it
+            // If the last event in the window is the same as the one in the last output,
+            // ignore it
             if (lastEvent.getTimestamp() == lastOutputTs) {
                 return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
