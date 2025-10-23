@@ -26,6 +26,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
     private final String inputCsvPath;
     private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
+    private final MainQuery.PerformanceMetrics originalMetrics;
 
     public StreamAnonymizationProblem(String inputCsvPath) throws Exception {
         this.inputCsvPath = inputCsvPath;
@@ -34,7 +35,10 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         List<AirQualityEvent> originalStream = StreamFactory.createListFromFile(inputCsvPath);
 
         // Execute the main query
-        this.originalResults = MainQuery.process(originalStream);
+        MainQuery.QueryResult baselineOutcome = MainQuery.process(originalStream);
+
+        this.originalResults = baselineOutcome.events();
+        this.originalMetrics = baselineOutcome.metrics();
 
         System.out.println("Ground Truth generata");
 
@@ -62,11 +66,13 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                     return qualities;
                 }
 
-                // Execute main query on the modified datastream
-                List<AirQualityEvent> resultEvents = MainQuery.process(modifiedEvents);
+                // Execute the main query
+                MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents);
+
+                System.out.println(modifiedOutcome.metrics());
 
                 // Populate the results map with F1 score
-                qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, resultEvents));
+                qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 return qualities;
 
             } catch (Exception e) {

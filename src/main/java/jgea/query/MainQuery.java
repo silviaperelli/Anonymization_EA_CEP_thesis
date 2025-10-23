@@ -1,5 +1,6 @@
 package jgea.query;
 
+import common.metrics.Metrics;
 import common.util.Util;
 import component.operator.Operator;
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
@@ -9,6 +10,8 @@ import component.source.Source;
 import component.source.SourceFunction;
 
 import event.AirQualityEvent;
+import jgea.metrics.MetricsConsumer;
+import query.LiebreContext;
 import query.Query;
 
 import java.util.ArrayList;
@@ -18,9 +21,21 @@ import java.util.List;
 
 public class MainQuery {
 
-    // TO DO: add metrics calculation
+    // Record to contain the performance metrics during a query run
+    public record PerformanceMetrics(double afterFilter1, double beforeAggregate, double afterAggregate, double beforeFilter2, double afterFilter2, double beforeSink, double afterSource, double beforeFilter1) {}
 
-    public static List<AirQualityEvent> process(List<AirQualityEvent> inputStream) throws Exception{
+    // Record to contain the final results events and the collected performance metrics
+    public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {}
+
+    public static QueryResult process(List<AirQualityEvent> inputStream) {
+
+        if (inputStream == null || inputStream.isEmpty()) {
+            return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0 , 0));
+        }
+
+        // Create a metric collector for the run
+        MetricsConsumer consumer = new MetricsConsumer();
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", consumer.buildConsumers()));
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
@@ -46,7 +61,7 @@ public class MainQuery {
                 "filter2", tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Final Sink that adds every event to a list
-        Sink<AirQualityEvent> sink = query.addBaseSink("output-sink", event -> {
+        Sink<AirQualityEvent> sink = query.addBaseSink("o1", event -> {
             if (event != null) {
                 collectedEvents.add(event);
             }
@@ -62,7 +77,7 @@ public class MainQuery {
         Util.sleep(2000);
         query.deActivate();
 
-        return collectedEvents;
+        return new QueryResult(collectedEvents, consumer.getMetrics());
 
     }
 
