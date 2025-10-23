@@ -1,6 +1,8 @@
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
 import component.operator.in1.aggregate.TimeWindowAddRemove;
+import component.sink.BaseSink;
 import component.sink.Sink;
+import component.sink.SinkFunction;
 import component.source.Source;
 import query.LiebreContext;
 import query.Query;
@@ -72,11 +74,24 @@ public class TestQueryLiebre {
         // Finale sink to print in a CSV file
         Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
 
+        
+        // Sink<AirQualityEvent> outputSink = query.addSink(new MyBaseSink("o1", new TextFileSinkFunction<>("src/main/resources/resultsTestQuery.csv", true)));
+
+
         query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator)
                 .connect(aggregateOperator, filter2).connect(filter2, outputSink);
 
-        System.out.println("*** Anonymization query activated ***");
         query.activate();
+        System.out.println("*** Anonymization query activated ***");
+        while(outputSink.isEnabled()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("*** Anonymization query completed ***");
+
     }
 
     private static class AggregateWindow extends BaseTimeWindowAddRemove<AirQualityEvent, AirQualityEvent> {
