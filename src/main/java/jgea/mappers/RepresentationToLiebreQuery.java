@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Translate an abstract PipelineRepresentation into an executable Liebre Query
 public class RepresentationToLiebreQuery {
 
+    // Translate an intermediate QueryRepresentation into an executable Liebre Query and execute it
     public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
@@ -61,8 +61,6 @@ public class RepresentationToLiebreQuery {
         });
         query.connect(lastOperatorInChain, sink);
         query.activate();
-
-
 
         int waitCycles = 0;
 

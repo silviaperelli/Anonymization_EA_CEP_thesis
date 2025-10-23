@@ -52,14 +52,14 @@ public class MetricsConsumer {
                 long value = (Long) data[1];
 
                 // DEBUG
-                System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n",
-                        queryid, timestamp, metricName, value);
+                System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n", queryid, timestamp, metricName, value);
 
                 // Get the history map for the specific metric, create it if it doesn't exist
-                Map<Long, Long> history = metricHistory.computeIfAbsent(
-                        metricName,
-                        k -> new ConcurrentHashMap<>()
-                );
+                Map<Long, Long> history = metricHistory.get(metricName);
+                if (history == null) {
+                    history = new ConcurrentHashMap<>();
+                    metricHistory.put(metricName, history);
+                }
 
                 // Add the new (timestamp, value) pair to the map
                 history.put(timestamp, value);
@@ -74,43 +74,31 @@ public class MetricsConsumer {
         return metricHistory;
     }
 
-    // Calculate and return the average rate (tuples/sec) for a given metric
-    public double getAverageRate(String metricName) {
+
+    // Calculate the number of valid tuples passing through a stream
+    public long getCount(String metricName) {
         Map<Long, Long> history = metricHistory.get(metricName);
         if (history == null || history.isEmpty()) {
-            return 0.0;
+            return 0;
         }
 
-        // Filter out invalid values (-1)
-        List<Long> validCounts = history.values().stream()
-                .filter(value -> value > 0)
-                .toList();
-
-        if (validCounts.isEmpty()) {
-            return 0.0;
-        }
-
-        double sumOfCounts = validCounts.stream()
-                .mapToDouble(Long::doubleValue)
+        return history.values().stream()
+                .filter(value -> value > 0)      // Skip invalid values (-1)
+                .mapToLong(Long::longValue)
                 .sum();
-
-        // Calculate the average
-        double averageRate = sumOfCounts / validCounts.size();
-
-        return averageRate;
     }
 
     // Retrieves the average rate for each metric
     public MainQuery.PerformanceMetrics getMetrics() {
         return new MainQuery.PerformanceMetrics(
-                getAverageRate(metricAfterFilter1),
-                getAverageRate(metricBeforeAggregate),
-                getAverageRate(metricAfterAggregate),
-                getAverageRate(metricBeforeFilter2),
-                getAverageRate(metricAfterFilter2),
-                getAverageRate(metricBeforeSink),
-                getAverageRate(metricAfterSource),
-                getAverageRate(metricBeforeFilter1)
+                getCount(metricAfterFilter1),
+                getCount(metricBeforeAggregate),
+                getCount(metricAfterAggregate),
+                getCount(metricBeforeFilter2),
+                getCount(metricAfterFilter2),
+                getCount(metricBeforeSink),
+                getCount(metricAfterSource),
+                getCount(metricBeforeFilter1)
         );
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
 public class MainQuery {
 
     // Record to contain the performance metrics during a query run
-    public record PerformanceMetrics(double afterFilter1, double beforeAggregate, double afterAggregate, double beforeFilter2, double afterFilter2, double beforeSink, double afterSource, double beforeFilter1) {}
+    public record PerformanceMetrics(long afterFilter1, long beforeAggregate, long afterAggregate, long beforeFilter2, long afterFilter2, long beforeSink, long afterSource, long beforeFilter1) {}
 
     // Record to contain the final results events and the collected performance metrics
     public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {}
