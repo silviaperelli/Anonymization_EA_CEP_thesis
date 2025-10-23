@@ -47,7 +47,7 @@ public class MainQuery {
 
         // Create a metric collector for the run
         MetricsConsumer consumer = new MetricsConsumer();
-        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers()));
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId)));
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
@@ -86,8 +86,22 @@ public class MainQuery {
 
         query.activate();
 
-        Util.sleep(2000);
-        query.deActivate();
+        int waitCycles = 0;
+
+        while (sink.isEnabled()) {
+            try {
+                // Stampa un messaggio PRIMA di entrare in sleep
+                System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
+                Thread.sleep(1000);
+                waitCycles++;
+            } catch (InterruptedException e) {
+                System.err.println("[DEBUG MainQuery] Ciclo di attesa interrotto!");
+                e.printStackTrace();
+                Thread.currentThread().interrupt(); // Buona pratica
+                break;
+            }
+        }
+
 
         return new QueryResult(collectedEvents, consumer.getMetrics());
 

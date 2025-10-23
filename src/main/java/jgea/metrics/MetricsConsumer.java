@@ -23,7 +23,7 @@ public class MetricsConsumer {
     private final String metricBeforeSink = "filter2_o1.OUT";
 
     // Build and return a map of the metric
-    public HashMap<String, Consumer<Object[]>> buildConsumers() {
+    public HashMap<String, Consumer<Object[]>> buildConsumers(String queryid) {
         // Default consumer used for any metric that Liebre generates but it's not used here
         Consumer<Object[]> doNothingConsumer = data -> {};
 
@@ -52,8 +52,8 @@ public class MetricsConsumer {
                 long value = (Long) data[1];
 
                 // DEBUG
-                System.out.printf("[METRIC_DEBUG] Time: %d, Metric: %s, Value: %d%n",
-                        timestamp, metricName, value);
+                System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n",
+                        queryid, timestamp, metricName, value);
 
                 // Get the history map for the specific metric, create it if it doesn't exist
                 Map<Long, Long> history = metricHistory.computeIfAbsent(
