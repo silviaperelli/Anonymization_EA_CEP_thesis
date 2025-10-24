@@ -1,6 +1,7 @@
 package jgea.query;
 
 import common.metrics.Metrics;
+import common.util.Util;
 import component.operator.Operator;
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
 import component.operator.in1.aggregate.TimeWindowAddRemove;
@@ -13,6 +14,9 @@ import jgea.metrics.MetricsConsumer;
 import query.LiebreContext;
 import query.Query;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,14 +24,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 public class MainQuery {
 
     // Record to contain the performance metrics during a query run
-    public record PerformanceMetrics(long afterFilter1, long beforeAggregate, long afterAggregate, long beforeFilter2, long afterFilter2, long beforeSink, long afterSource, long beforeFilter1) {}
+    public record PerformanceMetrics(long afterFilter1, long beforeAggregate, long afterAggregate, long beforeFilter2,
+            long afterFilter2, long beforeSink, long afterSource, long beforeFilter1) {
+    }
 
-    // Record to contain the final results events and the collected performance metrics
-    public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {}
+    // Record to contain the final results events and the collected performance
+    // metrics
+    public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {
+    }
 
     public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
 
@@ -41,7 +48,7 @@ public class MainQuery {
         }
 
         if (inputStream == null || inputStream.isEmpty()) {
-            return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0 , 0));
+            return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0, 0));
         }
 
         // Create a metric collector for the run
@@ -64,12 +71,14 @@ public class MainQuery {
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
         // Operator to aggregate the CO level and NO2 level in a window of 2 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator =
-                query.addTimeAggregateOperator("average", WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
+        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average",
+                WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
-        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
+        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2
+        // level >= 100.0
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
-                "filter2", tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
+                "filter2",
+                tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Final Sink that adds every event to a list
         Sink<AirQualityEvent> sink = query.addBaseSink("o1", event -> {
@@ -89,7 +98,9 @@ public class MainQuery {
 
         while (sink.isEnabled()) {
             try {
-                System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
+                System.out.printf(
+                        "[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n",
+                        waitCycles + 1);
                 Thread.sleep(1000);
                 waitCycles++;
             } catch (InterruptedException e) {
@@ -99,7 +110,6 @@ public class MainQuery {
                 break;
             }
         }
-
 
         return new QueryResult(collectedEvents, consumer.getMetrics());
 
@@ -111,9 +121,15 @@ public class MainQuery {
         return new SourceFunction<T>() {
             private int currentIndex = 0;
             private boolean isFinished = false;
+            private static final long IDLE_SLEEP = 1000;
+            private boolean enabled;
 
             @Override
             public T get() {
+                if (isFinished) {
+                    Util.sleep(IDLE_SLEEP);
+                    return null;
+                }
                 if (currentIndex < list.size()) {
                     T item = list.get(currentIndex);
                     currentIndex++;
@@ -128,10 +144,29 @@ public class MainQuery {
             public boolean isInputFinished() {
                 return isFinished;
             }
+
+            @Override
+            public void enable() {
+                this.enabled = true;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            @Override
+            public void disable() {
+                this.enabled = false;
+            }
+
+            @Override
+            public boolean canRun() {
+                return !isFinished;
+            }
+
         };
     }
-
-
 
     private static class AggregateWindow extends BaseTimeWindowAddRemove<AirQualityEvent, AirQualityEvent> {
 
@@ -167,7 +202,8 @@ public class MainQuery {
             }
 
             // Avoid duplicates due to the previous filter operator in the pipeline
-            // If the last event in the window is the same as the one in the last output, ignore it
+            // If the last event in the window is the same as the one in the last output,
+            // ignore it
             if (lastEvent.getTimestamp() == lastOutputTs) {
                 return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
