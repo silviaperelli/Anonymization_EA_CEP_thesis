@@ -79,7 +79,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 // Execute the main query
                 MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, String.valueOf(queryId));
                 System.out.printf("[DEBUG][%s] Main Query terminata. Sequenze di allerta trovate: %d%n", queryId, modifiedOutcome.events().size());
-                System.out.println("[DEBUG][%s] "+ queryId + " " + modifiedOutcome.metrics());
+                System.out.printf("[DEBUG][%s] " + modifiedOutcome.metrics(), queryId);
 
                 // Populate the results map with F1 score and Euclidean distance
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
