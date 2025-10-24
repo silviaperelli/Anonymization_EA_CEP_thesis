@@ -61,22 +61,27 @@ public class RepresentationToLiebreQuery {
         });
         query.connect(lastOperatorInChain, sink);
         query.activate();
+        Util.sleep(20000);
+        query.deActivate();
 
+
+        /*
         int waitCycles = 0;
 
-        while (sink.isEnabled()) {
+        while(sink.isEnabled()) {
             try {
-                // Stampa un messaggio PRIMA di entrare in sleep
                 System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
                 Thread.sleep(1000);
                 waitCycles++;
             } catch (InterruptedException e) {
                 System.err.println("[DEBUG MainQuery] Ciclo di attesa interrotto!");
                 e.printStackTrace();
-                Thread.currentThread().interrupt(); // Buona pratica
-                break;
             }
         }
+
+         */
+
+
         return collectedEvents;
     }
 

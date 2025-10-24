@@ -13,10 +13,6 @@ import event.AirQualityEvent;
 import jgea.metrics.MetricsConsumer;
 import query.LiebreContext;
 import query.Query;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +34,7 @@ public class MainQuery {
 
     public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
 
-        String metricsFilePath = "src/main/resources/" + queryId;
+        String metricsFilePath = "src/main/resources/query" + queryId;
 
         try {
             Files.createDirectories(Paths.get(metricsFilePath));
@@ -60,28 +56,28 @@ public class MainQuery {
 
         // Create and add a source that reads from the provided in-memory list
         SourceFunction<AirQualityEvent> collectionSource = createCollectionSource(inputStream);
-        Source<AirQualityEvent> inputSource = query.addBaseSource("I1", collectionSource);
+        Source<AirQualityEvent> inputSource = query.addBaseSource("I1_"+queryId, collectionSource);
 
         // Operator to filter tuple with CO level >= 2.0 and NO2 level >= 40.0
         Operator<AirQualityEvent, AirQualityEvent> filter1 = query.addFilterOperator(
-                "filter1", tuple -> tuple != null && (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
+                "filter1_" + queryId, tuple -> tuple != null && (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
 
         // Window of 3 hours, sliding every 1 hour
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
         // Operator to aggregate the CO level and NO2 level in a window of 2 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average",
+        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average_"+queryId,
                 WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
         // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2
         // level >= 100.0
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
-                "filter2",
+                "filter2_"+queryId,
                 tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Final Sink that adds every event to a list
-        Sink<AirQualityEvent> sink = query.addBaseSink("o1", event -> {
+        Sink<AirQualityEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
             if (event != null) {
                 collectedEvents.add(event);
             }
@@ -93,25 +89,24 @@ public class MainQuery {
                 .connect(filter2, sink);
 
         query.activate();
+        //Util.sleep(2000);
+        //query.deActivate();
+
 
         int waitCycles = 0;
 
-        while (sink.isEnabled()) {
+        while(sink.isEnabled()) {
             try {
-                System.out.printf(
-                        "[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n",
-                        waitCycles + 1);
+                System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
                 Thread.sleep(1000);
                 waitCycles++;
             } catch (InterruptedException e) {
                 System.err.println("[DEBUG MainQuery] Ciclo di attesa interrotto!");
                 e.printStackTrace();
-                Thread.currentThread().interrupt(); // Buona pratica
-                break;
             }
         }
 
-        return new QueryResult(collectedEvents, consumer.getMetrics());
+        return new QueryResult(collectedEvents, consumer.getMetrics(queryId));
 
     }
 

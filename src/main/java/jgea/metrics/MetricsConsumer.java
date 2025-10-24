@@ -13,17 +13,28 @@ public class MetricsConsumer {
     // Map with the metric name and the couple (timestamp, metric value)
     private final Map<String, Map<Long,Long>> metricHistory = new ConcurrentHashMap<>();
 
-    private final String metricAfterSource = "I1_filter1.IN";
-    private final String metricBeforeFilter1 = "I1_filter1.OUT";
-    private final String metricAfterFilter1 = "filter1_average.IN";
-    private final String metricBeforeAggregate = "filter1_average.OUT";
-    private final String metricAfterAggregate = "average_filter2.IN";
-    private final String metricBeforeFilter2 = "average_filter2.OUT";
-    private final String metricAfterFilter2 = "filter2_o1.IN";
-    private final String metricBeforeSink = "filter2_o1.OUT";
+    private record MetricNameSet(
+            String afterSource, String beforeFilter1,
+            String afterFilter1, String beforeAggregate,
+            String afterAggregate, String beforeFilter2,
+            String afterFilter2, String beforeSink
+    ) {}
+
+    private MetricNameSet generateMetricNames(String queryId) {
+        return new MetricNameSet(
+                String.format("I1_%s_filter1_%s.IN", queryId, queryId),
+                String.format("I1_%s_filter1_%s.OUT", queryId, queryId),
+                String.format("filter1_%s_average_%s.IN", queryId, queryId),
+                String.format("filter1_%s_average_%s.OUT", queryId, queryId),
+                String.format("average_%s_filter2_%s.IN", queryId, queryId),
+                String.format("average_%s_filter2_%s.IN", queryId, queryId),
+                String.format("filter2_%s_o1_%s.IN", queryId, queryId),
+                String.format("filter2_%s_o1_%s.OUT", queryId, queryId)
+        );
+    }
 
     // Build and return a map of the metric
-    public HashMap<String, Consumer<Object[]>> buildConsumers(String queryid) {
+    public HashMap<String, Consumer<Object[]>> buildConsumers(String queryId) {
         // Default consumer used for any metric that Liebre generates but it's not used here
         Consumer<Object[]> doNothingConsumer = data -> {};
 
@@ -36,12 +47,13 @@ public class MetricsConsumer {
             }
         };
 
+        MetricNameSet names = generateMetricNames(queryId);
         // List of all the specific metrics
         List<String> allMetrics = List.of(
-                metricAfterSource, metricBeforeFilter1,
-                metricAfterFilter1, metricBeforeAggregate,
-                metricAfterAggregate, metricBeforeFilter2,
-                metricAfterFilter2, metricBeforeSink
+                names.afterSource(), names.beforeFilter1(),
+                names.afterFilter1(), names.beforeAggregate(),
+                names.afterAggregate(), names.beforeFilter2(),
+                names.afterFilter2(), names.beforeSink()
         );
 
         // For each metric define the consumer
@@ -52,7 +64,7 @@ public class MetricsConsumer {
                 long value = (Long) data[1];
 
                 // DEBUG
-                System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n", queryid, timestamp, metricName, value);
+                //System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n", queryId, timestamp, metricName, value);
 
                 // Get the history map for the specific metric, create it if it doesn't exist
                 Map<Long, Long> history = metricHistory.get(metricName);
@@ -89,16 +101,17 @@ public class MetricsConsumer {
     }
 
     // Retrieves the average rate for each metric
-    public MainQuery.PerformanceMetrics getMetrics() {
+    public MainQuery.PerformanceMetrics getMetrics(String queryId) {
+        MetricNameSet names = generateMetricNames(queryId);
         return new MainQuery.PerformanceMetrics(
-                getCount(metricAfterFilter1),
-                getCount(metricBeforeAggregate),
-                getCount(metricAfterAggregate),
-                getCount(metricBeforeFilter2),
-                getCount(metricAfterFilter2),
-                getCount(metricBeforeSink),
-                getCount(metricAfterSource),
-                getCount(metricBeforeFilter1)
+                getCount(names.afterFilter1()),
+                getCount(names.beforeAggregate()),
+                getCount(names.afterAggregate()),
+                getCount(names.beforeFilter2()),
+                getCount(names.afterFilter2()),
+                getCount(names.beforeSink()),
+                getCount(names.afterSource()),
+                getCount(names.beforeFilter1())
         );
     }
 }
