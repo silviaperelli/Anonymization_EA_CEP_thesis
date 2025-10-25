@@ -10,6 +10,7 @@ import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import io.github.ericmedvet.jgea.core.solver.NsgaII;
 import io.github.ericmedvet.jgea.core.solver.StopConditions;
 import jgea.problem.StreamAnonymizationProblem;
+import query.LiebreContext;
 import jgea.mappers.Mapper;
 import jgea.mappers.QueryRepresentation;
 
@@ -22,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import common.metrics.Metrics;
+
 
 // Main class for the evolutionary experiment, it initializes all components and execute the solver
 // Will be replaced by an experiment txt file
@@ -29,6 +32,12 @@ public class NewExperimentEA {
 
     public static void main(String[] args) throws Exception {
 
+        /*
+         * Since metrics will be added and rmoved during the query execution, we need to
+         * ensure that the LiebreContext is initialized with the right metrics factory
+         */
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", new java.util.HashMap<>()));
+        
         String grammarPath = "generated-grammar.bnf";
         String inputCsvPath = "datasets/airQuality.csv";
         int populationSize = 5;

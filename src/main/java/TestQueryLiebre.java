@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 import common.metrics.Metrics;
+import common.metrics.MetricsFactory;
 import component.operator.Operator;
 import event.AirQualityEvent;
 
@@ -36,7 +37,8 @@ public class TestQueryLiebre {
         consumers.put("reader_filter1.OUT", x -> System.out.println(x[0] + ", " + x[1]));
 
         // set metrics before any operators are added
-        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", consumers));
+        MetricsFactory metrics = Metrics.fileAndConsumer("src/main/resources", consumers);
+        LiebreContext.mergeWithStreamMetrics(metrics);
 
         Query query = new Query();
 
@@ -87,6 +89,8 @@ public class TestQueryLiebre {
             }
         }
         System.out.println("*** Anonymization query completed ***");
+
+        LiebreContext.unmergeFromStreamMetrics(metrics);
 
     }
 

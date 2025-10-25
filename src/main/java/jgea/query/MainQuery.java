@@ -1,6 +1,7 @@
 package jgea.query;
 
 import common.metrics.Metrics;
+import common.metrics.MetricsFactory;
 import common.util.Util;
 import component.operator.Operator;
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
@@ -49,7 +50,8 @@ public class MainQuery {
 
         // Create a metric collector for the run
         MetricsConsumer consumer = new MetricsConsumer();
-        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId)));
+        MetricsFactory metrics = Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId));
+        LiebreContext.mergeWithStreamMetrics(metrics);
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
@@ -78,9 +80,9 @@ public class MainQuery {
 
         // Final Sink that adds every event to a list
         Sink<AirQualityEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
-            if (event != null) {
-                collectedEvents.add(event);
-            }
+        if (event != null) {
+        collectedEvents.add(event);
+        }
         });
 
         query.connect(inputSource, filter1)
@@ -89,9 +91,6 @@ public class MainQuery {
                 .connect(filter2, sink);
 
         query.activate();
-        //Util.sleep(2000);
-        //query.deActivate();
-
 
         int waitCycles = 0;
 
@@ -106,6 +105,7 @@ public class MainQuery {
             }
         }
 
+        LiebreContext.unmergeFromStreamMetrics(metrics);
         return new QueryResult(collectedEvents, consumer.getMetrics(queryId));
 
     }
