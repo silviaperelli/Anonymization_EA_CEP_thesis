@@ -47,9 +47,6 @@ public class MainQuery {
             return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0, 0));
         }
 
-        System.out.println("[DEBUG MetricsSetup] Setting stream metrics for query " + queryId);
-        System.out.println("[DEBUG MetricsSetup] Using Metrics type: FileAndConsumer");
-
         // Create a metric collector for the run
         MetricsConsumer consumer = new MetricsConsumer();
         MetricsFactory metrics = Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId));

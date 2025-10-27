@@ -66,13 +66,10 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
             // Build the results map
             SequencedMap<String, Double> qualities = new TreeMap<>();
             String queryId = String.valueOf(queryCounter.getAndIncrement());
-            System.out.println(intermediateRepr + queryId);
             try {
                 // Create an executable Liebre query and execute this anonymization query
                 LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
                 List<AirQualityEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath);
-
-                System.out.printf("[DEBUG][%s] Anonymization terminated. Events in dataset: %d%n", queryId, modifiedEvents.size());
 
                 // If the modified datastream is empty, return 0 as F1 score and maximum difference
                 if (modifiedEvents.isEmpty()) {
@@ -84,8 +81,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
                 // Execute the main query
                 MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, String.valueOf(queryId));
-                System.out.printf("[DEBUG][%s] Main Query terminated. Allerts tuples found: %d%n", queryId, modifiedOutcome.events().size());
-                System.out.printf("[DEBUG][%s] " + modifiedOutcome.metrics(), queryId);
 
                 // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
