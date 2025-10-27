@@ -80,7 +80,7 @@ public class ExperimentEA {
                 QueryRepresentation bestSolution = solutions.iterator().next();
 
                 System.out.println("\n--- Best Solution Found ---");
-                System.out.printf("P%s%n", bestSolution);
+                System.out.printf("%s%n", bestSolution);
                 System.out.println("---------------------------");
             } else {
                 System.out.println("\nNo solution found.");
