@@ -70,7 +70,7 @@ public class TreeToRepresentation {
 
             return new QueryRepresentation.OperatorNode("FILTER", condition);
         } catch (Exception e) {
-            System.err.printf("[Parser] Error parsing filter node: %s\n", e.getMessage());
+            System.err.printf("Error parsing filter node: %s\n", e.getMessage());
             return null;
         }
     }

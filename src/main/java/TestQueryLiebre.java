@@ -80,7 +80,7 @@ public class TestQueryLiebre {
                 .connect(aggregateOperator, filter2).connect(filter2, outputSink);
 
         query.activate();
-        System.out.println("*** Anonymization query activated ***");
+        System.out.println("*** Query activated ***");
         while(outputSink.isEnabled()) {
             try {
                 Thread.sleep(1000);
@@ -88,7 +88,7 @@ public class TestQueryLiebre {
                 e.printStackTrace();
             }
         }
-        System.out.println("*** Anonymization query completed ***");
+        System.out.println("*** Query completed ***");
 
         LiebreContext.unmergeFromStreamMetrics(metrics);
 

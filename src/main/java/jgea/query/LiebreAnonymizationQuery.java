@@ -1,7 +1,8 @@
-package jgea.mappers;
+package jgea.query;
 
 import common.util.Util;
 import event.AirQualityEvent;
+import jgea.mappers.QueryRepresentation;
 import query.Query;
 import component.operator.Operator;
 import component.source.Source;
@@ -11,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RepresentationToLiebreQuery {
+public class LiebreAnonymizationQuery {
 
     // Translate an intermediate QueryRepresentation into an executable Liebre Query and execute it
     public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
-        inputFile = RepresentationToLiebreQuery.class.getClassLoader().getResource(inputFile).getPath();
+        inputFile = LiebreAnonymizationQuery.class.getClassLoader().getResource(inputFile).getPath();
         Query query = new Query();
 
         // Define Source and CSV Reader (fixed part of the pipeline)
@@ -61,25 +62,15 @@ public class RepresentationToLiebreQuery {
         });
         query.connect(lastOperatorInChain, sink);
         query.activate();
-        Util.sleep(20000);
-        query.deActivate();
 
-
-        /*
-        int waitCycles = 0;
 
         while(sink.isEnabled()) {
             try {
-                System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
                 Thread.sleep(1000);
-                waitCycles++;
             } catch (InterruptedException e) {
-                System.err.println("[DEBUG MainQuery] Ciclo di attesa interrotto!");
                 e.printStackTrace();
             }
         }
-
-         */
 
 
         return collectedEvents;

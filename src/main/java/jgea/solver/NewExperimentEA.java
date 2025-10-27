@@ -36,7 +36,7 @@ public class NewExperimentEA {
          * Since metrics will be added and rmoved during the query execution, we need to
          * ensure that the LiebreContext is initialized with the right metrics factory
          */
-        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources", new java.util.HashMap<>()));
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new java.util.HashMap<>()));
         
         String grammarPath = "generated-grammar.bnf";
         String inputCsvPath = "datasets/airQuality.csv";
@@ -96,7 +96,7 @@ public class NewExperimentEA {
                 QueryRepresentation bestSolution = solutions.iterator().next();
 
                 System.out.println("\n--- Best Solution Found ---");
-                System.out.printf("Pipeline: %s%n", bestSolution);
+                System.out.printf("%s%n", bestSolution);
                 System.out.println("---------------------------");
             } else {
                 System.out.println("\nNo solution found.");

@@ -35,6 +35,8 @@ public class MetricsConsumer {
 
     // Build and return a map of the metric
     public HashMap<String, Consumer<Object[]>> buildConsumers(String queryId) {
+        System.out.println("[DEBUG MetricsConsumer] Building consumers for query " + queryId);
+
         // Default consumer used for any metric that Liebre generates but it's not used here
         Consumer<Object[]> doNothingConsumer = data -> {};
 
@@ -64,7 +66,7 @@ public class MetricsConsumer {
                 long value = (Long) data[1];
 
                 // DEBUG
-                //System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n", queryId, timestamp, metricName, value);
+                System.out.printf("[METRIC_DEBUG] Query ID: %s, Time: %d, Metric: %s, Value: %d%n", queryId, timestamp, metricName, value);
 
                 // Get the history map for the specific metric, create it if it doesn't exist
                 Map<Long, Long> history = metricHistory.get(metricName);

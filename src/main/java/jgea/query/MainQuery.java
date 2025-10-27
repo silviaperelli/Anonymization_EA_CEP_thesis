@@ -28,14 +28,13 @@ public class MainQuery {
             long afterFilter2, long beforeSink, long afterSource, long beforeFilter1) {
     }
 
-    // Record to contain the final results events and the collected performance
-    // metrics
+    // Record to contain the final results events and the collected performance metrics
     public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {
     }
 
     public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
 
-        String metricsFilePath = "src/main/resources/query" + queryId;
+        String metricsFilePath = "src/main/resources/queryMetrics";
 
         try {
             Files.createDirectories(Paths.get(metricsFilePath));
@@ -47,6 +46,9 @@ public class MainQuery {
         if (inputStream == null || inputStream.isEmpty()) {
             return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0, 0));
         }
+
+        System.out.println("[DEBUG MetricsSetup] Setting stream metrics for query " + queryId);
+        System.out.println("[DEBUG MetricsSetup] Using Metrics type: FileAndConsumer");
 
         // Create a metric collector for the run
         MetricsConsumer consumer = new MetricsConsumer();
@@ -72,17 +74,16 @@ public class MainQuery {
         Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average_"+queryId,
                 WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
-        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2
-        // level >= 100.0
+        // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
                 "filter2_"+queryId,
                 tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Final Sink that adds every event to a list
         Sink<AirQualityEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
-        if (event != null) {
-        collectedEvents.add(event);
-        }
+            if (event != null) {
+            collectedEvents.add(event);
+            }
         });
 
         query.connect(inputSource, filter1)
@@ -92,15 +93,10 @@ public class MainQuery {
 
         query.activate();
 
-        int waitCycles = 0;
-
         while(sink.isEnabled()) {
             try {
-                System.out.printf("[DEBUG MainQuery]    -> Ciclo di attesa %d: sink.isEnabled() è VERO. Attendo 1 secondo...%n", waitCycles + 1);
                 Thread.sleep(1000);
-                waitCycles++;
             } catch (InterruptedException e) {
-                System.err.println("[DEBUG MainQuery] Ciclo di attesa interrotto!");
                 e.printStackTrace();
             }
         }

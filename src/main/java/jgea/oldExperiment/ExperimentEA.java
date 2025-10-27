@@ -38,8 +38,8 @@ public class ExperimentEA {
                 new GrammarBasedSubtreeMutation<>(12, grammar), 0.2
         );
 
-        int populationSize = 20;
-        int nOfEvaluations = 100;
+        int populationSize = 5;
+        int nOfEvaluations = 10;
 
         System.out.println("--- JGEA Evolution Parameters ---");
         System.out.printf("Population size: %d%n", populationSize);
@@ -80,7 +80,7 @@ public class ExperimentEA {
                 QueryRepresentation bestSolution = solutions.iterator().next();
 
                 System.out.println("\n--- Best Solution Found ---");
-                System.out.printf("Pipeline: %s%n", bestSolution);
+                System.out.printf("P%s%n", bestSolution);
                 System.out.println("---------------------------");
             } else {
                 System.out.println("\nNo solution found.");

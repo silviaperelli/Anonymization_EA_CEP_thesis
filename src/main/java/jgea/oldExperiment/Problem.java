@@ -9,7 +9,7 @@ import io.github.ericmedvet.jgea.core.representation.grammar.string.GrammarBased
 import io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import jgea.mappers.QueryRepresentation;
-import jgea.mappers.RepresentationToLiebreQuery;
+import jgea.query.LiebreAnonymizationQuery;
 import jgea.mappers.TreeToRepresentation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -65,7 +65,7 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
     public Function<Tree<String>, QueryRepresentation> solutionMapper() {
         return (Tree<String> tree) -> {
             try{
-                // First mapping from tree to PipelineRepresentation
+                // First mapping from tree to QueryRepresentation
                 List<QueryRepresentation.OperatorNode> operators = new ArrayList<>();
                 // Start recursive parsing from the root of the tree
                 TreeToRepresentation firstMapper = new TreeToRepresentation();
@@ -89,7 +89,7 @@ public class Problem implements GrammarBasedProblem<String, QueryRepresentation>
         return intermediateRepr -> {
             try {
                 // Execute anonymization query
-                RepresentationToLiebreQuery liebreExecutor = new RepresentationToLiebreQuery();
+                LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
                 List<AirQualityEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath);
 
                 // If the modified datastream is empty, return 0

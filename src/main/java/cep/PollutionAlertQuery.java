@@ -26,6 +26,7 @@ public class PollutionAlertQuery {
 
     public static void main(String[] args) throws Exception {
 
+
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Apply CEP query to the original Dataset
@@ -153,7 +154,7 @@ public class PollutionAlertQuery {
                         "*** ALLERT: CO pollution episode detected! ***\n" +
                                 "\t- Start: %s\n" +
                                 "\t- Duration: %d hours\n" +
-                                "\t- Average CO Level Medio CO: %.2f mg/m^3\n",
+                                "\t- Average CO Level: %.2f mg/m^3\n",
                         firstEvent.getEventTime().toString(),
                         sequence.size(),
                         avgCO

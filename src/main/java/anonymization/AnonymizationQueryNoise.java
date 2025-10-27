@@ -28,7 +28,7 @@ public class AnonymizationQueryNoise {
                         "reader",
                         line -> {
                             Util.sleep(100);
-                            if (line.startsWith("Date;Time;CO(GT)")) {
+                            if (line.startsWith("ID;Date;Time;CO(GT)")) {
                                 return null;
                             }
                             return AirQualityEvent.eventCreation(line);

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Pipeline Representation (phenotype)
+// Query Representation (phenotype)
 public record QueryRepresentation(
         // Contains a sequence of operators
         List<OperatorNode> operators
@@ -21,7 +21,7 @@ public record QueryRepresentation(
             case "le" -> Operator.LESS_OR_EQUAL;
             case "ge" -> Operator.GREATER_OR_EQUAL;
             case "eq" -> Operator.EQUAL;
-            default -> throw new IllegalArgumentException("Operatore non valido: " + text);
+            default -> throw new IllegalArgumentException("Operator not valid: " + text);
         };
     }
 
@@ -39,7 +39,7 @@ public record QueryRepresentation(
 
     // Represents a single operator node in the pipeline (in this case we only have filters)
     public record OperatorNode(
-            String type, // Es. "FILTER", "AGGREGATE"
+            String type,
             Condition condition
     ) implements Serializable {
         @Override

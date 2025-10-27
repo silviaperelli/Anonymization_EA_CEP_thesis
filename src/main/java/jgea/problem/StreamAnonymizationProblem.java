@@ -5,8 +5,9 @@ import event.StreamFactory;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
-import jgea.mappers.RepresentationToLiebreQuery;
+import jgea.query.LiebreAnonymizationQuery;
 import jgea.metrics.EuclideanDistance;
+import jgea.metrics.PrivacyScore;
 import jgea.query.MainQuery;
 import jgea.metrics.F1Score;
 import java.util.*;
@@ -22,15 +23,18 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     // Define the objective for the multi-objective optimization
     private final static SequencedMap<String, Comparator<Double>> OBJECTIVES = new TreeMap<>(
             Map.ofEntries(
-                    //Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()),
-                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()),
-                    Map.entry("metrics-difference", Double::compareTo)
+                    Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()), // Maximize
+                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()), // Maximize
+                    Map.entry("metrics-difference", Double::compareTo)  // Minimize
             ));
 
 
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
     private final static Distance<MainQuery.PerformanceMetrics> METRICS_DIFFERENCE = new EuclideanDistance();
+    private final static Distance<List<AirQualityEvent>> PRIVACY = new PrivacyScore();
+
     private final String inputCsvPath;
+    private final List<AirQualityEvent> originalStream;
     private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
     private final MainQuery.PerformanceMetrics originalMetrics;
 
@@ -38,15 +42,15 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         this.inputCsvPath = inputCsvPath;
 
         // Load the original stream of events from the CSV file
-        List<AirQualityEvent> originalStream = StreamFactory.createListFromFile(inputCsvPath);
+        this.originalStream = StreamFactory.createListFromFile(inputCsvPath);
 
         // Execute the main query
-        MainQuery.QueryResult baselineOutcome = MainQuery.process(originalStream, "original");
+        MainQuery.QueryResult baselineOutcome = MainQuery.process(this.originalStream, "original");
 
         this.originalResults = baselineOutcome.events();
         this.originalMetrics = baselineOutcome.metrics();
 
-        System.out.println("Ground Truth generata");
+        System.out.println("Ground Truth generated");
 
     }
 
@@ -62,28 +66,31 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
             // Build the results map
             SequencedMap<String, Double> qualities = new TreeMap<>();
             String queryId = String.valueOf(queryCounter.getAndIncrement());
+            System.out.println(intermediateRepr + queryId);
             try {
                 // Create an executable Liebre query and execute this anonymization query
-                RepresentationToLiebreQuery liebreExecutor = new RepresentationToLiebreQuery();
+                LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
                 List<AirQualityEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath);
 
-                System.out.printf("[DEBUG][%s] Anonimizzazione terminata. Eventi nel dataset: %d%n", queryId, modifiedEvents.size());
+                System.out.printf("[DEBUG][%s] Anonymization terminated. Events in dataset: %d%n", queryId, modifiedEvents.size());
 
                 // If the modified datastream is empty, return 0 as F1 score and maximum difference
                 if (modifiedEvents.isEmpty()) {
                     qualities.put("results-similarity", 0.0);
                     qualities.put("metrics-difference", Double.MAX_VALUE);
+                    qualities.put("privacy", 1.0);
                     return qualities;
                 }
 
                 // Execute the main query
                 MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, String.valueOf(queryId));
-                System.out.printf("[DEBUG][%s] Main Query terminata. Sequenze di allerta trovate: %d%n", queryId, modifiedOutcome.events().size());
+                System.out.printf("[DEBUG][%s] Main Query terminated. Allerts tuples found: %d%n", queryId, modifiedOutcome.events().size());
                 System.out.printf("[DEBUG][%s] " + modifiedOutcome.metrics(), queryId);
 
-                // Populate the results map with F1 score and Euclidean distance
+                // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("metrics-difference", METRICS_DIFFERENCE.apply(originalMetrics, modifiedOutcome.metrics()));
+                qualities.put("privacy", PRIVACY.apply(this.originalStream, modifiedEvents));
                 return qualities;
 
             } catch (Exception e) {
@@ -91,6 +98,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 e.printStackTrace();
                 qualities.put("results-similarity", 0.0);
                 qualities.put("metrics-difference", Double.MAX_VALUE);
+                qualities.put("privacy", 1.0);
                 return qualities;
             }
         };
