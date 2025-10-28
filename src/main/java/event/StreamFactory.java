@@ -42,7 +42,7 @@ public class StreamFactory {
 
 // Load and parse the CSV file into a list of AirQuality Events
     public static List<AirQualityEvent> createListFromFile(String resourcePath) throws IOException {
-        InputStream inputStream = Evaluator.class.getClassLoader().getResourceAsStream(resourcePath);
+        InputStream inputStream = StreamFactory.class.getClassLoader().getResourceAsStream(resourcePath);
         if (inputStream == null) {
             throw new IOException("Resource not found in classpath: " + resourcePath);
         }
