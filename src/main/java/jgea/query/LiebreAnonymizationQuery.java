@@ -7,10 +7,17 @@ import query.Query;
 import component.operator.Operator;
 import component.source.Source;
 import component.sink.Sink;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import component.source.SourceFunction;
 
 public class LiebreAnonymizationQuery {
 
@@ -18,11 +25,22 @@ public class LiebreAnonymizationQuery {
     public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
-        inputFile = LiebreAnonymizationQuery.class.getClassLoader().getResource(inputFile).getPath();
+
+        List<String> linesFromCsv;
+        try (InputStream is = LiebreAnonymizationQuery.class.getClassLoader().getResourceAsStream(inputFile)) {
+            if (is == null) {
+                throw new IOException("Risorsa non trovata nel JAR: " + inputFile);
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                linesFromCsv = reader.lines().collect(Collectors.toList());
+            }
+        }
+
         Query query = new Query();
+        SourceFunction<String> collectionSource = createCollectionSource(linesFromCsv);
 
         // Define Source and CSV Reader (fixed part of the pipeline)
-        Source<String> source = query.addTextFileSource("input-source", inputFile);
+        Source<String> source = query.addBaseSource("input-source", collectionSource);
         Operator<String, AirQualityEvent> reader = query.addMapOperator(
                 "csv-reader",
                 line -> {
@@ -113,6 +131,56 @@ public class LiebreAnonymizationQuery {
             case LESS_OR_EQUAL -> eventValue <= conditionValue;
             case GREATER_OR_EQUAL -> eventValue >= conditionValue;
             case EQUAL -> eventValue == conditionValue;
+        };
+    }
+
+    private static <T> SourceFunction<T> createCollectionSource(final List<T> list) {
+        return new SourceFunction<T>() {
+            private int currentIndex = 0;
+            private boolean isFinished = false;
+            private static final long IDLE_SLEEP = 1000;
+            private boolean enabled;
+
+            @Override
+            public T get() {
+                if (isFinished) {
+                    Util.sleep(IDLE_SLEEP);
+                    return null;
+                }
+                if (currentIndex < list.size()) {
+                    T item = list.get(currentIndex);
+                    currentIndex++;
+                    return item;
+                } else {
+                    isFinished = true;
+                    return null;
+                }
+            }
+
+            @Override
+            public boolean isInputFinished() {
+                return isFinished;
+            }
+
+            @Override
+            public void enable() {
+                this.enabled = true;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            @Override
+            public void disable() {
+                this.enabled = false;
+            }
+
+            @Override
+            public boolean canRun() {
+                return !isFinished;
+            }
         };
     }
 }
