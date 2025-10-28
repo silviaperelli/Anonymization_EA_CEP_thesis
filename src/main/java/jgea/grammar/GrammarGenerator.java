@@ -10,7 +10,7 @@ import java.util.StringJoiner;
 
 public class GrammarGenerator {
 
-    private static final int DECIMAL_PRECISION_DIGITS = 4;
+    private static final int DECIMAL_PRECISION_DIGITS = 1;
 
     public static void main(String[] args) throws IOException {
         final String grammarPath = "generated-grammar.bnf";
