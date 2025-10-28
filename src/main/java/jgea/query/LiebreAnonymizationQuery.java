@@ -29,7 +29,7 @@ public class LiebreAnonymizationQuery {
         List<String> linesFromCsv;
         try (InputStream is = LiebreAnonymizationQuery.class.getClassLoader().getResourceAsStream(inputFile)) {
             if (is == null) {
-                throw new IOException("Risorsa non trovata nel JAR: " + inputFile);
+                throw new IOException("Resource not found: " + inputFile);
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 linesFromCsv = reader.lines().collect(Collectors.toList());
