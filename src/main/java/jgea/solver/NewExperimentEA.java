@@ -40,8 +40,8 @@ public class NewExperimentEA {
         
         String grammarPath = "generated-grammar.bnf";
         String inputCsvPath = "datasets/airQuality.csv";
-        int populationSize = 5;
-        int nOfEvaluations = 10;
+        int populationSize = 100;
+        int nOfEvaluations = 5000;
 
         System.out.println("--- JGEA Evolution Parameters ---");
         System.out.printf("Population size: %d%n", populationSize);
@@ -78,7 +78,6 @@ public class NewExperimentEA {
                 true,
                 List.of()
         );
-
 
         // Execution
         int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);

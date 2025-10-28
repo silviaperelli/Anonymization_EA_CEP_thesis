@@ -65,7 +65,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         return intermediateRepr -> {
             // Build the results map
             SequencedMap<String, Double> qualities = new TreeMap<>();
-            String queryId = String.valueOf(queryCounter.getAndIncrement());
+            Long counter = queryCounter.getAndIncrement();
+            String queryId = String.valueOf(counter);
             try {
                 // Create an executable Liebre query and execute this anonymization query
                 LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
@@ -86,6 +87,18 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("metrics-difference", METRICS_DIFFERENCE.apply(originalMetrics, modifiedOutcome.metrics()));
                 qualities.put("privacy", PRIVACY.apply(this.originalStream, modifiedEvents));
+
+                if (counter % 50 == 0) {
+                    // --- RIGA 3: La stampa effettiva ---
+                    System.out.printf(
+                            "Evaluation %5d -> Privacy: %.3f | Similarity: %.3f | Diff: %.3e%n",
+                            counter,
+                            qualities.get("privacy"),
+                            qualities.get("results-similarity"),
+                            qualities.get("metrics-difference")
+                    );
+                }
+
                 return qualities;
 
             } catch (Exception e) {
