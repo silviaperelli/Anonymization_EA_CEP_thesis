@@ -77,6 +77,12 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                     qualities.put("results-similarity", 0.0);
                     qualities.put("metrics-difference", Double.MAX_VALUE);
                     qualities.put("privacy", 1.0);
+                    if (counter % 50 == 0) {
+                        System.out.printf(
+                                "Evaluation %5d -> Result: Empty stream. Assigning worst-case fitness.%n",
+                                counter
+                        );
+                    }
                     return qualities;
                 }
 
@@ -89,7 +95,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 qualities.put("privacy", PRIVACY.apply(this.originalStream, modifiedEvents));
 
                 if (counter % 50 == 0) {
-                    // --- RIGA 3: La stampa effettiva ---
                     System.out.printf(
                             "Evaluation %5d -> Privacy: %.3f | Similarity: %.3f | Diff: %.3e%n",
                             counter,
