@@ -2,7 +2,6 @@ package cep;
 
 import event.AirQualityEvent;
 import event.StreamFactory;
-import org.apache.flink.cep.pattern.Pattern;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.slf4j.Logger;
@@ -14,8 +13,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static cep.PollutionAlertQuery.createHighCoPattern;
 
 public class PollutionAlertMain {
 
@@ -37,7 +34,6 @@ public class PollutionAlertMain {
     }
 
     private static void processDataset(StreamExecutionEnvironment env, String datasetPath, String filePath) throws Exception {
-
         DataStream<AirQualityEvent> stream = StreamFactory.createStreamfromFile(env, datasetPath);
         List<List<AirQualityEvent>> sequences = PollutionAlertQuery.processAlerts(stream);
 
@@ -50,6 +46,7 @@ public class PollutionAlertMain {
 
     private static void saveSequencesToFile(List<List<AirQualityEvent>> sequences, String outputFilePath) {
 
+        // Prepare output file
         String outputDir = "src/main/resources/datasets";
         String filePath = outputDir + outputFilePath;
         new File(outputDir).mkdirs();
@@ -57,6 +54,7 @@ public class PollutionAlertMain {
         int sequenceCount = 0;
         try (FileWriter writer = new FileWriter(filePath)) {
             for (List<AirQualityEvent> sequence : sequences) {
+                // Format and write the sequence on the file
                 String line = sequence.stream()
                         .map(Writer::writeToCSV)
                         .collect(Collectors.joining("|"));

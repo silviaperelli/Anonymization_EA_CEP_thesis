@@ -68,8 +68,7 @@ public class PollutionAlertQuery {
         return results;
     }
 
-
-    // Utility method to log a detected sequence
+    // Utility method to format a detected sequence to log on Console
     public static String formatAlertInfo(List<AirQualityEvent> sequence) {
         AirQualityEvent firstEvent = sequence.get(0);
         double avgCO = sequence.stream()
