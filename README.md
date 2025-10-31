@@ -15,7 +15,7 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 
 *   **/src/main/java/jgea/metrics**:
     *   `MetricsConsumer.java`: A custom collector that gather performance metrics (tuple counts) during a query execution.
-    *   `F1Score.java` / `EuclideanDistance.java`: Classes that implement the distance functions used to calculate the fitness scores for the objectives.
+    *   `F1Score.java` / `EuclideanDistance.java` / `PrivacyScore.java` : Classes that implement the distance functions used to calculate the fitness scores for the objectives.
 
 *   **/src/main/java/jgea/mappers**:
     *   `RepresentationToLiebreQuery.java`: A component that translates the genotype (a Tree<String> derived from the grammar) into a phenotype (a representation of a query).

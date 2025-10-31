@@ -90,6 +90,7 @@ public class CSVAnalyzer {
                         ));
                     } catch (NumberFormatException ignored) {
                         // If the value is not a number, ignore it
+                        System.err.printf("Error: value not in numeric format");
                     }
                 }
             }
