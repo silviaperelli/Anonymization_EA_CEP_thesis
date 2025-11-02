@@ -37,7 +37,9 @@ public class NewExperimentEA {
          * ensure that the LiebreContext is initialized with the right metrics factory
          */
         LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new java.util.HashMap<>()));
-        
+        // Notify the Terminator not to end after the first query has completed
+        LiebreContext.setSingleQueryExecution(false);
+
         String grammarPath = "generated-grammar.bnf";
         String inputCsvPath = "datasets/airQuality.csv";
         int populationSize = 100;
@@ -117,6 +119,8 @@ public class NewExperimentEA {
 
             // JVM shutdown for any background threads
             System.out.println("The process has terminated");
+            // Interrupt the LiebreContext terminator
+            LiebreContext.interruptTerminator();
             System.exit(0);
         }
     }
