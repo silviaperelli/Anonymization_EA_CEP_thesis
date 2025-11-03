@@ -98,6 +98,8 @@ public class MainQuery {
             }
         }
 
+        query.deActivate();
+
         LiebreContext.unmergeFromStreamMetrics(metrics);
         return new QueryResult(collectedEvents, consumer.getMetrics(queryId));
 

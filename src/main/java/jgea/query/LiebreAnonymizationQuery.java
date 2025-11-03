@@ -90,7 +90,7 @@ public class LiebreAnonymizationQuery {
             }
         }
 
-
+        query.deActivate();
         return collectedEvents;
     }
 

@@ -47,6 +47,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         // Execute the main query
         MainQuery.QueryResult baselineOutcome = MainQuery.process(this.originalStream, "original");
 
+        System.out.printf("[DEBUG][Main Query Metrics] " + baselineOutcome.metrics() + "%n");
+
         this.originalResults = baselineOutcome.events();
         this.originalMetrics = baselineOutcome.metrics();
 
@@ -93,6 +95,15 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("metrics-difference", METRICS_DIFFERENCE.apply(originalMetrics, modifiedOutcome.metrics()));
                 qualities.put("privacy", PRIVACY.apply(this.originalStream, modifiedEvents));
+
+                if (modifiedOutcome.metrics().afterAggregate() == 0 || modifiedOutcome.metrics().afterFilter1() == 0 || modifiedOutcome.metrics().afterFilter2() == 0 || modifiedOutcome.metrics().beforeFilter1() == 0
+                        || modifiedOutcome.metrics().beforeAggregate() == 0 || modifiedOutcome.metrics().beforeFilter2() == 0 || modifiedOutcome.metrics().afterSource() == 0 || modifiedOutcome.metrics().beforeSink() == 0){
+                    System.out.printf("[DEBUG][%s] " + modifiedOutcome.metrics() + "%n", queryId);
+                    System.out.printf("[DEBUG][%s] " + intermediateRepr + "%n", queryId);
+                    System.out.printf("[DEBUG][%s] Tuples in the anonymization dataset: %d%n", queryId, modifiedEvents.size());
+                    System.out.printf("[DEBUG][%s] Alert tuples found by the main query: %d%n", queryId, modifiedOutcome.events().size());
+                    System.out.printf("[DEBUG][%s] Metrics difference: %.3e%n", queryId, qualities.get("metrics-difference"));
+                }
 
                 if (counter % 50 == 0) {
                     System.out.printf(
