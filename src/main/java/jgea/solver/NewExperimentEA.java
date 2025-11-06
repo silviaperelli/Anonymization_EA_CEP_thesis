@@ -33,14 +33,14 @@ public class NewExperimentEA {
     public static void main(String[] args) throws Exception {
 
         /*
-         * Since metrics will be added and rmoved during the query execution, we need to
+         * Since metrics will be added and removed during the query execution, we need to
          * ensure that the LiebreContext is initialized with the right metrics factory
          */
         LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new java.util.HashMap<>()));
         // Notify the Terminator not to end after the first query has completed
         LiebreContext.setSingleQueryExecution(false);
 
-        String grammarPath = "generated-grammar.bnf";
+        String grammarPath = "src/main/resources/generated-grammar.bnf";
         String inputCsvPath = "datasets/airQuality.csv";
         int populationSize = 100;
         int nOfEvaluations = 5000;
