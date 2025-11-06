@@ -1,7 +1,7 @@
 package jgea.grammar;
 
-import jgea.utils.CSVAnalyzer;
-import jgea.utils.CSVAnalyzer.AttributeStats;
+import jgea.grammar.utils.CSVAnalyzer;
+import jgea.grammar.utils.CSVAnalyzer.AttributeStats;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -13,7 +13,7 @@ public class GrammarGenerator {
     private static final int DECIMAL_PRECISION_DIGITS = 1;
 
     public static void main(String[] args) throws IOException {
-        final String grammarPath = "generated-grammar.bnf";
+        final String grammarPath = "src/main/resources/generated-grammar.bnf";
         final String csvPath = "datasets/airQuality.csv";
         // Extract attributes and their numerical bounds from a CSV file
         List<String> attributes = CSVAnalyzer.extractAttributes(csvPath);
@@ -30,8 +30,13 @@ public class GrammarGenerator {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("<pipeline> ::= <filter> | <filter> <pipeline>\n");
-        sb.append("<filter> ::= <attribute> <operator> <value>\n");
+        sb.append("<pipeline> ::= <operator> | <operator> <pipeline>\n");
+        sb.append("<operator> ::= <filter> | <map_duplicate> | <map_noise>\n");
+
+        // Operator definition
+        sb.append("<filter> ::= <attribute> <condition> <value>\n");
+        sb.append("<map_duplicate> ::= <probability>\n");
+        sb.append("<map_noise> ::= <attribute> <percentage>\n");
 
         sb.append("<attribute> ::= ");
         StringJoiner attrJoiner = new StringJoiner(" | ");
@@ -40,7 +45,7 @@ public class GrammarGenerator {
         }
         sb.append(attrJoiner).append("\n");
 
-        sb.append("<operator> ::= lt | le | gt | ge | eq\n");
+        sb.append("<condition> ::= lt | le | gt | ge | eq\n");
 
         sb.append("<value> ::= ");
         StringJoiner valueJoiner = new StringJoiner(" | ");
@@ -50,7 +55,7 @@ public class GrammarGenerator {
         }
         sb.append(valueJoiner).append("\n");
 
-        // Specific attribute rules
+        // Specific attribute rules for the filter value
         for (String attribute : attributes) {
             AttributeStats stats = statsMap.get(attribute);
             if (stats == null) continue;
@@ -68,6 +73,9 @@ public class GrammarGenerator {
 
         sb.append("<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
         sb.append("<non_zero_digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
+
+        sb.append("<probability> ::= 0.1 | 0.2 | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | 1.0\n");
+        sb.append("<percentage> ::= 0.01 | 0.05 | 0.10 | 0.25\n");
 
         try (FileWriter fw = new FileWriter(filePath)) {
             fw.write(sb.toString());
