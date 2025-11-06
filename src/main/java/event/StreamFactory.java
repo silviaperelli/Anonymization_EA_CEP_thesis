@@ -3,7 +3,6 @@ package event;
 import org.apache.flink.api.common.eventtime.*;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import utils.Evaluator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
