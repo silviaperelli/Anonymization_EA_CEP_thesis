@@ -61,7 +61,7 @@ public class MainQuery {
 
         // Operator to filter tuple with CO level >= 2.0 and NO2 level >= 40.0
         Operator<AirQualityEvent, AirQualityEvent> filter1 = query.addFilterOperator(
-                "filter1_" + queryId, tuple -> tuple != null && (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
+                "filter1_" + queryId, tuple -> (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
 
         // Window of 3 hours, sliding every 1 hour
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
@@ -74,7 +74,7 @@ public class MainQuery {
         // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
                 "filter2_"+queryId,
-                tuple -> tuple != null && !tuple.isEmpty() && (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
+                tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Final Sink that adds every event to a list
         Sink<AirQualityEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
@@ -99,7 +99,6 @@ public class MainQuery {
         }
 
         query.deActivate();
-
         LiebreContext.unmergeFromStreamMetrics(metrics);
         return new QueryResult(collectedEvents, consumer.getMetrics(queryId));
 
