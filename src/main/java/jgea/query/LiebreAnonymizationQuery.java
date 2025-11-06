@@ -13,19 +13,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import component.source.SourceFunction;
 
+import static jgea.query.utils.OperatorUtils.*;
+
+// Class that translates a high-level QueryRepresentation (phenotype) into an executable Liebre query and
+// processes an input stream to produce a modified stream of events
 public class LiebreAnonymizationQuery {
 
-    // Translate an intermediate QueryRepresentation into an executable Liebre Query and execute it
+    private final Random random;
+
+    public LiebreAnonymizationQuery() {
+        this.random = new Random();
+    }
+
     public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
 
+        // Read all lines from the input CSV file into memory
         List<String> linesFromCsv;
         try (InputStream is = LiebreAnonymizationQuery.class.getClassLoader().getResourceAsStream(inputFile)) {
             if (is == null) {
@@ -52,23 +60,61 @@ public class LiebreAnonymizationQuery {
 
         // Build the operator chain by iterating through the representation's nodes
         Operator<?, AirQualityEvent> lastOperatorInChain = reader;
-        // Loop through each abstract operator node
-        for (int i = 0; i < representation.operators().size(); i++) {
-            QueryRepresentation.OperatorNode node = representation.operators().get(i);
-            // Create a unique id for the Liebre operator (filter-0)
-            String operatorId = node.type().toLowerCase() + "-" + i;
+        int opCounter = 0;
 
-            if ("FILTER".equals(node.type())) {
-                QueryRepresentation.Condition condition = node.condition();
-                // Create a Filter Operator in Liebre
-                Operator<AirQualityEvent, AirQualityEvent> filterOperator = query.addFilterOperator(
-                        operatorId,
-                        event -> evaluateCondition(event, condition)
-                );
+        // Loop through each operator node in the phenotype representation
+        for (QueryRepresentation.OperatorNode node: representation.operators()) {
+            // Create a unique id for the Liebre operator
+            String operatorId = node.type().name().toLowerCase() + "-" + opCounter++;
 
-                // Connect the output of the previous operator to the new filter
-                query.connect(lastOperatorInChain, filterOperator);
-                lastOperatorInChain = filterOperator;
+            // Build the correct Liebre operator based on the node's type
+            switch (node.type()) {
+                case FILTER:
+                    QueryRepresentation.FilterArgs filterArgs = (QueryRepresentation.FilterArgs) node.arguments();
+                    Operator<AirQualityEvent, AirQualityEvent> filterOperator = query.addFilterOperator(
+                            operatorId,
+                            event -> evaluateCondition(event, filterArgs)
+                    );
+                    query.connect(lastOperatorInChain, filterOperator);
+                    lastOperatorInChain = filterOperator;
+                    break;
+
+                case MAP_DUPLICATE:
+                    QueryRepresentation.MapDuplicateArgs duplicateArgs = (QueryRepresentation.MapDuplicateArgs) node.arguments();
+                    double duplicateProb = duplicateArgs.probability();
+
+                    Operator<AirQualityEvent, AirQualityEvent> duplicateOperator = query.addFlatMapOperator(
+                            operatorId,
+                            event -> {
+                                List<AirQualityEvent> results = new ArrayList<>();
+                                results.add(event);
+                                if (random.nextDouble() < duplicateProb) {
+                                    results.add(new AirQualityEvent(event, AirQualityEvent.EventType.DUPLICATE));
+                                }
+                                return results;
+                            }
+                    );
+                    query.connect(lastOperatorInChain, duplicateOperator);
+                    lastOperatorInChain = duplicateOperator;
+                    break;
+
+                case MAP_NOISE:
+                    QueryRepresentation.MapNoiseArgs noiseArgs = (QueryRepresentation.MapNoiseArgs) node.arguments();
+
+                    Operator<AirQualityEvent, AirQualityEvent> noiseOperator = query.addMapOperator(
+                            operatorId,
+                            event -> {
+                                if (event == null) return null;
+                                double originalValue = getAttributeValue(event, noiseArgs.attribute());
+                                if (Double.isNaN(originalValue)) return event;
+                                double sigma = noiseArgs.percentage() * Math.abs(originalValue);
+                                double noise = random.nextGaussian() * sigma;
+                                return applyNoise(event, noiseArgs.attribute(), originalValue, noise);
+                            }
+                    );
+                    query.connect(lastOperatorInChain, noiseOperator);
+                    lastOperatorInChain = noiseOperator;
+                    break;
             }
         }
 
@@ -92,46 +138,6 @@ public class LiebreAnonymizationQuery {
 
         query.deActivate();
         return collectedEvents;
-    }
-
-    // Helper method that evaluates if an event satisfies a given Condition
-    private boolean evaluateCondition(AirQualityEvent event, QueryRepresentation.Condition condition) {
-        if (event == null) return false;
-
-        double eventValue;
-        try {
-            // Switch that maps the string from the Condition to the actual event getter
-            switch (condition.variable()) {
-                case "CO(GT)": eventValue = event.getCoLevel(); break;
-                case "PT08.S1(CO)": eventValue = event.getPt08s1(); break;
-                case "NMHC(GT)": eventValue = event.getNmhc(); break;
-                case "C6H6(GT)": eventValue = event.getC6h6(); break;
-                case "PT08.S2(NMHC)": eventValue = event.getPt08s2(); break;
-                case "NOx(GT)": eventValue = event.getNox(); break;
-                case "PT08.S3(NOx)": eventValue = event.getPt08s3(); break;
-                case "NO2(GT)": eventValue = event.getNo2(); break;
-                case "PT08.S4(NO2)": eventValue = event.getPt08s4(); break;
-                case "PT08.S5(O3)": eventValue = event.getPt08s5(); break;
-                case "T": eventValue = event.getT(); break;
-                case "RH": eventValue = event.getRh(); break;
-                case "AH": eventValue = event.getAh(); break;
-                default: return false;
-            }
-            if(Double.isNaN(eventValue)) return false;
-
-        } catch (Exception e) {
-            return false;
-        }
-
-        double conditionValue = (Double) condition.value();
-
-        return switch (condition.operator()) {
-            case LESS_THAN -> eventValue < conditionValue;
-            case GREATER_THAN -> eventValue > conditionValue;
-            case LESS_OR_EQUAL -> eventValue <= conditionValue;
-            case GREATER_OR_EQUAL -> eventValue >= conditionValue;
-            case EQUAL -> eventValue == conditionValue;
-        };
     }
 
     private static <T> SourceFunction<T> createCollectionSource(final List<T> list) {
