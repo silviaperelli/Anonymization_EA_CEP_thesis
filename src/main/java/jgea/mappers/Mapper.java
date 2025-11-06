@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-// JGEA mapper that implements the mapping from genotype (a Tree<String> produced by the grammar) to a phenotype (a QueryRepresentation)
+// JGEA mapper that orchestrates the mapping from genotype (a Tree<String> produced by the grammar) to a phenotype (a QueryRepresentation)
 public class Mapper implements InvertibleMapper<Tree<String>, QueryRepresentation> {
 
     public Mapper() {}

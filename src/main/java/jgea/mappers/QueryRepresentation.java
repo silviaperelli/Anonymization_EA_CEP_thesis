@@ -10,18 +10,23 @@ public record QueryRepresentation(
         List<OperatorNode> operators
 ) implements Serializable {
 
-    public enum Operator implements Serializable {
+    public enum Operator{
+        FILTER,
+        MAP_DUPLICATE,
+        MAP_NOISE
+    }
+    public enum Condition implements Serializable {
         LESS_THAN, GREATER_THAN, LESS_OR_EQUAL, GREATER_OR_EQUAL, EQUAL
     }
 
-    public static Operator fromString(String text) {
+    public static Condition fromString(String text) {
         return switch (text) {
-            case "lt" -> Operator.LESS_THAN;
-            case "gt" -> Operator.GREATER_THAN;
-            case "le" -> Operator.LESS_OR_EQUAL;
-            case "ge" -> Operator.GREATER_OR_EQUAL;
-            case "eq" -> Operator.EQUAL;
-            default -> throw new IllegalArgumentException("Operator not valid: " + text);
+            case "lt" -> Condition.LESS_THAN;
+            case "gt" -> Condition.GREATER_THAN;
+            case "le" -> Condition.LESS_OR_EQUAL;
+            case "ge" -> Condition.GREATER_OR_EQUAL;
+            case "eq" -> Condition.EQUAL;
+            default -> throw new IllegalArgumentException("Condition not valid: " + text);
         };
     }
 
@@ -37,27 +42,29 @@ public record QueryRepresentation(
         return "Pipeline { " + ops + " }";
     }
 
-    // Represents a single operator node in the pipeline (in this case we only have filters)
+    // Represents a single operator node in the pipeline
     public record OperatorNode(
-            String type,
-            Condition condition
+            Operator type,
+            OperatorArguments arguments
     ) implements Serializable {
         @Override
         public String toString() {
-            return String.format("%s(%s)", type.toLowerCase(), condition.toString());
+            return String.format("%s(%s)", type.name().toLowerCase(), arguments.toString());
         }
     }
 
-    // Represents a single logical condition ("coLevel > 2.5")
-    public record Condition(
+    public interface OperatorArguments extends Serializable {}
+
+    // Represents a single logical condition for the filter operator
+    public record FilterArgs(
             String variable,
-            Operator operator,
-            Object value
-    ) implements Serializable {
+            Condition condition,
+            double value
+    ) implements OperatorArguments {
 
         @Override
         public String toString() {
-            String opString = switch(operator) {
+            String opString = switch(condition) {
                 case LESS_THAN -> "<";
                 case GREATER_THAN -> ">";
                 case LESS_OR_EQUAL -> "<=";
@@ -65,8 +72,28 @@ public record QueryRepresentation(
                 case EQUAL -> "==";
             };
 
-            String valueString = (value instanceof Double) ? String.format("%.4f", value) : value.toString();
-            return String.format("%s %s %s", variable, opString, valueString);
+            return String.format("%s %s %.4f", variable, opString, value);
+        }
+    }
+
+    // Represents the arguments (in this case just the probability) for the map operator that duplicates tuples
+    public record MapDuplicateArgs(
+            double probability
+    ) implements OperatorArguments {
+        @Override
+        public String toString() {
+            return String.format("probability=%.2f", probability);
+        }
+    }
+
+    // Represents the arguments for the map operator that adds noise
+    public record MapNoiseArgs(
+            String attribute,
+            double percentage
+    )implements OperatorArguments {
+        @Override
+        public String toString() {
+            return String.format("attribute=%s, percentage=%.2f", attribute, percentage);
         }
     }
 }
