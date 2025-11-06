@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PrivacyScore implements Distance<List<AirQualityEvent>> {
+public class SuppressionPrivacy implements Distance<List<AirQualityEvent>> {
 
-    // Calculate the privacy score that measures how many original tuple ID have been removed in the modified stream
+    // Calculate the Suppression privacy score that measures how many original tuple ID have been removed in the modified stream
     // A score of 1.0 represents maximum privacy (no original ID remain), while a score
     // of 0.0 represents minimum privacy (all original ID are still present)
     @Override
