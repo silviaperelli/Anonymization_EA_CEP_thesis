@@ -5,11 +5,10 @@ import event.StreamFactory;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
+import jgea.metrics.*;
 import jgea.query.LiebreAnonymizationQuery;
-import jgea.metrics.EuclideanDistance;
-import jgea.metrics.PrivacyScore;
 import jgea.query.MainQuery;
-import jgea.metrics.F1Score;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -28,10 +27,16 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                     Map.entry("metrics-difference", Double::compareTo)  // Minimize
             ));
 
-
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
     private final static Distance<MainQuery.PerformanceMetrics> METRICS_DIFFERENCE = new EuclideanDistance();
-    private final static Distance<List<AirQualityEvent>> PRIVACY = new PrivacyScore();
+    private final static Distance<List<AirQualityEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
+    private final static Distance<List<AirQualityEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
+    private final static ModificationPrivacy MODIFICATION_PRIVACY = new ModificationPrivacy();
+
+    // Weights for the weighted sum calculation of the final privacy score
+    private static final double W_SUPPRESSION = 0.33;
+    private static final double W_DUPLICATION = 0.33;
+    private static final double W_MODIFICATION = 0.34;
 
     private final String inputCsvPath;
     private final List<AirQualityEvent> originalStream;
@@ -47,20 +52,16 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         // Execute the main query
         MainQuery.QueryResult baselineOutcome = MainQuery.process(this.originalStream, "original");
 
-        System.out.printf("[DEBUG][Main Query Metrics] " + baselineOutcome.metrics() + "%n");
-
         this.originalResults = baselineOutcome.events();
         this.originalMetrics = baselineOutcome.metrics();
 
         System.out.println("Ground Truth generated");
-
     }
 
     @Override
     public SequencedMap<String, Comparator<Double>> comparators() {
         return OBJECTIVES;
     }
-
 
     @Override
     public Function<QueryRepresentation, SequencedMap<String, Double>> qualityFunction() {
@@ -74,19 +75,21 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
                 List<AirQualityEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath);
 
+                double finalPrivacyScore;
+
                 // If the modified datastream is empty, return 0 as F1 score and maximum difference
                 if (modifiedEvents.isEmpty()) {
                     qualities.put("results-similarity", 0.0);
                     qualities.put("metrics-difference", Double.MAX_VALUE);
-                    qualities.put("privacy", 1.0);
-                    if (counter % 50 == 0) {
-                        System.out.printf(
-                                "Evaluation %5d -> Result: Empty stream. Assigning worst-case fitness.%n",
-                                counter
-                        );
-                    }
+                    qualities.put("privacy", W_SUPPRESSION * 1.0);
                     return qualities;
                 }
+
+                // Calculate the three individual privacy score and combine them into a single value using the defined weights
+                double suppressionScore = SUPPRESSION_PRIVACY.apply(this.originalStream, modifiedEvents);
+                double duplicationScore = DUPLICATE_PRIVACY.apply(this.originalStream, modifiedEvents);
+                double modificationScore = MODIFICATION_PRIVACY.apply(this.originalStream, modifiedEvents, intermediateRepr);
+                finalPrivacyScore = (W_SUPPRESSION * suppressionScore) + (W_DUPLICATION * duplicationScore) + (W_MODIFICATION * modificationScore);
 
                 // Execute the main query
                 MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, String.valueOf(queryId));
@@ -94,27 +97,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("metrics-difference", METRICS_DIFFERENCE.apply(originalMetrics, modifiedOutcome.metrics()));
-                qualities.put("privacy", PRIVACY.apply(this.originalStream, modifiedEvents));
-
-                if (modifiedOutcome.metrics().afterAggregate() == 0 || modifiedOutcome.metrics().afterFilter1() == 0 || modifiedOutcome.metrics().afterFilter2() == 0 || modifiedOutcome.metrics().beforeFilter1() == 0
-                        || modifiedOutcome.metrics().beforeAggregate() == 0 || modifiedOutcome.metrics().beforeFilter2() == 0 || modifiedOutcome.metrics().afterSource() == 0 || modifiedOutcome.metrics().beforeSink() == 0){
-                    System.out.printf("[DEBUG][%s] " + modifiedOutcome.metrics() + "%n", queryId);
-                    System.out.printf("[DEBUG][%s] " + intermediateRepr + "%n", queryId);
-                    System.out.printf("[DEBUG][%s] Tuples in the anonymization dataset: %d%n", queryId, modifiedEvents.size());
-                    System.out.printf("[DEBUG][%s] Alert tuples found by the main query: %d%n", queryId, modifiedOutcome.events().size());
-                    System.out.printf("[DEBUG][%s] Metrics difference: %.3e%n", queryId, qualities.get("metrics-difference"));
-                }
-
-                if (counter % 50 == 0) {
-                    System.out.printf(
-                            "Evaluation %5d -> Privacy: %.3f | Similarity: %.3f | Diff: %.3e%n",
-                            counter,
-                            qualities.get("privacy"),
-                            qualities.get("results-similarity"),
-                            qualities.get("metrics-difference")
-                    );
-                }
-
+                qualities.put("privacy", finalPrivacyScore);
                 return qualities;
 
             } catch (Exception e) {
