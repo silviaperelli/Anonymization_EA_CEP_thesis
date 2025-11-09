@@ -28,7 +28,7 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 
 ### How to Run an Experiment
 
-This project uses the `jgea.experimenter` module, which allows defining and executing experiments from a text file (e.g., experiment.txt).
+This project uses the `jgea.experimenter` module, which allows defining and executing experiments from a text file.
 The process consists of three main steps:
 
 #### 1. Define the Experiment
