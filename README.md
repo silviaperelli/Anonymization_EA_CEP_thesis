@@ -19,16 +19,16 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 
 *   **/src/main/java/jgea/mappers**:
     *   `Mapper.java`: The primary mapper class responsible for the actual transformation. It's invoked by the evolutionary algorithm to translate a genotype into a phenotype.
-    *   `RepresentationToLiebreQuery.java`: A component used by Mapper.java to translate the genotype (a Tree<String> derived from the grammar) into the phenotype (a query representation).
+    *   `RepresentationToLiebreQuery.java`: A component used by `Mapper.java` to translate the genotype (a Tree<String> derived from the grammar) into the phenotype (a query representation).
 
 *   **/src/main/java/jgea/builders**:
     *   This package contains the builders classes that make custom components of this project (like problems and mappers) available to the JGEA experimenter framework. They use jnb annotations (@Discoverable, @Param) to expose Java methods to the experiment definition file (experiment.txt).
-    *   `ProblemBuilder.java`: Makes the `StreamAnonymizationProblem` accessible from the experiment file using the silvia.problem.anonymizationProblem(...) builder.
-    *   `MapperBuilder.java`: Makes the custom `Mapper` class accessible from the experiment file using the silvia.mapper.treeToQueryMapper() builder.
+    *   `ProblemBuilder.java`: Makes the `StreamAnonymizationProblem` accessible from the experiment file using the `silvia.problem.anonymizationProblem(...)` builder.
+    *   `MapperBuilder.java`: Makes the custom `Mapper` class accessible from the experiment file using the `silvia.mapper.treeToQueryMapper()` builder.
 
 ### How to Run an Experiment
 
-This project uses the `jgea.experimenter` module, which allows defining and running experiments, which allows defining and executing experiments from a text file (e.g., experiment.txt).
+This project uses the `jgea.experimenter` module, which allows defining and executing experiments from a text file (e.g., experiment.txt).
 The process consists of three main steps:
 
 #### 1. Define the Experiment
