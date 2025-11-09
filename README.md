@@ -7,35 +7,51 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 *   **/src/main/java/jgea/problem**:
     *   `StreamAnonymizationProblem.java`: The core class that defines the multi-objective problem. It sets up the objectives and contains the `qualityFunction` responsible for evaluating the fitness of each candidate solution.
 
-*   **/src/main/java/jgea/solver**:
-    *   `NewExperimentEA.java`: The main executable class. This is the entry point to configure and launch a new evolutionary experiment.
-
 *   **/src/main/java/jgea/query**:
     *   `MainQuery.java`: Defines the fixed Liebre analysis query (`Q`) that is used to evaluate the quality of an anonymized stream.
 
 *   **/src/main/java/jgea/metrics**:
     *   `MetricsConsumer.java`: A custom collector that gather performance metrics (tuple counts) during a query execution.
-    *   `F1Score.java` / `EuclideanDistance.java` / `PrivacyScore.java` : Classes that implement the distance functions used to calculate the fitness scores for the objectives.
+    *   `F1Score.java` / `EuclideanDistance.java` / `ModificationPrivacy.java` / `SuppressionPrivacy.java` / `DuplicationPrivacy.java`: Classes that implement the distance functions used to calculate the fitness scores for the objectives.
 
 *   **/src/main/java/jgea/mappers**:
-    *   `RepresentationToLiebreQuery.java`: A component that translates the genotype (a Tree<String> derived from the grammar) into a phenotype (a representation of a query).
+    *   `Mapper.java`: The primary mapper class responsible for the actual transformation. It's invoked by the evolutionary algorithm to translate a genotype into a phenotype.
+    *   `RepresentationToLiebreQuery.java`: A component used by Mapper.java to translate the genotype (a Tree<String> derived from the grammar) into the phenotype (a query representation).
 
 ### How to Run an Experiment
 
-The main entry point is the `jgea.solver.NewExperimentEA` class.
+This project uses the `jgea.experimenter` module, which allows defining and running experiments, which allows defining and executing experiments from a text file (e.g., experiment.txt).
+The process consists of three main steps:
 
-### Single-Thread vs. Multi-Thread Execution
+#### 1. Define the Experiment
 
-You can switch between sequential (single-thread) and parallel (multi-thread) fitness evaluations by editing the `jgea.solver.NewExperimentEA.java` file.
+The entire experiment — including the algorithm, problem, parameters, and listeners — is configured in a dedicated experiment definition file (e.g., experiment.txt).
 
-To configure the execution mode, find these lines in the `main` method of `NewExperimentEA.java`:
+#### 2. Build the Project
 
-```java
-// --- To run in MULTI-THREAD mode, uncomment these lines ---
-// int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-// System.out.println("Starting evolution with " + nThreads + " threads.");
-// ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+Compile the project, from the project’s root directory, run:
 
-// --- To run in SINGLE-THREAD mode, use this line ---
-ExecutorService executor = Executors.newSingleThreadExecutor();
+```
+mvn clean install
+```
 
+This command creates the executable JAR file with all dependencies in the target/ directory:
+
+```
+Anonymization_EA_CEP_thesis-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+
+#### 3. Run the Experiment from the Command Line
+
+Launch the experiment using the JAR file created in the previous step:
+
+```
+java -jar target/Anonymization_EA_CEP_thesis-1.0-SNAPSHOT-jar-with-dependencies.jar -v -nt 10 -f experiment.txt
+```
+##### Key Command-Line Arguments:
+
+* `-f experiment.txt` — (Required) Specifies the path to the experiment definition file.
+
+* `-nt 10` — (Concurrency) Sets the number of threads for parallel fitness evaluations (e.g., 10).
+
+* `-v` — (Verbose) Enables detailed output and progress information in the console.
