@@ -17,9 +17,28 @@ ea.experiment(
       f.mapValue(key = "results-similarity"; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
       f.mapValue(key = "metrics-difference"; of = ea.f.quality(of = ea.f.best()); format = "%6.1f")
     ]);
+    ea.l.bestCsv(
+      path = "../{name}/{startTime}/best-solution.csv";
+      functions = [
+        f.mapValue(key = privacy; of = ea.f.quality(of = ea.f.best()));
+        f.mapValue(key = "results-similarity"; of = ea.f.quality(of = ea.f.best()));
+        f.mapValue(key = "metrics-difference"; of = ea.f.quality(of = ea.f.best()));
+        ea.f.solution(of = ea.f.best())
+      ]
+    );
     ea.l.savePlotForExp(
       path = "../{name}/{startTime}/best-privacy.svg";
       plot = ea.plot.multi.quality(q = f.mapValue(key = privacy));
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../{name}/{startTime}/best-results-similarity.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = "results-similarity"));
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../{name}/{startTime}/best-metrics-difference.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = "metrics-difference"));
       type = svg
     )
   ]
