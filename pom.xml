@@ -85,7 +85,7 @@
         <!-- JGEA  -->
         <dependency>
             <groupId>io.github.ericmedvet</groupId>
-            <artifactId>jgea.core</artifactId>
+            <artifactId>jgea.experimenter</artifactId>
             <version>2.7.1-SNAPSHOT</version>
         </dependency>
 
@@ -98,7 +98,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>jgea.solver.NewExperimentEA</mainClass>
+                            <mainClass>io.github.ericmedvet.jgea.experimenter.Starter</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

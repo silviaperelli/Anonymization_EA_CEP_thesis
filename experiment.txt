@@ -1,0 +1,26 @@
+ea.experiment(
+  runs = [
+    ea.run(
+      solver = ea.s.ga(
+        stop = ea.sc.nOfQualityEvaluations(n = 1000);
+        representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
+        mapper = silvia.mapper.treeToQueryMapper()
+      );
+      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv");
+      randomGenerator = m.defaultRG(seed = 1)
+    )
+  ];
+  listeners = [
+    ea.l.console(functions = [
+      ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+      f.mapValue(key = privacy; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
+      f.mapValue(key = "results-similarity"; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
+      f.mapValue(key = "metrics-difference"; of = ea.f.quality(of = ea.f.best()); format = "%6.1f")
+    ]);
+    ea.l.savePlotForExp(
+      path = "../{name}/{startTime}/best-privacy.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = privacy));
+      type = svg
+    )
+  ]
+)

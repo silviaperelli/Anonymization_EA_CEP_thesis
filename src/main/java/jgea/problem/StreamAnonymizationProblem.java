@@ -1,5 +1,6 @@
 package jgea.problem;
 
+import common.metrics.Metrics;
 import event.AirQualityEvent;
 import event.StreamFactory;
 import io.github.ericmedvet.jgea.core.distance.Distance;
@@ -8,6 +9,7 @@ import jgea.mappers.QueryRepresentation;
 import jgea.metrics.*;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQuery;
+import query.LiebreContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -18,6 +20,14 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
+
+    static {
+        //Since metrics will be added and removed during the query execution, we need to
+        //ensure that the LiebreContext is initialized with the right metrics factory
+        LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new java.util.HashMap<>()));
+        // Notify the Terminator not to end after the first query has completed
+        LiebreContext.setSingleQueryExecution(false);
+    }
 
     // Define the objective for the multi-objective optimization
     private final static SequencedMap<String, Comparator<Double>> OBJECTIVES = new TreeMap<>(
