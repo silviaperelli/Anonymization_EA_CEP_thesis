@@ -10,6 +10,9 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 *   **/src/main/java/jgea/query**:
     *   `MainQuery.java`: Defines the fixed Liebre analysis query (`Q`) that is used to evaluate the quality of an anonymized stream.
 
+*   **/src/main/java/jgea/grammar**:
+    *    `GrammarGenerator.java`: A class that generates the grammar file (.bnf). This grammar defines the set of rules used by the evolutionary algorithm to create valid Tree<String> genotypes, which represent the candidate solutions.
+
 *   **/src/main/java/jgea/metrics**:
     *   `MetricsConsumer.java`: A custom collector that gather performance metrics (tuple counts) during a query execution.
     *   `F1Score.java` / `EuclideanDistance.java` / `ModificationPrivacy.java` / `SuppressionPrivacy.java` / `DuplicationPrivacy.java`: Classes that implement the distance functions used to calculate the fitness scores for the objectives.
@@ -17,6 +20,11 @@ This project uses a multi-objective evolutionary algorithm (implemented with JGE
 *   **/src/main/java/jgea/mappers**:
     *   `Mapper.java`: The primary mapper class responsible for the actual transformation. It's invoked by the evolutionary algorithm to translate a genotype into a phenotype.
     *   `RepresentationToLiebreQuery.java`: A component used by Mapper.java to translate the genotype (a Tree<String> derived from the grammar) into the phenotype (a query representation).
+
+*   **/src/main/java/jgea/builders**:
+    *   This package contains the builders classes that make custom components of this project (like problems and mappers) available to the JGEA experimenter framework. They use jnb annotations (@Discoverable, @Param) to expose Java methods to the experiment definition file (experiment.txt).
+    *   `ProblemBuilder.java`: Makes the `StreamAnonymizationProblem` accessible from the experiment file using the silvia.problem.anonymizationProblem(...) builder.
+    *   `MapperBuilder.java`: Makes the custom `Mapper` class accessible from the experiment file using the silvia.mapper.treeToQueryMapper() builder.
 
 ### How to Run an Experiment
 
