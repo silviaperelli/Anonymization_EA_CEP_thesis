@@ -16,7 +16,7 @@ public record QueryRepresentation(
         MAP_NOISE
     }
     public enum Condition implements Serializable {
-        LESS_THAN, GREATER_THAN, LESS_OR_EQUAL, GREATER_OR_EQUAL, EQUAL
+        LESS_THAN, GREATER_THAN, LESS_OR_EQUAL, GREATER_OR_EQUAL
     }
 
     public static Condition fromString(String text) {
@@ -25,7 +25,6 @@ public record QueryRepresentation(
             case "gt" -> Condition.GREATER_THAN;
             case "le" -> Condition.LESS_OR_EQUAL;
             case "ge" -> Condition.GREATER_OR_EQUAL;
-            case "eq" -> Condition.EQUAL;
             default -> throw new IllegalArgumentException("Condition not valid: " + text);
         };
     }
@@ -69,7 +68,6 @@ public record QueryRepresentation(
                 case GREATER_THAN -> ">";
                 case LESS_OR_EQUAL -> "<=";
                 case GREATER_OR_EQUAL -> ">=";
-                case EQUAL -> "==";
             };
 
             return String.format("%s %s %.4f", variable, opString, value);

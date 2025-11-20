@@ -45,7 +45,7 @@ public class GrammarGenerator {
         }
         sb.append(attrJoiner).append("\n");
 
-        sb.append("<condition> ::= lt | le | gt | ge | eq\n");
+        sb.append("<condition> ::= lt | le | gt | ge\n");
 
         sb.append("<value> ::= ");
         StringJoiner valueJoiner = new StringJoiner(" | ");

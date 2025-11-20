@@ -42,7 +42,6 @@ public class OperatorUtils {
             case GREATER_THAN -> eventValue > conditionValue;
             case LESS_OR_EQUAL -> eventValue <= conditionValue;
             case GREATER_OR_EQUAL -> eventValue >= conditionValue;
-            case EQUAL -> eventValue == conditionValue;
         };
     }
 

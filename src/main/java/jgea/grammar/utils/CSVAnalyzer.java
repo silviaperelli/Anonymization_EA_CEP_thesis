@@ -54,8 +54,7 @@ public class CSVAnalyzer {
             }
 
             // Initialize the statistics map
-            Map<String, AttributeStats> statsMap = headersOfInterest.stream()
-                    .collect(Collectors.toMap(h -> h, h -> new AttributeStats(Double.MAX_VALUE, -Double.MAX_VALUE, Integer.MAX_VALUE, 0)));
+            Map<String, AttributeStats> statsMap = new HashMap<>();
 
             // Process each data row
             String line;
@@ -82,12 +81,21 @@ public class CSVAnalyzer {
                         if (intPartString.equals("0")) intDigits = 1;
 
                         AttributeStats current = statsMap.get(header);
-                        statsMap.put(header, new AttributeStats(
-                                Math.min(current.min(), value),
-                                Math.max(current.max(), value),
-                                Math.min(current.minIntDigits(), intDigits),
-                                Math.max(current.maxIntDigits(), intDigits)
-                        ));
+                        if (current == null) {
+                            statsMap.put(header, new AttributeStats(
+                                    value,       // min
+                                    value,       // max
+                                    intDigits,   // minDigits
+                                    intDigits    // maxDigits
+                            ));
+                        } else {
+                            statsMap.put(header, new AttributeStats(
+                                    Math.min(current.min(), value),
+                                    Math.max(current.max(), value),
+                                    Math.min(current.minIntDigits(), intDigits),
+                                    Math.max(current.maxIntDigits(), intDigits)
+                            ));
+                        }
                     } catch (NumberFormatException ignored) {
                         // If the value is not a number, ignore it
                         System.err.printf("Error: value not in numeric format");
