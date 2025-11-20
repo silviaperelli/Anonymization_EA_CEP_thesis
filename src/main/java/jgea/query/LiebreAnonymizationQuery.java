@@ -130,7 +130,7 @@ public class LiebreAnonymizationQuery {
 
         while(sink.isEnabled()) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -144,7 +144,7 @@ public class LiebreAnonymizationQuery {
         return new SourceFunction<T>() {
             private int currentIndex = 0;
             private boolean isFinished = false;
-            private static final long IDLE_SLEEP = 1000;
+            private static final long IDLE_SLEEP = 50;
             private boolean enabled;
 
             @Override

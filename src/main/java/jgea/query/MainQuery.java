@@ -110,7 +110,7 @@ public class MainQuery {
         return new SourceFunction<T>() {
             private int currentIndex = 0;
             private boolean isFinished = false;
-            private static final long IDLE_SLEEP = 1000;
+            private static final long IDLE_SLEEP = 50;
             private boolean enabled;
 
             @Override
