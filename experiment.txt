@@ -2,7 +2,7 @@ ea.experiment(
   runs = [
     ea.run(
       solver = ea.s.ga(
-        stop = ea.sc.nOfQualityEvaluations(n = 1000);
+        stop = ea.sc.nOfQualityEvaluations(n = 5000);
         representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
         mapper = silvia.mapper.treeToQueryMapper()
       );
