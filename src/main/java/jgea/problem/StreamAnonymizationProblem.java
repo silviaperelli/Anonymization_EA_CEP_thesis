@@ -29,16 +29,16 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         LiebreContext.setSingleQueryExecution(false);
     }
 
-    // Define the objective for the multi-objective optimization
+    // Define the objective to maximize for the multi-objective optimization
     private final static SequencedMap<String, Comparator<Double>> OBJECTIVES = new TreeMap<>(
             Map.ofEntries(
-                    Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()), // Maximize
-                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()), // Maximize
-                    Map.entry("metrics-difference", Double::compareTo)  // Minimize
+                    Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()),
+                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()),
+                    Map.entry("performance-similarity", ((Comparator<Double>) Double::compareTo).reversed())
             ));
 
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
-    private final static Distance<MainQuery.PerformanceMetrics> METRICS_DIFFERENCE = new EuclideanDistance();
+    private final static Distance<MainQuery.PerformanceMetrics> PERFORMANCE_SIMILARITY = new PerformanceSimilarity();
     private final static Distance<List<AirQualityEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
     private final static Distance<List<AirQualityEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
     private final static ModificationPrivacy MODIFICATION_PRIVACY = new ModificationPrivacy();
@@ -87,11 +87,12 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
                 double finalPrivacyScore;
 
-                // If the modified datastream is empty, return 0 as F1 score and maximum difference
+                // Case with empty modified datastream
                 if (modifiedEvents.isEmpty()) {
                     qualities.put("results-similarity", 0.0);
-                    qualities.put("metrics-difference", Double.MAX_VALUE);
-                    qualities.put("privacy", W_SUPPRESSION * 1.0);
+                    qualities.put("privacy", W_SUPPRESSION);
+                    MainQuery.PerformanceMetrics zeroMetrics = new MainQuery.PerformanceMetrics(0,0,0,0,0,0,0,0);
+                    qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(this.originalMetrics, zeroMetrics));
                     return qualities;
                 }
 
@@ -106,7 +107,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
                 // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
-                qualities.put("metrics-difference", METRICS_DIFFERENCE.apply(originalMetrics, modifiedOutcome.metrics()));
+                qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalMetrics, modifiedOutcome.metrics()));
                 qualities.put("privacy", finalPrivacyScore);
                 return qualities;
 
@@ -114,8 +115,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 System.err.printf("Error during fitness evaluation: %s", e.getMessage());
                 e.printStackTrace();
                 qualities.put("results-similarity", 0.0);
-                qualities.put("metrics-difference", Double.MAX_VALUE);
-                qualities.put("privacy", 1.0);
+                qualities.put("performance-similarity", 0.0);
+                qualities.put("privacy", 0.0);
                 return qualities;
             }
         };
