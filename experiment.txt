@@ -15,14 +15,14 @@ ea.experiment(
       ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
       f.mapValue(key = privacy; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
       f.mapValue(key = "results-similarity"; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
-      f.mapValue(key = "metrics-difference"; of = ea.f.quality(of = ea.f.best()); format = "%6.1f")
+      f.mapValue(key = "performance-similarity"; of = ea.f.quality(of = ea.f.best()); format = "%5.3f")
     ]);
     ea.l.bestCsv(
       path = "../{name}/{startTime}/best-solution.csv";
       functions = [
         f.mapValue(key = privacy; of = ea.f.quality(of = ea.f.best()));
         f.mapValue(key = "results-similarity"; of = ea.f.quality(of = ea.f.best()));
-        f.mapValue(key = "metrics-difference"; of = ea.f.quality(of = ea.f.best()));
+        f.mapValue(key = "performance-similarity"; of = ea.f.quality(of = ea.f.best()));
         ea.f.solution(of = ea.f.best())
       ]
     );
@@ -37,8 +37,8 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForExp(
-      path = "../{name}/{startTime}/best-metrics-difference.svg";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = "metrics-difference"));
+      path = "../{name}/{startTime}/best-performance-similarity.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = "performance-similarity"));
       type = svg
     )
   ]
