@@ -14,10 +14,7 @@ ea.experiment(
   ];
   listeners = [
     ea.l.console(eFunctions = [
-      ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = privacy; of = ea.f.quality())); format = "%5.3f");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = "results-similarity"; of = ea.f.quality())); format = "%5.3f");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = "performance-similarity"; of = ea.f.quality())); format = "%5.3f")
+      ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d")
     ]);
     ea.l.csv(
       path = $basePath + "solutions-percentile.csv";
