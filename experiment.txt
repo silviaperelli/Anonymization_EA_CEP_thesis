@@ -1,23 +1,19 @@
 $basePath = ''../{^^.name}/{^^.startTime}/''
 
 ea.experiment(
-  runs = [
+  runs = (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) * [
     ea.run(
       solver = ea.s.nsga2(
         stop = ea.sc.nOfQualityEvaluations(n = 5000);
         representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
         mapper = silvia.mapper.treeToQueryMapper()
       );
-      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv");
-      randomGenerator = m.defaultRG(seed = 1)
+      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv")
     )
   ];
   listeners = [
     ea.l.console(eFunctions = [
-      ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = privacy; of = ea.f.quality())); format = "%5.3f");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = "results-similarity"; of = ea.f.quality())); format = "%5.3f");
-      f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = "performance-similarity"; of = ea.f.quality())); format = "%5.3f")
+      ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d")
     ]);
     ea.l.csv(
       path = $basePath + "solutions-percentile.csv";
@@ -54,7 +50,7 @@ ea.experiment(
       ]
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-performance-vs-results.svg";
+      path = $basePath + "scatter-performance-vs-results-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = "performance-similarity"; of = ea.f.quality());
         y = f.mapValue(key = "results-similarity"; of = ea.f.quality())
@@ -64,7 +60,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-privacy-vs-results.svg";
+      path = $basePath + "scatter-privacy-vs-results-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = privacy; of = ea.f.quality());
         y = f.mapValue(key = "results-similarity"; of = ea.f.quality())
@@ -74,7 +70,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-performance-vs-privacy.svg";
+      path = $basePath + "scatter-performance-vs-privacy-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = "performance-similarity"; of = ea.f.quality());
         y = f.mapValue(key = privacy; of = ea.f.quality())
