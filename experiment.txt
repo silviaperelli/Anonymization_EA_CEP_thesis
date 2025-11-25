@@ -1,15 +1,14 @@
 $basePath = ''../{^^.name}/{^^.startTime}/''
 
 ea.experiment(
-  runs = [
+  runs = (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) * [
     ea.run(
       solver = ea.s.nsga2(
         stop = ea.sc.nOfQualityEvaluations(n = 5000);
         representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
         mapper = silvia.mapper.treeToQueryMapper()
       );
-      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv");
-      randomGenerator = m.defaultRG(seed = 1)
+      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv")
     )
   ];
   listeners = [
@@ -51,7 +50,7 @@ ea.experiment(
       ]
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-performance-vs-results.svg";
+      path = $basePath + "scatter-performance-vs-results-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = "performance-similarity"; of = ea.f.quality());
         y = f.mapValue(key = "results-similarity"; of = ea.f.quality())
@@ -61,7 +60,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-privacy-vs-results.svg";
+      path = $basePath + "scatter-privacy-vs-results-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = privacy; of = ea.f.quality());
         y = f.mapValue(key = "results-similarity"; of = ea.f.quality())
@@ -71,7 +70,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForRun(
-      path = $basePath + "scatter-performance-vs-privacy.svg";
+      path = $basePath + "scatter-performance-vs-privacy-{randomGenerator.seed:%03d}.svg";
       plot = ea.plot.single.biObjectivePopulation(
         x = f.mapValue(key = "performance-similarity"; of = ea.f.quality());
         y = f.mapValue(key = privacy; of = ea.f.quality())
