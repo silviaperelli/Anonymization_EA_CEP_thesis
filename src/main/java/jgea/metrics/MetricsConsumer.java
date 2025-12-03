@@ -20,16 +20,19 @@ public class MetricsConsumer {
             String afterFilter2, String beforeSink
     ) {}
 
+    public record TupleMetrics(long afterFilter1, long beforeAggregate, long afterAggregate, long beforeFilter2,
+                               long afterFilter2, long beforeSink, long afterSource, long beforeFilter1) {}
+
     private MetricNameSet generateMetricNames(String queryId) {
         return new MetricNameSet(
-                String.format("I1_%s_filter1_%s.IN", queryId, queryId),
-                String.format("I1_%s_filter1_%s.OUT", queryId, queryId),
-                String.format("filter1_%s_average_%s.IN", queryId, queryId),
-                String.format("filter1_%s_average_%s.OUT", queryId, queryId),
-                String.format("average_%s_filter2_%s.IN", queryId, queryId),
-                String.format("average_%s_filter2_%s.OUT", queryId, queryId),
+                String.format("I1_%s_rec_as_%s.IN", queryId, queryId),
+                String.format("rec_as_%s_filter1_%s.IN", queryId, queryId),
+                String.format("filter1_%s_rec_af1_%s.IN", queryId, queryId),
+                String.format("rec_af1_%s_average_%s.IN", queryId, queryId),
+                String.format("average_%s_rec_aa_%s.IN", queryId, queryId),
+                String.format("rec_aa_%s_filter2_%s.IN", queryId, queryId),
                 String.format("filter2_%s_o1_%s.IN", queryId, queryId),
-                String.format("filter2_%s_o1_%s.OUT", queryId, queryId)
+                String.format("filter2_%s_o1_%s.IN", queryId, queryId)
         );
     }
 
@@ -74,7 +77,6 @@ public class MetricsConsumer {
                 history.put(timestamp, value);
             });
         }
-
         return consumers;
     }
 
@@ -83,18 +85,31 @@ public class MetricsConsumer {
         return metricHistory;
     }
 
-
     // Calculate the number of valid tuples passing through a stream
     public long getCount(String metricName) {
         Map<Long, Long> history = metricHistory.get(metricName);
         if (history == null || history.isEmpty()) {
             return 0;
         }
-
         return history.values().stream()
-                .filter(value -> value > 0)      // Skip invalid values (-1)
+                .filter(value -> value > 0)  // Skip invalid values (-1)
                 .mapToLong(Long::longValue)
                 .sum();
+    }
+
+    // Retrieves the average rate for each metric
+    public TupleMetrics getTupleMetrics(String queryId) {
+        MetricNameSet names = generateMetricNames(queryId);
+        return new TupleMetrics(
+                getCount(names.afterFilter1()),
+                getCount(names.beforeAggregate()),
+                getCount(names.afterAggregate()),
+                getCount(names.beforeFilter2()),
+                getCount(names.afterFilter2()),
+                getCount(names.beforeSink()),
+                getCount(names.afterSource()),
+                getCount(names.beforeFilter1())
+        );
     }
 
     // Retrieves the average rate for each metric
