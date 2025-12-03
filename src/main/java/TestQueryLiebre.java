@@ -18,9 +18,7 @@ public class TestQueryLiebre {
     public static void main(String[] args) {
 
         final String inputFile = "src/main/resources/datasets/airQuality.csv";
-        //final String inputFile = "src/main/resources/resultsTest2.csv";
 
-        /*
         // You can define your own consumers for metrics collection
         HashMap<String, Consumer<Object[]>> consumers = new HashMap<>();
         // For each metric id (yes, you need to know the name) define the consumer that
@@ -42,8 +40,6 @@ public class TestQueryLiebre {
         MetricsFactory metrics = Metrics.fileAndConsumer("src/main/resources", consumers);
         LiebreContext.mergeWithStreamMetrics(metrics);
 
-
-         */
         Query query = new Query();
 
         // Source from CSV file
@@ -58,11 +54,9 @@ public class TestQueryLiebre {
                     return AirQualityEvent.eventCreation(line);
                 });
 
-
         // Operator to filter tuple with CO level >= 2.0 and NO2 level >= 40.0
         Operator<AirQualityEvent, AirQualityEvent> filter1 = query.addFilterOperator(
                 "filter1", tuple -> (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
-
 
         // Window of 3 hours
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
@@ -77,14 +71,13 @@ public class TestQueryLiebre {
         Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
                 "filter2", tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
-
         // Finale sink to print in a CSV file
-        Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQueryReal.csv", true);
+        Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
 
         // Sink<AirQualityEvent> outputSink = query.addSink(new MyBaseSink("o1", new TextFileSinkFunction<>("src/main/resources/resultsTestQuery.csv", true)));
 
-        query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator).connect(aggregateOperator, filter2)
-                .connect(filter2, outputSink);
+        query.connect(inputSource, inputReader).connect(inputReader, filter1).connect(filter1, aggregateOperator)
+                .connect(aggregateOperator, filter2).connect(filter2, outputSink);
 
         query.activate();
         System.out.println("*** Query activated ***");
@@ -97,7 +90,7 @@ public class TestQueryLiebre {
         }
         System.out.println("*** Query completed ***");
 
-        //LiebreContext.unmergeFromStreamMetrics(metrics);
+        LiebreContext.unmergeFromStreamMetrics(metrics);
 
     }
 
@@ -134,6 +127,9 @@ public class TestQueryLiebre {
                 return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
 
+            // Avoid duplicates due to the previous filter operator in the pipeline
+            // If the last event in the window is the same as the one in the last output,
+            // ignore it
             if (lastEvent.getTimestamp() == lastOutputTs) {
                 return AirQualityEvent.createEmptyEvent(this.startTimestamp);
             }
