@@ -52,7 +52,7 @@ public class LiebreAnonymizationQuery {
         Operator<String, AirQualityEvent> reader = query.addMapOperator(
                 "csv-reader",
                 line -> {
-                    if (line.startsWith("ID;Date;Time;CO(GT)")) return null;
+                    if (line.startsWith("ID;SensorID;Date")) return null;
                     return AirQualityEvent.eventCreation(line);
                 }
         );

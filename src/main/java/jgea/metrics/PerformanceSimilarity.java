@@ -2,7 +2,7 @@ package jgea.metrics;
 
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import jgea.query.MainQuery;
-import jgea.query.MainQueryKeyBy;
+import jgea.query.MainQueryKeys;
 
 /**
  * Calculates the similarity between the performance profile of the original query
@@ -16,7 +16,7 @@ import jgea.query.MainQueryKeyBy;
  * 1. A score of 1.0 indicates identical performance profiles (zero distance).
  * 2. A score of 0.0 is assigned if the distance reaches or exceeds a calibrated 'worst-case' threshold.
  */
-public class PerformanceSimilarity implements Distance<MainQueryKeyBy.PerformanceMetrics> {
+public class PerformanceSimilarity implements Distance<MainQueryKeys.PerformanceMetrics> {
 
     /**
      * The maximum tolerable Euclidean distance, used to normalize the similarity score.
@@ -30,7 +30,7 @@ public class PerformanceSimilarity implements Distance<MainQueryKeyBy.Performanc
     private static final double MAX_TOLERABLE_DISTANCE = 6.0;
 
     @Override
-    public Double apply(MainQueryKeyBy.PerformanceMetrics o, MainQueryKeyBy.PerformanceMetrics m) {
+    public Double apply(MainQueryKeys.PerformanceMetrics o, MainQueryKeys.PerformanceMetrics m) {
 
         // Convert records to arrays for easier iteration
         long[] originalTuples = {
