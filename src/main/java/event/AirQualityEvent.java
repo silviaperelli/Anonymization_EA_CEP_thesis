@@ -25,19 +25,19 @@ public class AirQualityEvent extends BaseRichTuple {
     private long tupleId;
     private long sensorId;
     private LocalDateTime eventTime;
-    private double coLevel;
-    private double pt08s1;
-    private double nmhc;
-    private double c6h6;
-    private double pt08s2;
-    private double nox;
-    private double pt08s3;
-    private double no2;
-    private double pt08s4;
-    private double pt08s5;
-    private double t;
-    private double rh;
-    private double ah;
+    private double coLevel; // CO(GT)
+    private double pt08s1; // PT08.S1(CO)
+    private double nmhc;   // NMHC(GT)
+    private double c6h6;  // C6H6(GT)
+    private double pt08s2; // PT08.S2(NMHC)
+    private double nox;    // NOx(GT)
+    private double pt08s3; // PT08.S3(NOx)
+    private double no2;    // NO2(GT)
+    private double pt08s4; // PT08.S4(NO2)
+    private double pt08s5; // PT08.S5(O3)
+    private double t;     // T
+    private double rh;    // RH
+    private double ah;    // AH
     private EventType eventType;
 
     public AirQualityEvent(long tupleId, long sensorId, LocalDateTime eventTime, double coLevel, double pt08s1, double nmhc, double c6h6, double pt08s2, double nox, double pt08s3, double no2, double pt08s4, double pt08s5, double t, double rh, double ah, EventType eventType) {
@@ -111,7 +111,6 @@ public class AirQualityEvent extends BaseRichTuple {
     public long getTimestamp() { return timestamp;}
 
     public long getSensorId() {return sensorId;}
-
     public void setSensorId(long sensorId) {this.sensorId = sensorId;}
 
     public LocalDateTime getEventTime() {return eventTime;}
@@ -167,12 +166,16 @@ public class AirQualityEvent extends BaseRichTuple {
                 return null;
             }
 
+            // Parse tuple ID and sensor ID
             long id = Long.parseLong(tokens[0].trim());
             long sensorId = Long.parseLong(tokens[1].trim());
+
+            // Combine date and time and create a single timestamp
             String date = tokens[2];
             String time = tokens[3].replace('.', ':');
             LocalDateTime timestamp = LocalDateTime.parse(date + " " + time, formatter);
 
+            // Parse all the features
             double coValue = Writer.formatDouble(tokens[4]);
             double pt08s1Val = Writer.formatDouble(tokens[5]);
             double nmhcVal = Writer.formatDouble(tokens[6]);
@@ -187,7 +190,10 @@ public class AirQualityEvent extends BaseRichTuple {
             double rhVal = Writer.formatDouble(tokens[15]);
             double ahVal = Writer.formatDouble(tokens[16]);
 
+            // EventType setting that work with both the original and modified datasets
             EventType type = EventType.NORMAL;
+
+            // If the event type column exists and has content, parse the string into an Enum constant
             if (tokens.length > 17 && tokens[17] != null && !tokens[17].isEmpty()) {
                 try {
                     type = EventType.valueOf(tokens[17].trim().toUpperCase());

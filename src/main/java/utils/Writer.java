@@ -1,6 +1,5 @@
 package utils;
 
-import event.AirQualityEvent;
 import static java.lang.Double.parseDouble;
 
 public class Writer {
