@@ -8,7 +8,7 @@ import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
 import jgea.metrics.*;
 import jgea.query.LiebreAnonymizationQuery;
-import jgea.query.MainQuery;
+import jgea.query.MainQueryKeys;
 import query.LiebreContext;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
             ));
 
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
-    private final static Distance<MainQuery.PerformanceMetrics> PERFORMANCE_SIMILARITY = new PerformanceSimilarity();
+    private final static Distance<MainQueryKeys.PerformanceMetrics> PERFORMANCE_SIMILARITY = new PerformanceSimilarity();
     private final static Distance<List<AirQualityEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
     private final static Distance<List<AirQualityEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
     private final static ModificationPrivacy MODIFICATION_PRIVACY = new ModificationPrivacy();
@@ -51,7 +51,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final String inputCsvPath;
     private final List<AirQualityEvent> originalStream;
     private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
-    private final MainQuery.PerformanceMetrics originalMetrics;
+    private final MainQueryKeys.PerformanceMetrics originalMetrics;
 
     public StreamAnonymizationProblem(String inputCsvPath) throws Exception {
         this.inputCsvPath = inputCsvPath;
@@ -60,7 +60,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         this.originalStream = StreamFactory.createListFromFile(inputCsvPath);
 
         // Execute the main query
-        MainQuery.QueryResult baselineOutcome = MainQuery.process(this.originalStream, "original");
+        MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original");
 
         this.originalResults = baselineOutcome.events();
         this.originalMetrics = baselineOutcome.metrics();
@@ -91,7 +91,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 if (modifiedEvents.isEmpty()) {
                     qualities.put("results-similarity", 0.0);
                     qualities.put("privacy", W_SUPPRESSION);
-                    MainQuery.PerformanceMetrics zeroMetrics = new MainQuery.PerformanceMetrics(0,0,0,0,0,0,0,0);
+                    MainQueryKeys.PerformanceMetrics zeroMetrics = new MainQueryKeys.PerformanceMetrics(0,0,0,0,0,0,0,0,0,0,0,0);
                     qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(this.originalMetrics, zeroMetrics));
                     return qualities;
                 }
@@ -103,7 +103,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 finalPrivacyScore = (W_SUPPRESSION * suppressionScore) + (W_DUPLICATION * duplicationScore) + (W_MODIFICATION * modificationScore);
 
                 // Execute the main query
-                MainQuery.QueryResult modifiedOutcome = MainQuery.process(modifiedEvents, String.valueOf(queryId));
+                MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId));
 
                 // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));

@@ -8,7 +8,7 @@ ea.experiment(
         representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
         mapper = silvia.mapper.treeToQueryMapper()
       );
-      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality.csv")
+      problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality_withSensorID.csv")
     )
   ];
   listeners = [
