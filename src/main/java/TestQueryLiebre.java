@@ -17,7 +17,7 @@ public class TestQueryLiebre {
 
     public static void main(String[] args) {
 
-        final String inputFile = "src/main/resources/datasets/airQuality.csv";
+        final String inputFile = "src/main/resources/datasets/airQuality_withSensorID.csv";
 
         // You can define your own consumers for metrics collection
         HashMap<String, Consumer<Object[]>> consumers = new HashMap<>();
@@ -72,7 +72,7 @@ public class TestQueryLiebre {
                 "filter2", tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
         // Finale sink to print in a CSV file
-        Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/resultsTestQuery.csv", true);
+        Sink<AirQualityEvent> outputSink = query.addTextFileSink("o1", "src/main/resources/results/originalResultsMainQuery.csv", true);
 
         // Sink<AirQualityEvent> outputSink = query.addSink(new MyBaseSink("o1", new TextFileSinkFunction<>("src/main/resources/resultsTestQuery.csv", true)));
 
@@ -89,6 +89,7 @@ public class TestQueryLiebre {
             }
         }
         System.out.println("*** Query completed ***");
+        query.deActivate();
 
         LiebreContext.unmergeFromStreamMetrics(metrics);
 
