@@ -28,6 +28,8 @@ public class PerformanceSimilarity implements Distance<MainQueryKeys.Performance
      * The resulting maximum distance is sqrt(36) = 6.0}
      */
     private static final double MAX_TOLERABLE_DISTANCE = 6.0;
+    // In case of only filters we have as max distance the empty stream
+    //private static final double MAX_TOLERABLE_DISTANCE = Math.sqrt(12);
 
     @Override
     public Double apply(MainQueryKeys.PerformanceMetrics o, MainQueryKeys.PerformanceMetrics m) {

@@ -31,8 +31,8 @@ public class MetricsConsumer {
                 String.format("rec_af1_%s_average_%s.IN", queryId, queryId),
                 String.format("average_%s_rec_aa_%s.IN", queryId, queryId),
                 String.format("rec_aa_%s_filter2_%s.IN", queryId, queryId),
-                String.format("filter2_%s_o1_%s.IN", queryId, queryId),
-                String.format("filter2_%s_o1_%s.IN", queryId, queryId)
+                String.format("filter2_%s_rec_af2_%s.IN", queryId, queryId),
+                String.format("rec_af2_%s_o1_%s.IN", queryId, queryId)
         );
     }
 
