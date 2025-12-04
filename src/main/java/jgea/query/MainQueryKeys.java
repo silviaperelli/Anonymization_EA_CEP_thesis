@@ -111,22 +111,22 @@ public class MainQueryKeys {
         // Build a hashmap of extra consumers to record unique keys at different stages
         // Do not forget to de-register the metrics at the end of the query execution
         HashMap<String, Consumer<Object[]>> keyConsumers = new HashMap<>();
-        keyConsumers.put("uniqueKeys_afterSource_" + queryId, data -> {
+        keyConsumers.put("uniqueKeys_afterSource_" + queryId + ".keys", data -> {
             long timestamp = (Long) data[0];
             long value = (Long) data[1];
             // DO WHAT YOU WANT HERE
         });
-        keyConsumers.put("uniqueKeys_afterFilter1_" + queryId, data -> {
+        keyConsumers.put("uniqueKeys_afterFilter1_" + queryId + ".keys", data -> {
             long timestamp = (Long) data[0];
             long value = (Long) data[1];
             // DO WHAT YOU WANT HERE
         });
-        keyConsumers.put("uniqueKeys_afterAggregate_" + queryId, data -> {
+        keyConsumers.put("uniqueKeys_afterAggregate_" + queryId + ".keys", data -> {
             long timestamp = (Long) data[0];
             long value = (Long) data[1];
             // DO WHAT YOU WANT HERE
         });
-        keyConsumers.put("uniqueKeys_output_" + queryId, data -> {
+        keyConsumers.put("uniqueKeys_output_" + queryId + ".keys", data -> {
             long timestamp = (Long) data[0];
             long value = (Long) data[1];
             // DO WHAT YOU WANT HERE
@@ -142,7 +142,12 @@ public class MainQueryKeys {
 
             public InnerMainQueryKeys(String id) {
                 this.id = id;
-                keyMetric = keyMetrics.newCountPerSecondMetric(id, "");
+                keyMetric = keyMetrics.newCountPerSecondMetric(id, "keys");
+            }
+
+            @Override
+            public void enable() {
+                keyMetric.enable();
             }
 
             @Override
@@ -154,6 +159,11 @@ public class MainQueryKeys {
                     }
                 }
                 return t;
+            }
+
+            @Override
+            public void disable() {
+                keyMetric.disable();
             }
 
         }
