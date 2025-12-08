@@ -34,8 +34,8 @@ import java.util.Set;
 public final class StreamStatsWindow {
 
     private final Set<String> streamNames;
-    private final int minTimestamp;
-    private final int maxTimestamp;
+    private final long minTimestamp;
+    private final long maxTimestamp;
     private final int size; // number of timestamps represented
     private final long resolutionMillis;
 
@@ -51,7 +51,7 @@ public final class StreamStatsWindow {
      * @param minTimestamp    Inclusive minimum timestamp.
      * @param maxTimestamp    Inclusive maximum timestamp.
      */
-    public StreamStatsWindow(Set<String> streamNames, int minTimestamp, int maxTimestamp,  long resolutionMillis) {
+    public StreamStatsWindow(Set<String> streamNames, long minTimestamp, long maxTimestamp,  long resolutionMillis) {
         if (streamNames == null || streamNames.isEmpty()) {
             throw new IllegalArgumentException("streamNames cannot be null or empty");
         }
@@ -78,7 +78,7 @@ public final class StreamStatsWindow {
     }
 
     /** Convert timestamp to array index. */
-    private int idx(int timestamp) {
+    private int idx(long timestamp) {
         if ((timestamp < minTimestamp) || (timestamp > maxTimestamp)) {
             throw new IllegalArgumentException("Timestamp out of bounds: " + timestamp);
         }
@@ -107,7 +107,7 @@ public final class StreamStatsWindow {
      * Increase tuple count for a given stream and timestamp.
      * Safe under the assumption of no concurrent updates to the same cell.
      */
-    public void addTuples(String streamName, int timestamp, int amount) {
+    public void addTuples(String streamName, long timestamp, int amount) {
         if (amount < 0) throw new IllegalArgumentException("amount < 0");
         int[] arr = getArrayFor(tupleCounts, streamName);
         arr[idx(timestamp)] += amount;
@@ -117,7 +117,7 @@ public final class StreamStatsWindow {
      * Increase key count for a given stream and timestamp.
      * Same concurrency assumption applies.
      */
-    public void addKeys(String streamName, int timestamp, int amount) {
+    public void addKeys(String streamName, long timestamp, int amount) {
         if (amount < 0) throw new IllegalArgumentException("amount < 0");
         int[] arr = getArrayFor(keyCounts, streamName);
         arr[idx(timestamp)] += amount;
@@ -177,12 +177,16 @@ public final class StreamStatsWindow {
         return streamNames;
     }
 
-    public int minTimestamp() {
+    public long minTimestamp() {
         return minTimestamp;
     }
 
-    public int maxTimestamp() {
+    public long maxTimestamp() {
         return maxTimestamp;
+    }
+
+    public int getResolutionMillis() {
+        return (int) resolutionMillis;
     }
 
     public int[] getTupleArray(String stream) {
