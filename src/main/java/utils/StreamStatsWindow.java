@@ -9,6 +9,12 @@ import java.util.Set;
  * StreamStatsWindow keeps lightweight statistics for a fixed set of streams
  * over a fixed timestamp window [minTimestamp, maxTimestamp], inclusive.
  *
+ * Resolution determines the granularity of statistics. For example,
+ * if resolutionMillis = 3600000 (1 hour), then an entry exists for each hour
+ * between minTimestamp and maxTimestamp. Timestamps must align exactly with
+ * this resolution. Concurrency is safe as long as no two threads update the
+ * same (stream, index) cell simultaneously.
+ *
  * For each stream and each timestamp in the window, two integer counters exist:
  *  - tupleCounts: number of tuples observed
  *  - keyCounts:   number of keys observed
@@ -31,6 +37,8 @@ public final class StreamStatsWindow {
     private final int minTimestamp;
     private final int maxTimestamp;
     private final int size; // number of timestamps represented
+    private final long resolutionMillis;
+
 
     // For each stream, we keep an array of ints for counts and keys.
     private final Map<String, int[]> tupleCounts;
@@ -43,18 +51,22 @@ public final class StreamStatsWindow {
      * @param minTimestamp    Inclusive minimum timestamp.
      * @param maxTimestamp    Inclusive maximum timestamp.
      */
-    public StreamStatsWindow(Set<String> streamNames, int minTimestamp, int maxTimestamp) {
+    public StreamStatsWindow(Set<String> streamNames, int minTimestamp, int maxTimestamp,  long resolutionMillis) {
         if (streamNames == null || streamNames.isEmpty()) {
             throw new IllegalArgumentException("streamNames cannot be null or empty");
         }
         if (minTimestamp > maxTimestamp) {
             throw new IllegalArgumentException("minTimestamp > maxTimestamp");
         }
+    if (resolutionMillis <= 0) {
+            throw new IllegalArgumentException("Resolution must be > 0");
+        }
 
         this.streamNames = Collections.unmodifiableSet(Set.copyOf(streamNames));
         this.minTimestamp = minTimestamp;
-        this.maxTimestamp = maxTimestamp;
-        this.size = maxTimestamp - minTimestamp + 1;
+        this.maxTimestamp = maxTimestamp;    
+        this.resolutionMillis = resolutionMillis;
+        this.size = (int) ((maxTimestamp - minTimestamp) / resolutionMillis) + 1;
 
         this.tupleCounts = new HashMap<>();
         this.keyCounts = new HashMap<>();
@@ -67,11 +79,15 @@ public final class StreamStatsWindow {
 
     /** Convert timestamp to array index. */
     private int idx(int timestamp) {
-        if (timestamp < minTimestamp || timestamp > maxTimestamp) {
-            throw new IllegalArgumentException(
-                "Timestamp " + timestamp + " outside of [" + minTimestamp + "," + maxTimestamp + "]");
+        if ((timestamp < minTimestamp) || (timestamp > maxTimestamp)) {
+            throw new IllegalArgumentException("Timestamp out of bounds: " + timestamp);
         }
-        return timestamp - minTimestamp;
+
+        if ((timestamp - minTimestamp) % resolutionMillis != 0) {
+            throw new IllegalArgumentException("Timestamp does not align with resolution: " + timestamp);
+        }
+
+        return (int) ((timestamp - minTimestamp) / resolutionMillis);
     }
 
     /** Validate stream name. */
@@ -118,14 +134,22 @@ public final class StreamStatsWindow {
      * Result = this - other (element-wise).
      */
     public StreamStatsWindow diff(StreamStatsWindow other) {
+
+        // TODO: @Silvia: change this as you need...
+
         if (!this.streamNames.equals(other.streamNames)) {
             throw new IllegalArgumentException("Stream name sets differ");
         }
         if (this.minTimestamp != other.minTimestamp || this.maxTimestamp != other.maxTimestamp) {
             throw new IllegalArgumentException("Timestamp windows differ");
         }
+        if (this.resolutionMillis != other.resolutionMillis ||
+            this.minTimestamp != other.minTimestamp ||
+            this.maxTimestamp != other.maxTimestamp) {
+            throw new IllegalArgumentException("Objects must share the same time bounds and resolution");
+        }
 
-        StreamStatsWindow result = new StreamStatsWindow(this.streamNames, this.minTimestamp, this.maxTimestamp);
+        StreamStatsWindow result = new StreamStatsWindow(this.streamNames, this.minTimestamp, this.maxTimestamp, this.resolutionMillis);
 
         for (String stream : streamNames) {
             int[] thisTuples = this.tupleCounts.get(stream);
