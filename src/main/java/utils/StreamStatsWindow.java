@@ -135,8 +135,6 @@ public final class StreamStatsWindow {
      */
     public StreamStatsWindow diff(StreamStatsWindow other) {
 
-        // TODO: @Silvia: change this as you need...
-
         if (!this.streamNames.equals(other.streamNames)) {
             throw new IllegalArgumentException("Stream name sets differ");
         }
@@ -169,6 +167,42 @@ public final class StreamStatsWindow {
         return result;
     }
 
+    public double calculateSumOfSquaredRelativeErrors(StreamStatsWindow other) {
+        if (!this.streamNames.equals(other.streamNames)) {
+            throw new IllegalArgumentException("Stream name sets differ");
+        }
+        if (this.minTimestamp != other.minTimestamp || this.maxTimestamp != other.maxTimestamp) {
+            throw new IllegalArgumentException("Timestamp windows differ");
+        }
+        if (this.resolutionMillis != other.resolutionMillis ||
+                this.minTimestamp != other.minTimestamp ||
+                this.maxTimestamp != other.maxTimestamp) {
+            throw new IllegalArgumentException("Objects must share the same time bounds and resolution");
+        }
+
+        double sumOfSquares = 0.0;
+
+        for (String stream : streamNames) {
+            int[] thisTuples = this.getTupleArray(stream);
+            int[] thisKeys   = this.getKeyArray(stream);
+            int[] otherTuples = other.getTupleArray(stream);
+            int[] otherKeys   = other.getKeyArray(stream);
+
+            for (int i = 0; i < size; i++) {
+                sumOfSquares += squaredRelativeError(thisTuples[i], otherTuples[i]);
+                sumOfSquares += squaredRelativeError(thisKeys[i], otherKeys[i]);
+            }
+        }
+        return sumOfSquares;
+    }
+
+    private double squaredRelativeError(int original, int modified) {
+        if (original == 0) return (modified == 0) ? 0.0 : 1.0;
+
+        double relativeError = Math.abs((double) original - modified) / original;
+        return relativeError * relativeError;
+    }
+
     // ------------------------------------------------------------------------
     // GETTERS
     // ------------------------------------------------------------------------
@@ -196,4 +230,36 @@ public final class StreamStatsWindow {
     public int[] getKeyArray(String stream) {
         return getArrayFor(keyCounts, stream);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("StreamStatsWindow {\n");
+        sb.append("  streams: ").append(streamNames).append("\n");
+        sb.append("  minTimestamp: ").append(minTimestamp)
+                .append(" (").append(java.time.Instant.ofEpochMilli(minTimestamp)).append(")\n");
+        sb.append("  maxTimestamp: ").append(maxTimestamp)
+                .append(" (").append(java.time.Instant.ofEpochMilli(maxTimestamp)).append(")\n");
+        sb.append("  resolutionMillis: ").append(resolutionMillis).append("\n");
+        sb.append("  size: ").append(size).append("\n");
+
+        for (String s : streamNames) {
+            sb.append("  stream '").append(s).append("':\n");
+
+            int[] tuples = tupleCounts.get(s);
+            int[] keys = keyCounts.get(s);
+
+            sb.append("    tuples[0..27]: ");
+            for (int i = 0; i < Math.min(10, tuples.length); i++) sb.append(tuples[i]).append(" ");
+            sb.append("...\n");
+
+            sb.append("    keys[0..27]:   ");
+            for (int i = 0; i < Math.min(10, keys.length); i++) sb.append(keys[i]).append(" ");
+            sb.append("...\n");
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
 }

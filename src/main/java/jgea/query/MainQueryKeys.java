@@ -1,10 +1,5 @@
 package jgea.query;
 
-import com.codahale.metrics.Gauge;
-
-import common.metrics.Metric;
-import common.metrics.Metrics;
-import common.metrics.MetricsFactory;
 import common.util.Util;
 import component.operator.Operator;
 import component.operator.in1.aggregate.BaseTimeWindowAddRemove;
@@ -14,74 +9,34 @@ import component.sink.Sink;
 import component.source.Source;
 import component.source.SourceFunction;
 import event.AirQualityEvent;
-import jgea.metrics.MetricsConsumer;
-import query.LiebreContext;
 import query.Query;
 import utils.StreamStatsWindow;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class MainQueryKeys {
 
-    // Record to contain the performance metrics during a query run
-    public record PerformanceMetrics(
-            long afterSource, long beforeFilter1, long afterFilter1,
-            long beforeAggregate, long afterAggregate, long beforeFilter2,
-            long afterFilter2, long beforeSink,
-            long keysAfterSource, long keysAfterFilter1,
-            long keysAfterAggregate, long keysOutput) {
-    }
-
-    // Record to contain the final results events and the collected performance
-    // metrics
-    public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {
-    }
+    // Record to contain the final results events and the collected performance metrics
+    public record QueryResult(List<AirQualityEvent> events, StreamStatsWindow statsWindow) {}
 
     public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
 
-        // New part: using StreamStatsWindow to collect metrics
-        // Change the 0s in the constructor, otherwise it will not work @Silvia
+        long minTs = 1078941600000L; // 2004-03-10 18:00:00 UTC
+        long maxTs = 1112623200000L; // 2005-04-04 14:00:00 UTC
+        long resolution = 3600000L;  // 1 Ora in millisecondi
+
         StreamStatsWindow statsWindow = new StreamStatsWindow(
                 Set.of("sourceStream", "afterFilter1", "afterAggregate", "outputStream"),
-                0, 0, 0); // Using dummy timestamps since we only need total counts
-
-        String metricsFilePath = "src/main/resources/queryMetrics";
-        try {
-            Files.createDirectories(Paths.get(metricsFilePath));
-        } catch (IOException e) {
-            throw e;
-        }
+                minTs, maxTs, resolution);
 
         if (inputStream == null || inputStream.isEmpty()) {
-            return new QueryResult(Collections.emptyList(), new PerformanceMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            // Create an empty StreamStatsWindow
+            StreamStatsWindow emptyStats = new StreamStatsWindow(
+                    Set.of("sourceStream", "afterFilter1", "afterAggregate", "outputStream"),
+                    minTs, maxTs, resolution);
+            return new QueryResult(Collections.emptyList(), emptyStats);
         }
-
-        // Create a metric collector for the run
-        // @Silvia: If you only need the performance metrics from StreamStatsWindow, you can remove the following lines most likely too, please check
-        MetricsConsumer consumer = new MetricsConsumer();
-        MetricsFactory metrics = Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId));
-        LiebreContext.mergeWithStreamMetrics(metrics);
-
-        // // Atomic counters to collect unique key counts
-        // final AtomicLong keysAfterSource = new AtomicLong(0);
-        // final AtomicLong keysAfterFilter1 = new AtomicLong(0);
-        // final AtomicLong keysAfterAggregate = new AtomicLong(0);
-        // final AtomicLong finalKeys = new AtomicLong(0);
-
-        // Metrics.metricRegistry().gauge("uniqueKeys_afterSource_" + queryId,
-        // () -> (Gauge<Integer>) () -> (int) keysAfterSource.get());
-        // Metrics.metricRegistry().gauge("uniqueKeys_afterFilter1_" + queryId,
-        // () -> (Gauge<Integer>) () -> (int) keysAfterFilter1.get());
-        // Metrics.metricRegistry().gauge("uniqueKeys_afterAggregate_" + queryId,
-        // () -> (Gauge<Integer>) () -> (int) keysAfterAggregate.get());
-        // Metrics.metricRegistry().gauge("uniqueKeys_output_" + queryId,
-        // () -> (Gauge<Integer>) () -> (int) finalKeys.get());
 
         final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
@@ -109,70 +64,58 @@ public class MainQueryKeys {
                 "filter2_" + queryId,
                 tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
 
-        // Build a hashmap of extra consumers to record unique keys at different stages
-        // The consumers update the corresponding counters
-        // HashMap<String, Consumer<Object[]>> keyConsumers = new HashMap<>();
-        // keyConsumers.put("uniqueKeys_afterSource_" + queryId + ".keys", data -> {
-        // keysAfterSource.addAndGet((Long) data[1]);
-        // });
-        // keyConsumers.put("uniqueKeys_afterFilter1_" + queryId + ".keys", data -> {
-        // keysAfterFilter1.addAndGet((Long) data[1]);
-        // });
-        // keyConsumers.put("uniqueKeys_afterAggregate_" + queryId + ".keys", data -> {
-        // keysAfterAggregate.addAndGet((Long) data[1]);
-        // });
-        // keyConsumers.put("uniqueKeys_output_" + queryId + ".keys", data -> {
-        // finalKeys.addAndGet((Long) data[1]);
-        // });
-
-        // MetricsFactory keyMetrics = Metrics.fileAndConsumer(metricsFilePath,
-        // keyConsumers);
-        // LiebreContext.mergeWithStreamMetrics(keyMetrics);
-
         class InnerMainQueryKeys implements MapFunction<AirQualityEvent, AirQualityEvent> {
 
             private final HashSet<String> keysSet = new HashSet<>();
             private final String id;
             private final StreamStatsWindow statsWindowLocal;
-            // private Metric keyMetric;
 
             private long currentPerformanceMetricTimestamp = -1L;
 
             public InnerMainQueryKeys(String id, StreamStatsWindow statsWindowLocal) {
                 this.id = id;
                 this.statsWindowLocal = statsWindowLocal;
-                // keyMetric = keyMetrics.newCountPerSecondMetric(id, "keys");
             }
-
-            // @Override
-            // public void enable() {
-            // // keyMetric.enable();
-            // }
 
             @Override
             public AirQualityEvent apply(AirQualityEvent t) {
                 if (t != null) {
-                    if (currentPerformanceMetricTimestamp != -1L &&
-                            currentPerformanceMetricTimestamp != t.getTimestamp()
-                                    / statsWindowLocal.getResolutionMillis()) {
+
+                    // Calculate the bucket index for the current event's timestamp.
+                    long bucketIndex =
+                            (t.getTimestamp() - statsWindowLocal.minTimestamp())
+                                    / statsWindowLocal.getResolutionMillis();
+
+                    if (currentPerformanceMetricTimestamp != -1
+                            && currentPerformanceMetricTimestamp != bucketIndex) {
                         // New timestamp, reset the keys set
                         keysSet.clear();
                     }
-                    currentPerformanceMetricTimestamp = t.getTimestamp() / statsWindowLocal.getResolutionMillis();
+                    currentPerformanceMetricTimestamp = bucketIndex;
+
+                    // Reconstruct the aligned timestamp for the start of the current bucket
+                    long alignedTs = statsWindowLocal.minTimestamp() + bucketIndex * statsWindowLocal.getResolutionMillis();
+
+                    // Clamp timestamp to avoid out-of-bounds
+                    if (alignedTs < statsWindowLocal.minTimestamp()) {
+                        alignedTs = statsWindowLocal.minTimestamp();
+                    }
+                    if (alignedTs > statsWindowLocal.maxTimestamp()) {
+                        alignedTs = statsWindowLocal.maxTimestamp();
+                    }
+
+                    // Update the performance statistics
                     if (!keysSet.contains(t.getKey())
                             && t.getEventType() != AirQualityEvent.EventType.EMPTY_WINDOW) {
                         keysSet.add(t.getKey());
-                        statsWindowLocal.addKeys(id, currentPerformanceMetricTimestamp, 1);
+                        statsWindowLocal.addKeys(id, alignedTs, 1);
                     }
-                    statsWindowLocal.addTuples(id, currentPerformanceMetricTimestamp, 1);
+
+                    statsWindowLocal.addTuples(id, alignedTs, 1);
                 }
+
                 return t;
             }
-
-            // @Override
-            // public void disable() {
-            // // keyMetric.disable();
-            // }
         }
 
         Operator<AirQualityEvent, AirQualityEvent> keyRecorderAfterSource = query.addMapOperator("rec_as_" + queryId,
@@ -211,31 +154,7 @@ public class MainQueryKeys {
         }
         query.deActivate();
 
-        LiebreContext.unmergeFromStreamMetrics(metrics);
-        // LiebreContext.unmergeFromStreamMetrics(keyMetrics);
-
-        // Obtain tuples counter from consumer
-        MetricsConsumer.TupleMetrics tupleMetrics = consumer.getTupleMetrics(queryId);
-
-        // NO ITALIAN PLEASE!!!
-
-        // Following part you need to update to obtain keys counts from
-        // StreamStatsWindow
-
-        // Obtain keys counter dai Set popolati
-        long keysAS = 0;
-        long keysAF1 = 0;
-        long keysAA = 0;
-        long keysO = 0;
-
-        // Create final record
-        PerformanceMetrics finalMetrics = new PerformanceMetrics(
-                tupleMetrics.afterSource(), tupleMetrics.beforeFilter1(), tupleMetrics.afterFilter1(),
-                tupleMetrics.beforeAggregate(), tupleMetrics.afterAggregate(), tupleMetrics.beforeFilter2(),
-                tupleMetrics.afterFilter2(), tupleMetrics.beforeSink(),
-                keysAS, keysAF1, keysAA, keysO);
-
-        return new QueryResult(collectedEvents, finalMetrics);
+        return new QueryResult(collectedEvents, statsWindow);
     }
 
     // Helper method to create a Source Function that reads from a list
