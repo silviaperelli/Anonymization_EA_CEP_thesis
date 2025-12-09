@@ -48,7 +48,7 @@ public class TestQueryLiebre {
         // Operator to read and parse the line
         Operator<String, AirQualityEvent> inputReader = query.addMapOperator(
                 "reader", line -> {
-                    if (line.startsWith("ID;Date;Time;CO(GT)")) {
+                    if (line.startsWith("ID;SensorID;Date;Time;")) {
                         return null;
                     }
                     return AirQualityEvent.eventCreation(line);
