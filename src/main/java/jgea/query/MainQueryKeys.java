@@ -93,10 +93,10 @@ public class MainQueryKeys {
                     }
                     currentPerformanceMetricTimestamp = bucketIndex;
 
-                    // Reconstruct the aligned timestamp for the start of the current bucket
+                    // Reconstruct the aligned timestamp for the start of the current bucket to use in the method addKeys and addTuples
                     long alignedTs = statsWindowLocal.minTimestamp() + bucketIndex * statsWindowLocal.getResolutionMillis();
 
-                    // Clamp timestamp to avoid out-of-bounds
+                    // Clamp timestamp to avoid out-of-bounds generated from the aggregation
                     if (alignedTs < statsWindowLocal.minTimestamp()) {
                         alignedTs = statsWindowLocal.minTimestamp();
                     }
