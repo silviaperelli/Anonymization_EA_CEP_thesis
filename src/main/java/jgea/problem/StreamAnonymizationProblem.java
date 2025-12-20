@@ -61,7 +61,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         // Load the original stream of events from the CSV file
         this.originalStream = StreamFactory.createListFromFile(inputCsvPath);
 
-        K_ANONYMITY_PRIVACY = new KAnonymityPrivacyDeviation(this.originalStream, 50);
+        K_ANONYMITY_PRIVACY = new KAnonymityPrivacyCardinality(this.originalStream, 50);
 
         // Execute the main query
         MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original");
@@ -96,7 +96,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 // Case with empty modified datastream
                 if (modifiedEvents.isEmpty()) {
                     qualities.put("results-similarity", 0.0);
-                    qualities.put("privacy", 1.0);
+                    qualities.put("privacy", K_ANONYMITY_PRIVACY.apply(this.originalStream, modifiedEvents));
                     // Crea un profilo di performance vuoto da confrontare
                     StreamStatsWindow emptyStats = new StreamStatsWindow(
                             originalStats.streamNames(),

@@ -8,15 +8,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Metric to evaluate the privacy of a modified stream
+ * A privacy metric that evaluates a modified stream based on two criteria:
+ * 1.  Anonymity Quality: For each tuple, it measures the "flatness" of the distance distribution
+ *     to its k-nearest neighbors in the original stream. A low standard deviation (flat distribution)
+ *     implies higher privacy as it confuses an attacker.
+ * 2.  Cardinality Fidelity: It penalizes solutions that significantly alter the size (cardinality)
+ *     of the dataset compared to the original.
  *
- * Logic:
- * For each tuple in the modified stream, find its k tuples in the original stream
- * with minimun distance from that one. Calculate the Standard Deviation of distances to these k tuples.
- *
- * Lower StdDev -> Higher Privacy Score (Distance distribution is flat)
+ * The final score is the product of the average anonymity quality and a size similarity factor
  */
-public class KAnonymityPrivacyDeviation implements Distance<List<AirQualityEvent>> {
+public class KAnonymityPrivacyCardinality implements Distance<List<AirQualityEvent>> {
 
     private final int k;
     private final Map<String, Double> inverseStds;
@@ -27,7 +28,7 @@ public class KAnonymityPrivacyDeviation implements Distance<List<AirQualityEvent
             "PT08.S3(NOx)", "NO2(GT)", "PT08.S4(NO2)", "PT08.S5(O3)", "T", "RH", "AH"
     };
 
-    public KAnonymityPrivacyDeviation(List<AirQualityEvent> originalStream, int k) {
+    public KAnonymityPrivacyCardinality(List<AirQualityEvent> originalStream, int k) {
         if (k < 2) {
             throw new IllegalArgumentException("k must be at least 2");
         }
@@ -76,10 +77,36 @@ public class KAnonymityPrivacyDeviation implements Distance<List<AirQualityEvent
 
     @Override
     public Double apply(List<AirQualityEvent> originalStream, List<AirQualityEvent> modifiedStream) {
-        if (modifiedStream == null || modifiedStream.isEmpty()) return 1.0;
 
-        double totalStdDev = 0.0;
-        int count = 0;
+        if (modifiedStream == null) {
+            return 0.0;
+        }
+
+        // Calculate the Size Similarity Factor as g(r) = min(r, 1/r) where r is the size ratio
+        double nOrig = originalStream.size();
+        double nMod = modifiedStream.size();
+
+        if (nOrig == 0) {
+            return (nMod == 0) ? 1.0 : 0.0;
+        }
+
+        double sizeSimilarityFactor;
+        if (nMod == 0) {
+            // If the modified stream is empty, the size factor is 0. This will result in a final score of 0
+            sizeSimilarityFactor = 0.0;
+        } else {
+            double sizeRatio = nMod / nOrig;
+            sizeSimilarityFactor = Math.min(sizeRatio, nOrig / nMod);
+        }
+
+        // Early exit optimization: if the size penalty is already zero, the final score will be zero
+        if (sizeSimilarityFactor == 0.0) {
+            return 0.0;
+        }
+
+        // Calculate the Average Tuple Score
+        double totalTupleScore = 0.0;
+        int validTuplesCount = 0;
 
         // Iterate through every tuple in the modified stream
         for (AirQualityEvent modEvent : modifiedStream) {
@@ -100,21 +127,25 @@ public class KAnonymityPrivacyDeviation implements Distance<List<AirQualityEvent
 
             // Calculate Standard Deviation of the Euclidean distances
             double stdDev = calculateStdDev(realDistances);
-
-            // Skip invalid results
             if (Double.isNaN(stdDev)) continue;
 
-            totalStdDev += stdDev;
-            count++;
+            // Calculate the individual score for this tuple (from 0 to 1)
+            double tupleScore = 1.0 / (1.0 + stdDev);
+
+            totalTupleScore += tupleScore;
+            validTuplesCount++;
         }
 
-        if (count == 0) return 0.0;
+        // If no valid tuples were found to score the quality is 0.
+        if (validTuplesCount == 0) {
+            return 0.0;
+        }
+        double avgTupleScore = totalTupleScore / validTuplesCount;
 
-        double averageStdDev = totalStdDev / count;
+        // Calculate the Final Privacy Score
+        double finalPrivacyScore = avgTupleScore * sizeSimilarityFactor;
 
-        // We want to maximize privacy
-        // Formula: 1 / (1 + x) maps [0, inf) to [1, 0].
-        return 1.0 / (1.0 + averageStdDev);
+        return finalPrivacyScore;
     }
 
     // Helper to check if a vector contains only NaN values
