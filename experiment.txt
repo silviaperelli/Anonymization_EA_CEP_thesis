@@ -5,7 +5,7 @@ ea.experiment(
     ea.run(
       solver = ea.s.nsga2(
         stop = ea.sc.nOfQualityEvaluations(n = 5000);
-        representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar.bnf"));
+        representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar-aggregate.bnf"));
         mapper = silvia.mapper.treeToQueryMapper()
       );
       problem = silvia.problem.anonymizationProblem(inputCsvPath = "datasets/airQuality_withSensorID.csv")
