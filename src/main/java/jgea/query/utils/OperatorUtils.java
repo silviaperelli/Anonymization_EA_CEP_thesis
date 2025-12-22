@@ -92,5 +92,25 @@ public class OperatorUtils {
         }
     }
 
+    // Helper method that sets the value of a specified attribute
+    public static void setAttributeValue(AirQualityEvent event, String attributeToSet, double newValue) {
+        if (event == null) return;
+        switch (attributeToSet) {
+            case "CO(GT)": event.setCoLevel(newValue); break;
+            case "PT08.S1(CO)": event.setPt08s1(newValue); break;
+            case "NMHC(GT)": event.setNmhc(newValue); break;
+            case "C6H6(GT)": event.setC6h6(newValue); break;
+            case "PT08.S2(NMHC)": event.setPt08s2(newValue); break;
+            case "NOx(GT)": event.setNox(newValue); break;
+            case "PT08.S3(NOx)": event.setPt08s3(newValue); break;
+            case "NO2(GT)": event.setNo2(newValue); break;
+            case "PT08.S4(NO2)": event.setPt08s4(newValue); break;
+            case "PT08.S5(O3)": event.setPt08s5(newValue); break;
+            case "T": event.setT(newValue); break;
+            case "RH": event.setRh(newValue); break;
+            case "AH": event.setAh(newValue); break;
+            default: break;
+        }
+    }
 
 }

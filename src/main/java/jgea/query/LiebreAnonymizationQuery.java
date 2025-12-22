@@ -23,6 +23,7 @@ import static jgea.query.utils.OperatorUtils.*;
 // processes an input stream to produce a modified stream of events
 public class LiebreAnonymizationQuery {
 
+    private static final int MOVING_AVERAGE_WINDOW_SIZE = 3;
     private final Random random;
 
     public LiebreAnonymizationQuery() {
@@ -114,6 +115,16 @@ public class LiebreAnonymizationQuery {
                     );
                     query.connect(lastOperatorInChain, noiseOperator);
                     lastOperatorInChain = noiseOperator;
+                    break;
+
+                case MAP_AGGREGATE:
+                    QueryRepresentation.MapAggregateArgs aggregateArgs = (QueryRepresentation.MapAggregateArgs) node.arguments();
+                    Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addMapOperator(
+                            operatorId,
+                            new MovingAverageMap(aggregateArgs.attribute(), MOVING_AVERAGE_WINDOW_SIZE)
+                            );
+                    query.connect(lastOperatorInChain, aggregateOperator);
+                    lastOperatorInChain = aggregateOperator;
                     break;
             }
         }
