@@ -13,7 +13,8 @@ public record QueryRepresentation(
     public enum Operator{
         FILTER,
         MAP_DUPLICATE,
-        MAP_NOISE
+        MAP_NOISE,
+        MAP_AGGREGATE
     }
     public enum Condition implements Serializable {
         LESS_THAN, GREATER_THAN, LESS_OR_EQUAL, GREATER_OR_EQUAL
@@ -92,6 +93,16 @@ public record QueryRepresentation(
         @Override
         public String toString() {
             return String.format("attribute=%s, percentage=%.2f", attribute, percentage);
+        }
+    }
+
+    // Represents the arguments for the map operator that aggregates attributes of tuples
+    public record MapAggregateArgs(
+            String attribute
+    )implements OperatorArguments {
+        @Override
+        public String toString() {
+            return String.format("attribute=%s", attribute);
         }
     }
 }

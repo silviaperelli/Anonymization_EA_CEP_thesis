@@ -38,6 +38,7 @@ public class TreeToRepresentation {
             case "<filter>" -> operator = parseFilterNode(specificOpNode);
             case "<map_duplicate>" -> operator = parseMapDuplicateNode(specificOpNode);
             case "<map_noise>" -> operator = parseMapNoiseNode(specificOpNode);
+            case "<map_aggregate>" -> operator = parseMapAggregateNode(specificOpNode);
             default -> System.err.println("Unknown operator type found: " + specificOpNode.content());
         }
 
@@ -120,7 +121,6 @@ public class TreeToRepresentation {
 
         if (attribute == null || percentageString == null) return null;
 
-
         try{
             double percentage = Double.parseDouble(percentageString);
             attribute = attribute.replace("'", "");
@@ -129,6 +129,30 @@ public class TreeToRepresentation {
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_NOISE, args);
         } catch (Exception e) {
             System.err.printf("Error parsing noise map node: %s\n", e.getMessage());
+            return null;
+        }
+    }
+
+    // Parse a single aggregate map node
+    private QueryRepresentation.OperatorNode parseMapAggregateNode(Tree<String> mapNode) {
+        String attribute = null;
+
+        // Search for the child <attribute> in the node
+        for (Tree<String> child : mapNode) {
+            if ("<attribute>".equals(child.content())) {
+                attribute = findFirstTerminal(child);
+            }
+        }
+
+        if (attribute == null) return null;
+
+        try{
+            attribute = attribute.replace("'", "");
+            // Create the specific arguments object for an aggregate map
+            QueryRepresentation.MapAggregateArgs args = new QueryRepresentation.MapAggregateArgs(attribute);
+            return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_AGGREGATE, args);
+        }catch (Exception e) {
+            System.err.printf("Error parsing aggregate map node: %s\n", e.getMessage());
             return null;
         }
     }
