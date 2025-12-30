@@ -5,21 +5,19 @@ import event.StreamFactory;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
-import jgea.metrics.performance.PerformanceSimilarity;
 import jgea.metrics.privacy.*;
 import jgea.metrics.results.F1Score;
 import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQueryKeys;
 import query.LiebreContext;
-import jgea.metrics.performance.utils.StreamStatsWindow;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 // Define the multi-objective optimization problem
-public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresentation, Double> {
+public class AnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRepresentation, Double> {
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
@@ -27,7 +25,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     static {
         //Since metrics will be added and removed during the query execution, we need to
         //ensure that the LiebreContext is initialized with the right metrics factory
-        //LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new HashMap<>()));
+        //LiebreContext.setStreamMetrics(Metrics.fileAndConsumer("src/main/resources/queryMetrics", new java.util.HashMap<>()));
         // Notify the Terminator not to end after the first query has completed
         LiebreContext.setSingleQueryExecution(false);
     }
@@ -36,12 +34,10 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final static SequencedMap<String, Comparator<Double>> OBJECTIVES = new TreeMap<>(
             Map.ofEntries(
                     Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()),
-                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()),
-                    Map.entry("performance-similarity", ((Comparator<Double>) Double::compareTo).reversed())
+                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed())
             ));
 
     private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
-    private final Distance<StreamStatsWindow> PERFORMANCE_SIMILARITY;
 
     private final Distance<List<AirQualityEvent>> K_ANONYMITY_PRIVACY;
     private final Distance<List<AirQualityEvent>> K_ANONYMITY_PRIVACY_CARDINALITY;
@@ -57,11 +53,10 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final String inputCsvPath;
     private final List<AirQualityEvent> originalStream;
     private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
-    private final StreamStatsWindow originalStats;
 
     private final PrivacyMetricChoice privacyMetricChoice;
 
-    public StreamAnonymizationProblem(String inputCsvPath, PrivacyMetricChoice privacyMetric, boolean isFilterOnly) throws Exception {
+    public AnonymizationProblem_2Objectives(String inputCsvPath, PrivacyMetricChoice privacyMetric) throws Exception {
         this.inputCsvPath = inputCsvPath;
 
         // Load the original stream of events from the CSV file
@@ -75,9 +70,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original");
 
         this.originalResults = baselineOutcome.events();
-        this.originalStats = baselineOutcome.statsWindow();
-
-        PERFORMANCE_SIMILARITY = new PerformanceSimilarity(this.originalStats, isFilterOnly);
 
         System.out.println("Ground Truth generated");
     }
@@ -101,8 +93,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
                 // Case with empty modified datastream
                 if (modifiedEvents.isEmpty()) {
-                    double privacyScoreEmpty;
                     // Based on the user choice, calculate the correct privacy metric
+                    double privacyScoreEmpty;
                     switch (privacyMetricChoice) {
                         case SUPPRESSION_ONLY -> privacyScoreEmpty = 1.0;
                         case WEIGHTED_AVERAGE -> privacyScoreEmpty = W_SUPPRESSION;
@@ -112,12 +104,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                     }
                     qualities.put("privacy", privacyScoreEmpty);
                     qualities.put("results-similarity", 0.0);
-                    StreamStatsWindow emptyStats = new StreamStatsWindow(
-                            originalStats.streamNames(),
-                            originalStats.minTimestamp(),
-                            originalStats.maxTimestamp(),
-                            originalStats.getResolutionMillis());
-                    qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(this.originalStats, emptyStats));
                     return qualities;
                 }
 
@@ -145,9 +131,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 // Execute the main query
                 MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId));
 
-                StreamStatsWindow modifiedStats = modifiedOutcome.statsWindow();
-                qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalStats, modifiedStats));
-
                 // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("privacy", finalPrivacyScore);
@@ -157,11 +140,9 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 System.err.printf("Error during fitness evaluation: %s", e.getMessage());
                 e.printStackTrace();
                 qualities.put("results-similarity", 0.0);
-                qualities.put("performance-similarity", 0.0);
                 qualities.put("privacy", 0.0);
                 return qualities;
             }
         };
     }
 }
-
