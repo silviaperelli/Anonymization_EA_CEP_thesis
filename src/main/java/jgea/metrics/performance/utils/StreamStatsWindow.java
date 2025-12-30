@@ -1,4 +1,4 @@
-package utils;
+package jgea.metrics.performance.utils;
 
 import java.util.Collections;
 import java.util.HashMap;

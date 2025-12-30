@@ -10,7 +10,7 @@ import component.source.Source;
 import component.source.SourceFunction;
 import event.AirQualityEvent;
 import query.Query;
-import utils.StreamStatsWindow;
+import jgea.metrics.performance.utils.StreamStatsWindow;
 
 import java.io.IOException;
 import java.util.*;

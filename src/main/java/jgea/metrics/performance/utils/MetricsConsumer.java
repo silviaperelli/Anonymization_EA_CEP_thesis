@@ -1,4 +1,4 @@
-package jgea.metrics;
+package jgea.metrics.performance.utils;
 
 import jgea.query.MainQuery;
 import java.util.HashMap;

@@ -11,7 +11,7 @@ import component.source.Source;
 import component.source.SourceFunction;
 
 import event.AirQualityEvent;
-import jgea.metrics.MetricsConsumer;
+import jgea.metrics.performance.utils.MetricsConsumer;
 import query.LiebreContext;
 import query.Query;
 import java.io.IOException;

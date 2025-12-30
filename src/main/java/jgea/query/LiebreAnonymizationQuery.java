@@ -3,6 +3,7 @@ package jgea.query;
 import common.util.Util;
 import event.AirQualityEvent;
 import jgea.mappers.QueryRepresentation;
+import jgea.query.utils.MovingAverageMap;
 import query.Query;
 import component.operator.Operator;
 import component.source.Source;

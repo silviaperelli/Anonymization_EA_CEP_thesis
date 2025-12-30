@@ -1,8 +1,7 @@
-package jgea.query;
+package jgea.query.utils;
 
 import component.operator.in1.map.MapFunction;
 import event.AirQualityEvent;
-import jgea.query.utils.OperatorUtils;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
