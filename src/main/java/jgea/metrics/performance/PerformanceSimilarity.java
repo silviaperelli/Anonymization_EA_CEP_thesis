@@ -1,7 +1,7 @@
-package jgea.metrics;
+package jgea.metrics.performance;
 
 import io.github.ericmedvet.jgea.core.distance.Distance;
-import utils.StreamStatsWindow;
+import jgea.metrics.performance.utils.StreamStatsWindow;
 
 /**
  * Calculates the similarity between two performance profiles represented by StreamStatsWindow objects.
@@ -20,11 +20,11 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
      * Il costruttore calcola D_max una sola volta basandosi sul profilo originale.
      */
     // Pre-calculates D_max, so it is computed once based on the timestamp represented on the original performance profile
-    public PerformanceSimilarity(StreamStatsWindow originalProfile) {
+    public PerformanceSimilarity(StreamStatsWindow originalProfile, boolean isFilterOnly) {
         if (originalProfile == null) {
             throw new IllegalArgumentException("Original profile cannot be null.");
         }
-        this.dMax = calculateDMax(originalProfile);
+        this.dMax = calculateDMax(originalProfile, isFilterOnly);
     }
 
     @Override
@@ -53,14 +53,15 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
     /**
      * Helper method to calculate D_max, the distance for the "worst-case scenario".
      * The worst-case is defined as:
-     * - For TUPLES: Triplication of data (relative error = 2.0).
+     * - For TUPLES: Triplication of data (relative error = 2.0) / Total suppression if only filters (relative error = 1.0)
      * - For KEYS: Total suppression (relative error = 1.0).
      *
      *  For tuples if original > 0, the worst case is generating data from nothing (error = 1.0)
      * */
-    private double calculateDMax(StreamStatsWindow originalProfile) {
+    private double calculateDMax(StreamStatsWindow originalProfile, boolean isFilterOnly) {
         double sumOfWorstCaseSquaredErrors = 0.0;
-        final double TUPLE_DISTORTION_ERROR = 2.0;
+        // If the grammar is composed only by filters, the worst case is suppression
+        final double TUPLE_WORST_CASE_ERROR = isFilterOnly ? 1.0 : 2.0;
         final double KEY_WORST_CASE_ERROR = 1.0;
         final double GENERATION_FROM_ZERO_ERROR = 1.0;
 
@@ -72,7 +73,7 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
             for (int originalCount : tupleCounts) {
                 if (originalCount > 0) {
                     // If data existed, the worst case is triplication
-                    sumOfWorstCaseSquaredErrors += Math.pow(TUPLE_DISTORTION_ERROR, 2);
+                    sumOfWorstCaseSquaredErrors += Math.pow(TUPLE_WORST_CASE_ERROR, 2);
                 } else {
                     // If no data existed, the worst case is creating data from nothing
                     sumOfWorstCaseSquaredErrors += Math.pow(GENERATION_FROM_ZERO_ERROR, 2);

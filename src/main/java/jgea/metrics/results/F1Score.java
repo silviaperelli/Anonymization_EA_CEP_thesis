@@ -1,4 +1,4 @@
-package jgea.metrics;
+package jgea.metrics.results;
 
 import event.AirQualityEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
