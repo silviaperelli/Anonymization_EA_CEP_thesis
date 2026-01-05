@@ -1,4 +1,4 @@
-## Evolutionary Query Anonymization for Privacy-preserving Stream Processing
+# Evolutionary Query Anonymization for Privacy-preserving Stream Processing
 
 This project uses a **multi-objective evolutionary algorithm**, implemented with the **JGEA** framework, to automatically discover optimal "data modifiers". A data modifier is a streaming query that transforms an original data stream (`S`) into a modified, privacy-preserving stream (`S'`). The quality of each data modifier is determined by running a fixed Liebre analysis query (Q) on the modified stream (S') and evaluating its impact on the final results and the overall performance profile.
 
@@ -9,7 +9,7 @@ The core idea is to find the best possible trade-offs between three competing ob
 
 The evolutionary process explores different anonymization pipelines to find a set of non-dominated solutions representing the best possible compromises between these objectives. The anonymization query can be composed of operators like `filter`, `map_noise`, `map_duplicate`, and `map_aggregate`.
 
-### Project Structure
+## Project Structure
 Here is an overview of the key packages and classes:
 
 *   **/src/main/java/jgea/problem**:
@@ -36,11 +36,11 @@ Here is an overview of the key packages and classes:
     *   `ProblemBuilder.java`: Makes the `StreamAnonymizationProblem` accessible from the experiment file using the `silvia.problem.anonymizationProblem(...)` or `silvia.problem.anonymizationProblem2O(...)` builder.
     *   `MapperBuilder.java`: Makes the custom `Mapper` class accessible from the experiment file using the `silvia.mapper.treeToQueryMapper()` builder.
 
-### How to Run an Experiment
+## How to Run an Experiment
 
 This project is designed to be configured and run entirely from an experiment file (`.txt`) using the JGEA experimenter.
 
-#### 1. Generate the Grammar
+### 1. Generate the Grammar
 
 Before running an experiment, you must generate the grammar file that defines the search space. Run the `main` method of the appropriate class to generate a grammar file for the example dataset **AirQuality**:
 
@@ -50,13 +50,13 @@ Before running an experiment, you must generate the grammar file that defines th
 
 This will create/update the corresponding `.bnf` file in `src/main/resources`, where three grammar files for the example dataset are already provided.
 
-#### 2. Configure the Experiment File
+### 2. Configure the Experiment File
 
 The experiment file (e.g., experiment.txt) allows to configure the entire experiment. Here you define which problem, grammar, and metrics to use.
 
 For the example dataset **AirQuality**, the file `experiment.txt` is provided to run the problem with three objectives, while `experiment_2objectives.txt` is used to run it with two objectives.
 
-In these files the `representation` block must point to the correct grammar file and the `problem` block must point to the correct input file and grammar file and must select the privacy metric to use.
+In these files the `representation` block must point to the correct **grammar file** and the `problem` block must point to the correct **input file** and **grammar file** and must select the **privacy metric** to use.
 
 **Example 1: 3-Objective Experiment `experiment.txt`**
 ```
@@ -97,7 +97,7 @@ For **privacy evaluation**, the following metrics are available and can be selec
 - When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While `K_ANONYMITY` and `K_ANONYMITY_CARDINALITY` may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
 - The **Performance Similarity** metric is based on event time, not wall-clock time. The `minTimestamp`, `maxTimestamp` and `resolution` are dataset-dependent and are currently hardcoded in `MainQueryKeys.java`. If you change the dataset, you must update these values to match the new time range.
 
-#### 3. Build the Project
+### 3. Build the Project
 
 Compile the project and package it into an executable JAR with all dependencies. Run from the project’s root directory:
 
@@ -108,7 +108,7 @@ mvn clean install
 **Java version**:
 **Java 21** is required to build and run the project due to compatibility constraints of the JGEA framework, which requires JDK 21.
 
-#### 4. Run the Experiment
+### 4. Run the Experiment
 
 Execute the JAR from your terminal, pointing to your experiment file:
 
