@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class GrammarGenerator {
+public class GrammarGeneratorMap {
 
     private static final int DECIMAL_PRECISION_DIGITS = 1;
 
     public static void main(String[] args) throws IOException {
-        final String grammarPath = "src/main/resources/generated-grammar.bnf";
+        final String grammarPath = "src/main/resources/generated-grammar-map.bnf";
         final String csvPath = "datasets/airQuality.csv";
         // Extract attributes and their numerical bounds from a CSV file
         List<String> attributes = CSVAnalyzer.extractAttributes(csvPath);
