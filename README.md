@@ -55,7 +55,8 @@ This will create/update the corresponding `.bnf` file in `src/main/resources`, w
 The experiment file (e.g., experiment.txt) allows to configure the entire experiment. Here you define which problem, grammar, and metrics to use.
 
 For the example dataset **AirQuality**, the file `experiment.txt` is provided to run the problem with three objectives, while `experiment_2objectives.txt` is used to run it with two objectives.
-In these files the `representation` and `problem` blocks must be configured. The `representation` block must point to the correct grammar file. The `problem` block must point to the correct input file and grammar file and must select the privacy metric to use.
+
+In these files the `representation` block must point to the correct grammar file and the `problem` block must point to the correct input file and grammar file and must select the privacy metric to use.
 
 **Example 1: 3-Objective Experiment `experiment.txt`**
 ```
