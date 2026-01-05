@@ -105,7 +105,7 @@ Compile the project and package it into an executable JAR with all dependencies.
 mvn clean install
 ```
 
-**Java version**
+**Java version**:
 **Java 21** is required to build and run the project due to compatibility constraints of the JGEA framework, which requires JDK 21.
 
 #### 4. Run the Experiment
