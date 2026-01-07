@@ -48,7 +48,7 @@ Before running an experiment, you must generate the grammar file that defines th
 *   `GrammarGeneratorMap.java`: For experiments with filter and map operators.
 *   `GrammarGeneratorAggregate.java`: For experiments with filter, map, and aggregate operators.
 
-This will create/update the corresponding `.bnf` file in `src/main/resources`, where three grammar files for the example dataset are already provided.
+This will create/update the corresponding `.bnf` file in `src/main/resources`, where three grammar files for the example dataset are already provided (`generated-grammar-filters.bnf`, `generated-grammar-map.bnf`, `generated-grammar-aggregate.bnf`).
 
 ### 2. Configure the Experiment File
 
