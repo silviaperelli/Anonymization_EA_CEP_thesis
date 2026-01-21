@@ -1,10 +1,9 @@
 package jgea.metrics.privacy;
 
-import event.AirQualityEvent;
+import event.GenericEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import jgea.metrics.privacy.utils.KDTree;
 import jgea.metrics.privacy.utils.MetricUtils;
-import jgea.query.utils.OperatorUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,38 +18,35 @@ import java.util.stream.Collectors;
  *
  * The final score is the product of the average anonymity quality and a size similarity factor
  */
-public class KAnonymityPrivacyCardinality implements Distance<List<AirQualityEvent>> {
+public class KAnonymityPrivacyCardinality implements Distance<List<GenericEvent>> {
 
     private final int k;
     private final Map<String, Double> inverseStds;
     private final KDTree originalTree;
+    private final List<String> attributes;
 
-    private static final String[] ATTRIBUTES = {
-            "CO(GT)", "PT08.S1(CO)", "NMHC(GT)", "C6H6(GT)", "PT08.S2(NMHC)", "NOx(GT)",
-            "PT08.S3(NOx)", "NO2(GT)", "PT08.S4(NO2)", "PT08.S5(O3)", "T", "RH", "AH"
-    };
-
-    public KAnonymityPrivacyCardinality(List<AirQualityEvent> originalStream, int k) {
+    public KAnonymityPrivacyCardinality(List<GenericEvent> originalStream, int k, List<String> attributes) {
         if (k < 2) {
             throw new IllegalArgumentException("k must be at least 2");
         }
         this.k = k;
+        this.attributes = attributes;
 
         // Calculate mean for each attribute in the original stream
-        Map<String, Double> means = Arrays.stream(ATTRIBUTES).collect(Collectors.toMap(
+        Map<String, Double> means = this.attributes.stream().collect(Collectors.toMap(
                 attr -> attr,
                 attr -> originalStream.stream()
-                        .mapToDouble(event -> OperatorUtils.getAttributeValue(event, attr))
+                        .mapToDouble(event -> event.getAttribute(attr))
                         .filter(v -> !Double.isNaN(v))
                         .average().orElse(0.0)
         ));
 
         // Calculate Standard Deviation for each attribute in the original stream
-        this.inverseStds = Arrays.stream(ATTRIBUTES).collect(Collectors.toMap(
+        this.inverseStds = this.attributes.stream().collect(Collectors.toMap(
                 attr -> attr,
                 attr -> {
                     List<Double> values = originalStream.stream()
-                            .map(event -> OperatorUtils.getAttributeValue(event, attr))
+                            .map(event -> event.getAttribute(attr))
                             .filter(v -> !Double.isNaN(v))
                             .collect(Collectors.toList());
 
@@ -78,7 +74,7 @@ public class KAnonymityPrivacyCardinality implements Distance<List<AirQualityEve
     }
 
     @Override
-    public Double apply(List<AirQualityEvent> originalStream, List<AirQualityEvent> modifiedStream) {
+    public Double apply(List<GenericEvent> originalStream, List<GenericEvent> modifiedStream) {
 
         if (modifiedStream == null) {
             return 0.0;
@@ -111,7 +107,7 @@ public class KAnonymityPrivacyCardinality implements Distance<List<AirQualityEve
         int validTuplesCount = 0;
 
         // Iterate through every tuple in the modified stream
-        for (AirQualityEvent modEvent : modifiedStream) {
+        for (GenericEvent modEvent : modifiedStream) {
             double[] targetVector = toVector(modEvent);
 
             // Skip if the tuple has no valid data
@@ -151,11 +147,12 @@ public class KAnonymityPrivacyCardinality implements Distance<List<AirQualityEve
     }
 
     // Convert a tuple to a normalized double array
-    private double[] toVector(AirQualityEvent e) {
-        double[] v = new double[ATTRIBUTES.length];
-        for (int i = 0; i < ATTRIBUTES.length; i++) {
-            double val = OperatorUtils.getAttributeValue(e, ATTRIBUTES[i]);
-            double inv = inverseStds.get(ATTRIBUTES[i]);
+    private double[] toVector(GenericEvent e) {
+        double[] v = new double[this.attributes.size()];
+        for (int i = 0; i < this.attributes.size(); i++) {
+            String attrName = this.attributes.get(i);
+            double val = e.getAttribute(attrName);
+            double inv = inverseStds.get(attrName);
             v[i] = Double.isNaN(val) ? Double.NaN : val * inv;
         }
         return v;
