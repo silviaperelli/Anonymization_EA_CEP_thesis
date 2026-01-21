@@ -4,6 +4,7 @@ import jgea.grammar.utils.CSVAnalyzer;
 import jgea.grammar.utils.CSVAnalyzer.AttributeStats;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -13,11 +14,19 @@ public class GrammarGeneratorMap {
     private static final int DECIMAL_PRECISION_DIGITS = 1;
 
     public static void main(String[] args) throws IOException {
-        final String grammarPath = "src/main/resources/generated-grammar-map.bnf";
-        final String csvPath = "datasets/airQuality.csv";
+
+        final String grammarPath = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-map.bnf";
+        final String csvPath = "datasets/airQuality_withSensorID.csv";
+        final String keyColumn = "SensorID";
+
+        List<String> excludedColumns = new ArrayList<>(List.of("timestamp", "ID"));
+        if (keyColumn != null && !keyColumn.isEmpty()) {
+            excludedColumns.add(keyColumn);
+        }
+
         // Extract attributes and their numerical bounds from a CSV file
-        List<String> attributes = CSVAnalyzer.extractAttributes(csvPath);
-        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(csvPath);
+        List<String> attributes = CSVAnalyzer.extractAttributes(csvPath, excludedColumns);
+        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(csvPath, attributes);
         // Grammar generation
         generateGrammar(attributes, statsMap, grammarPath);
     }

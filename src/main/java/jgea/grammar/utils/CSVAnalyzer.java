@@ -1,15 +1,17 @@
 package jgea.grammar.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSVAnalyzer {
 
+    // Data structure holding basic statistics for a numeric attribute
     public record AttributeStats(double min, double max, int minIntDigits, int maxIntDigits) {}
 
     // Helper method to read the CSV file in the package resources
@@ -20,89 +22,61 @@ public class CSVAnalyzer {
     }
 
     // Read the first line of the CSV file and extract the column names
-    public static List<String> extractAttributes(String resourcePath) throws IOException {
+    public static List<String> extractAttributes(String resourcePath, List<String> excludedColumns) throws IOException {
         try (BufferedReader reader = getReaderForResource(resourcePath)) {
             String header = reader.readLine();
             if (header == null) throw new IOException("CSV file is invalid or empty");
 
-            return Arrays.stream(header.split(";"))
-                    .map(String::trim) // Remove blank space
-                    .filter(h -> !h.isEmpty() &&
-                            !h.equalsIgnoreCase("ID") &&
-                            !h.equalsIgnoreCase("Date") &&
-                            !h.equalsIgnoreCase("Time"))
+            return Arrays.stream(header.split(","))
+                    .map(String::trim)
+                    .filter(h -> !h.isEmpty() && !excludedColumns.contains(h))
                     .collect(Collectors.toList());
         }
     }
 
     // Analyze the dataset and create a map with the attribute name and its stats (min, max, minDigits, maxDigits)
-    public static Map<String, AttributeStats> analyze(String resourcePath) throws IOException {
-        List<String> headersOfInterest = extractAttributes(resourcePath);
+    public static Map<String, AttributeStats> analyze(String resourcePath, List<String> headersOfInterest) throws IOException {
 
-        try (BufferedReader reader = getReaderForResource(resourcePath)) {
-            String headerLine = reader.readLine();
-            if (headerLine == null) throw new IOException("CSV file is invalid or empty");
+        CSVFormat format = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setTrim(true).build();
+        Map<String, AttributeStats> statsMap = new HashMap<>();
 
-            String[] originalHeaders = headerLine.split(";");
+        try (InputStream is = CSVAnalyzer.class.getClassLoader().getResourceAsStream(resourcePath);
+             Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+             CSVParser parser = new CSVParser(reader, format)) {
 
-            // Create a map to link a attribute name to its original column index
-            Map<String, Integer> headerToIndex = new HashMap<>();
-            for (int i = 0; i < originalHeaders.length; i++) {
-                if (headersOfInterest.contains(originalHeaders[i].trim())) {
-                    headerToIndex.put(originalHeaders[i].trim(), i);
-                }
-            }
-
-            // Initialize the statistics map
-            Map<String, AttributeStats> statsMap = new HashMap<>();
-
-            // Process each data row
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] values = line.split(";");
-
+            for (CSVRecord record : parser) {
+                // Process only the attributes we are interested in
                 for (String header : headersOfInterest) {
-                    Integer index = headerToIndex.get(header);
-                    if (index == null || index >= values.length || values[index].trim().isEmpty()) continue;
+                    if (!record.isMapped(header)) continue;
 
-                    String raw = values[index].trim().replace(',', '.');
+                    String rawValue = record.get(header);
+                    if (rawValue.isEmpty() || rawValue.equalsIgnoreCase("NaN")) continue;
 
                     try {
-                        // Parse the value and update statistics
-                        double value = Double.parseDouble(raw);
-                        // Ignore missing value
-                        if (value == -200.0) continue;
+                        double value = Double.parseDouble(rawValue);
 
-                        // Calculate the number of integer digits for the current value
-                        String[] parts = raw.split("\\.");
+                        // Extract the integer part to count digits
+                        String[] parts = rawValue.split("\\.");
                         String intPartString = parts[0].replace("-", "");
-                        int intDigits = intPartString.isEmpty() ? 0 : intPartString.length();
-                        if (intPartString.equals("0")) intDigits = 1;
+                        // Determine the number of digits in the integer part
+                        int intDigits = intPartString.isEmpty() ? 0 : (intPartString.equals("0") ? 1 : intPartString.length());
 
-                        AttributeStats current = statsMap.get(header);
-                        if (current == null) {
-                            statsMap.put(header, new AttributeStats(
-                                    value,       // min
-                                    value,       // max
-                                    intDigits,   // minDigits
-                                    intDigits    // maxDigits
-                            ));
-                        } else {
-                            statsMap.put(header, new AttributeStats(
-                                    Math.min(current.min(), value),
-                                    Math.max(current.max(), value),
-                                    Math.min(current.minIntDigits(), intDigits),
-                                    Math.max(current.maxIntDigits(), intDigits)
-                            ));
-                        }
-                    } catch (NumberFormatException ignored) {
-                        // If the value is not a number, ignore it
-                        System.err.printf("Error: value not in numeric format");
-                    }
+                        // Update statistics for this attribute
+                        statsMap.compute(header, (k, current) -> {
+                            if (current == null) {
+                                return new AttributeStats(value, value, intDigits, intDigits);
+                            } else {
+                                // Update min/max values and digit counts
+                                return new AttributeStats(
+                                        Math.min(current.min(), value), Math.max(current.max(), value),
+                                        Math.min(current.minIntDigits(), intDigits), Math.max(current.maxIntDigits(), intDigits)
+                                );
+                            }
+                        });
+                    } catch (NumberFormatException ignored) {}
                 }
             }
-            return statsMap;
         }
+        return statsMap;
     }
 }
