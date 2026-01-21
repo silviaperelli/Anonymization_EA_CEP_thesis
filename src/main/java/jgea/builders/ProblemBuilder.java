@@ -3,7 +3,7 @@ package jgea.builders;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
-import jgea.problem.AnonymizationProblem_2Objectives;
+import jgea.problem.StreamAnonymizationProblem_2Objectives;
 import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.problem.StreamAnonymizationProblem;
 
@@ -20,20 +20,22 @@ public class ProblemBuilder {
             @Param("inputCsvPath") String inputCsvPath,
             @Param("grammarPath") String grammarPath,
             @Param(value = "privacyMetric", dS = "K_ANONYMITY_CARDINALITY") PrivacyMetricChoice privacyMetric,
+            @Param(value = "keyColumn", dS = "") String keyColumn,
             @Param(value = "name", iS = "{inputCsvPath}") String name
     ) throws Exception {
         boolean isFilterOnly = grammarPath.toLowerCase().contains("filters");
-        return new StreamAnonymizationProblem(inputCsvPath, privacyMetric, isFilterOnly);
+        return new StreamAnonymizationProblem(inputCsvPath, keyColumn, privacyMetric, isFilterOnly);
     }
 
     // Create a problem with 2 objectives
     @SuppressWarnings("unused")
     @Cacheable
-    public static AnonymizationProblem_2Objectives anonymizationProblem2O(
+    public static StreamAnonymizationProblem_2Objectives anonymizationProblem2O(
             @Param("inputCsvPath") String inputCsvPath,
             @Param(value = "privacyMetric", dS = "K_ANONYMITY_CARDINALITY") PrivacyMetricChoice privacyMetric,
+            @Param(value = "keyColumn", dS = "") String keyColumn,
             @Param(value = "name", iS = "{inputCsvPath}") String name
     ) throws Exception {
-        return new AnonymizationProblem_2Objectives(inputCsvPath, privacyMetric);
+        return new StreamAnonymizationProblem_2Objectives(inputCsvPath, keyColumn, privacyMetric);
     }
 }

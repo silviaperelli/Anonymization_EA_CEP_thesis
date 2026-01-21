@@ -1,7 +1,7 @@
 package jgea.problem;
 
-import event.AirQualityEvent;
-import event.StreamFactory;
+import event.DataLoader;
+import event.GenericEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
 import jgea.mappers.QueryRepresentation;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 // Define the multi-objective optimization problem
-public class AnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRepresentation, Double> {
+public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRepresentation, Double> {
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
@@ -37,13 +37,13 @@ public class AnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRe
                     Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed())
             ));
 
-    private final static Distance<List<AirQualityEvent>> RESULTS_SIMILARITY = new F1Score();
+    private final static Distance<List<GenericEvent>> RESULTS_SIMILARITY = new F1Score();
 
-    private final Distance<List<AirQualityEvent>> K_ANONYMITY_PRIVACY;
-    private final Distance<List<AirQualityEvent>> K_ANONYMITY_PRIVACY_CARDINALITY;
-    private final static Distance<List<AirQualityEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
-    private final static Distance<List<AirQualityEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
-    private final static ModificationPrivacy MODIFICATION_PRIVACY = new ModificationPrivacy();
+    private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY;
+    private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY_CARDINALITY;
+    private final static Distance<List<GenericEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
+    private final static Distance<List<GenericEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
+    private final ModificationPrivacy MODIFICATION_PRIVACY;
 
     // Weights for the weighted sum calculation of the final privacy score
     private static final double W_SUPPRESSION = 0.33;
@@ -51,20 +51,28 @@ public class AnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRe
     private static final double W_MODIFICATION = 0.34;
 
     private final String inputCsvPath;
-    private final List<AirQualityEvent> originalStream;
-    private final List<AirQualityEvent> originalResults; // Ground truth results, calculated once in the constructor
+    private final String keyColumn;
+    private final List<GenericEvent> originalStream;
+    private final List<GenericEvent> originalResults; // Ground truth results, calculated once in the constructor
 
     private final PrivacyMetricChoice privacyMetricChoice;
+    private final List<String> attributes;
 
-    public AnonymizationProblem_2Objectives(String inputCsvPath, PrivacyMetricChoice privacyMetric) throws Exception {
+    public StreamAnonymizationProblem_2Objectives(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric) throws Exception {
         this.inputCsvPath = inputCsvPath;
+        this.keyColumn = keyColumn;
 
         // Load the original stream of events from the CSV file
-        this.originalStream = StreamFactory.createListFromFile(inputCsvPath);
+        DataLoader loader = new DataLoader(inputCsvPath, keyColumn);
+        DataLoader.LoadResult result = loader.load();
+
+        this.originalStream = result.events();
+        this.attributes = result.numericAttributes();
         this.privacyMetricChoice = privacyMetric;
 
-        K_ANONYMITY_PRIVACY = new KAnonymityPrivacy(this.originalStream, 50);
-        K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50);
+        K_ANONYMITY_PRIVACY = new KAnonymityPrivacy(this.originalStream, 50, this.attributes);
+        K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50, this.attributes);
+        MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
         MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original");
@@ -89,7 +97,7 @@ public class AnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRe
             try {
                 // Create an executable Liebre query and execute this anonymization query
                 LiebreAnonymizationQuery liebreExecutor = new LiebreAnonymizationQuery();
-                List<AirQualityEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath);
+                List<GenericEvent> modifiedEvents = liebreExecutor.processAnonymizationQuery(intermediateRepr, this.inputCsvPath, this.keyColumn);
 
                 // Case with empty modified datastream
                 if (modifiedEvents.isEmpty()) {
