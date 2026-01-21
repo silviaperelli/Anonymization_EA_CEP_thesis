@@ -1,7 +1,7 @@
 package jgea.query.utils;
 
 import component.operator.in1.map.MapFunction;
-import event.AirQualityEvent;
+import event.GenericEvent;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -12,7 +12,7 @@ import java.util.Deque;
  *
  * This class is stateful and maintains an internal buffer of recent values
  */
-public class MovingAverageMap implements MapFunction<AirQualityEvent, AirQualityEvent> {
+public class MovingAverageMap implements MapFunction<GenericEvent, GenericEvent> {
 
     private final String attribute;
     private final int windowSize;
@@ -25,7 +25,7 @@ public class MovingAverageMap implements MapFunction<AirQualityEvent, AirQuality
 
     // Applies the moving average transformation to a single event
     @Override
-    public AirQualityEvent apply(AirQualityEvent currentEvent) {
+    public GenericEvent apply(GenericEvent currentEvent) {
         if (currentEvent == null) {
             return null;
         }
@@ -35,7 +35,7 @@ public class MovingAverageMap implements MapFunction<AirQualityEvent, AirQuality
 
         // If the current value is NaN, do not update the window or apply a new value
         if (Double.isNaN(currentValue)) {
-            return new AirQualityEvent(currentEvent);
+            return new GenericEvent(currentEvent);
         }
 
         // Add the new valid value to the end of the window buffer
@@ -54,7 +54,7 @@ public class MovingAverageMap implements MapFunction<AirQualityEvent, AirQuality
         double average = currentSum / windowBuffer.size();
 
         // Create a copy of the event and set the calculated average on the corresponding attribute
-        AirQualityEvent anonymizedEvent = new AirQualityEvent(currentEvent);
+        GenericEvent anonymizedEvent = new GenericEvent(currentEvent);
         OperatorUtils.setAttributeValue(anonymizedEvent, attribute, average);
 
         return anonymizedEvent;

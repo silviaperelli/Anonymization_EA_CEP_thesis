@@ -1,7 +1,8 @@
 package jgea.query;
 
 import common.util.Util;
-import event.AirQualityEvent;
+import event.EventFactory;
+import event.GenericEvent;
 import jgea.mappers.QueryRepresentation;
 import jgea.query.utils.MovingAverageMap;
 import query.Query;
@@ -31,9 +32,9 @@ public class LiebreAnonymizationQuery {
         this.random = new Random();
     }
 
-    public List<AirQualityEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile) throws IOException {
+    public List<GenericEvent> processAnonymizationQuery(QueryRepresentation representation, String inputFile, String keyColumn) throws IOException {
 
-        final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
+        final List<GenericEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
 
         // Read all lines from the input CSV file into memory
         List<String> linesFromCsv;
@@ -46,22 +47,26 @@ public class LiebreAnonymizationQuery {
             }
         }
 
+        String headerLine = linesFromCsv.get(0);
+        String[] headers = Arrays.stream(headerLine.split(",")).map(String::trim).toArray(String[]::new);
+
         Query query = new Query();
         SourceFunction<String> collectionSource = createCollectionSource(linesFromCsv);
 
         // Define Source and CSV Reader (fixed part of the pipeline)
+        long[] idCounter = {0};
         Source<String> source = query.addBaseSource("input-source", collectionSource);
-        Operator<String, AirQualityEvent> reader = query.addMapOperator(
+        Operator<String, GenericEvent> reader = query.addMapOperator(
                 "csv-reader",
                 line -> {
-                    if (line.startsWith("ID;SensorID;Date")) return null;
-                    return AirQualityEvent.eventCreation(line);
+                    if (line.equals(headerLine)) return null;
+                    return EventFactory.createEventFromLine(line, headers, keyColumn, idCounter[0]++);
                 }
         );
         query.connect(source, reader);
 
         // Build the operator chain by iterating through the representation's nodes
-        Operator<?, AirQualityEvent> lastOperatorInChain = reader;
+        Operator<?, GenericEvent> lastOperatorInChain = reader;
         int opCounter = 0;
 
         // Loop through each operator node in the phenotype representation
@@ -73,7 +78,7 @@ public class LiebreAnonymizationQuery {
             switch (node.type()) {
                 case FILTER:
                     QueryRepresentation.FilterArgs filterArgs = (QueryRepresentation.FilterArgs) node.arguments();
-                    Operator<AirQualityEvent, AirQualityEvent> filterOperator = query.addFilterOperator(
+                    Operator<GenericEvent, GenericEvent> filterOperator = query.addFilterOperator(
                             operatorId,
                             event -> evaluateCondition(event, filterArgs)
                     );
@@ -85,13 +90,13 @@ public class LiebreAnonymizationQuery {
                     QueryRepresentation.MapDuplicateArgs duplicateArgs = (QueryRepresentation.MapDuplicateArgs) node.arguments();
                     double duplicateProb = duplicateArgs.probability();
 
-                    Operator<AirQualityEvent, AirQualityEvent> duplicateOperator = query.addFlatMapOperator(
+                    Operator<GenericEvent, GenericEvent> duplicateOperator = query.addFlatMapOperator(
                             operatorId,
                             event -> {
-                                List<AirQualityEvent> results = new ArrayList<>();
+                                List<GenericEvent> results = new ArrayList<>();
                                 results.add(event);
                                 if (random.nextDouble() < duplicateProb) {
-                                    results.add(new AirQualityEvent(event, AirQualityEvent.EventType.DUPLICATE));
+                                    results.add(new GenericEvent(event, GenericEvent.EventType.DUPLICATE));
                                 }
                                 return results;
                             }
@@ -103,7 +108,7 @@ public class LiebreAnonymizationQuery {
                 case MAP_NOISE:
                     QueryRepresentation.MapNoiseArgs noiseArgs = (QueryRepresentation.MapNoiseArgs) node.arguments();
 
-                    Operator<AirQualityEvent, AirQualityEvent> noiseOperator = query.addMapOperator(
+                    Operator<GenericEvent, GenericEvent> noiseOperator = query.addMapOperator(
                             operatorId,
                             event -> {
                                 if (event == null) return null;
@@ -120,7 +125,7 @@ public class LiebreAnonymizationQuery {
 
                 case MAP_AGGREGATE:
                     QueryRepresentation.MapAggregateArgs aggregateArgs = (QueryRepresentation.MapAggregateArgs) node.arguments();
-                    Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addMapOperator(
+                    Operator<GenericEvent, GenericEvent> aggregateOperator = query.addMapOperator(
                             operatorId,
                             new MovingAverageMap(aggregateArgs.attribute(), MOVING_AVERAGE_WINDOW_SIZE)
                             );
@@ -131,7 +136,7 @@ public class LiebreAnonymizationQuery {
         }
 
         // Define the final Sink
-        Sink<AirQualityEvent> sink = query.addBaseSink("output-sink", event -> {
+        Sink<GenericEvent> sink = query.addBaseSink("output-sink", event -> {
             if (event != null) {
                 collectedEvents.add(event);
             }

@@ -10,7 +10,7 @@ import component.sink.Sink;
 import component.source.Source;
 import component.source.SourceFunction;
 
-import event.AirQualityEvent;
+import event.GenericEvent;
 import jgea.metrics.performance.utils.MetricsConsumer;
 import query.LiebreContext;
 import query.Query;
@@ -29,10 +29,10 @@ public class MainQuery {
     }
 
     // Record to contain the final results events and the collected performance metrics
-    public record QueryResult(List<AirQualityEvent> events, PerformanceMetrics metrics) {
+    public record QueryResult(List<GenericEvent> events, PerformanceMetrics metrics) {
     }
 
-    public static QueryResult process(List<AirQualityEvent> inputStream, String queryId) throws IOException {
+    public static QueryResult process(List<GenericEvent> inputStream, String queryId) throws IOException {
 
         String metricsFilePath = "src/main/resources/queryMetrics";
 
@@ -52,32 +52,32 @@ public class MainQuery {
         MetricsFactory metrics = Metrics.fileAndConsumer(metricsFilePath, consumer.buildConsumers(queryId));
         LiebreContext.mergeWithStreamMetrics(metrics);
 
-        final List<AirQualityEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
+        final List<GenericEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
 
         // Create and add a source that reads from the provided in-memory list
-        SourceFunction<AirQualityEvent> collectionSource = createCollectionSource(inputStream);
-        Source<AirQualityEvent> inputSource = query.addBaseSource("I1_"+queryId, collectionSource);
+        SourceFunction<GenericEvent> collectionSource = createCollectionSource(inputStream);
+        Source<GenericEvent> inputSource = query.addBaseSource("I1_"+queryId, collectionSource);
 
         // Operator to filter tuple with CO level >= 2.0 and NO2 level >= 40.0
-        Operator<AirQualityEvent, AirQualityEvent> filter1 = query.addFilterOperator(
-                "filter1_" + queryId, tuple -> (tuple.getCoLevel() >= 2.0 && tuple.getNo2() >= 40.0));
+        Operator<GenericEvent, GenericEvent> filter1 = query.addFilterOperator(
+                "filter1_" + queryId, tuple -> (tuple.getAttribute("CO(GT)") >= 2.0 && tuple.getAttribute("NO2(GT)") >= 40.0));
 
         // Window of 3 hours, sliding every 1 hour
         final long WINDOW_SIZE = 3 * 60 * 60 * 1000;
         final long WINDOW_SLIDE = 60 * 60 * 1000;
 
         // Operator to aggregate the CO level and NO2 level in a window of 2 hours
-        Operator<AirQualityEvent, AirQualityEvent> aggregateOperator = query.addTimeAggregateOperator("average_"+queryId,
+        Operator<GenericEvent, GenericEvent> aggregateOperator = query.addTimeAggregateOperator("average_"+queryId,
                 WINDOW_SIZE, WINDOW_SLIDE, new AggregateWindow());
 
         // Operator to filter tuple with aggregate CO level >= 5.0 and aggregate NO2 level >= 100.0
-        Operator<AirQualityEvent, AirQualityEvent> filter2 = query.addFilterOperator(
+        Operator<GenericEvent, GenericEvent> filter2 = query.addFilterOperator(
                 "filter2_"+queryId,
-                tuple -> (tuple.getCoLevel() >= 5.0 && tuple.getNo2() >= 100.0));
+                tuple -> (tuple.getAttribute("CO(GT)") >= 5.0 && tuple.getAttribute("NO2(GT)") >= 100.0));
 
         // Final Sink that adds every event to a list
-        Sink<AirQualityEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
+        Sink<GenericEvent> sink = query.addBaseSink("o1_"+queryId, event -> {
             if (event != null) {
             collectedEvents.add(event);
             }
@@ -157,54 +157,64 @@ public class MainQuery {
         };
     }
 
-    private static class AggregateWindow extends BaseTimeWindowAddRemove<AirQualityEvent, AirQualityEvent> {
+    private static class AggregateWindow extends BaseTimeWindowAddRemove<GenericEvent, GenericEvent> {
 
         private int count = 0;
         private double sumCO = 0.0;
         private double sumNO2 = 0.0;
-        private AirQualityEvent lastEvent = null;
+        private GenericEvent lastEvent = null;
         private long lastOutputTs = -1L;
 
         @Override
-        public void add(AirQualityEvent event) {
-            if (!Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
-                sumCO += event.getCoLevel();
-                sumNO2 += event.getNo2();
+        public void add(GenericEvent event) {
+            double co = event.getAttribute("CO(GT)");
+            double no2 = event.getAttribute("NO2(GT)");
+            if (!Double.isNaN(co) && !Double.isNaN(no2)) {
+                sumCO += co;
+                sumNO2 += no2;
                 count++;
                 lastEvent = event;
             }
         }
 
         @Override
-        public void remove(AirQualityEvent event) {
-            if (!Double.isNaN(event.getCoLevel()) && !Double.isNaN(event.getNo2())) {
-                sumCO -= event.getCoLevel();
-                sumNO2 -= event.getNo2();
+        public void remove(GenericEvent event) {
+            double co = event.getAttribute("CO(GT)");
+            double no2 = event.getAttribute("NO2(GT)");
+            if (!Double.isNaN(co) && !Double.isNaN(no2)) {
+                sumCO -= co;
+                sumNO2 -= no2;
                 count--;
             }
         }
 
         @Override
-        public AirQualityEvent getAggregatedResult() {
+        public GenericEvent getAggregatedResult() {
             if (count == 0 || lastEvent == null) {
-                return AirQualityEvent.createEmptyEvent(this.startTimestamp);
+                return GenericEvent.createEmptyEvent(this.startTimestamp);
             }
 
             // Avoid duplicates due to the previous filter operator in the pipeline
             // If the last event in the window is the same as the one in the last output,
             // ignore it
             if (lastEvent.getTimestamp() == lastOutputTs) {
-                return AirQualityEvent.createEmptyEvent(this.startTimestamp);
+                return GenericEvent.createEmptyEvent(this.startTimestamp);
             }
 
             double averageCO = sumCO / count;
             double averageNO2 = sumNO2 / count;
             lastOutputTs = lastEvent.getTimestamp();
-            return new AirQualityEvent(lastEvent, averageCO, averageNO2);
+
+
+            GenericEvent resultEvent = new GenericEvent(lastEvent);
+            resultEvent.setAttribute("CO(GT)", averageCO);
+            resultEvent.setAttribute("NO2(GT)", averageNO2);
+
+            return resultEvent;
         }
 
         @Override
-        public TimeWindowAddRemove<AirQualityEvent, AirQualityEvent> factory() {
+        public TimeWindowAddRemove<GenericEvent, GenericEvent> factory() {
             return new AggregateWindow();
         }
 
