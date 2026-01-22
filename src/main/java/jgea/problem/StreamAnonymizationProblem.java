@@ -45,6 +45,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
     private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY;
     private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY_CARDINALITY;
+    private final KAnonymityPrivacyCardinalityStats K_ANONYMITY_STATS;
     private final static Distance<List<GenericEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
     private final static Distance<List<GenericEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
     private final ModificationPrivacy MODIFICATION_PRIVACY;
@@ -77,6 +78,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
         K_ANONYMITY_PRIVACY = new KAnonymityPrivacy(this.originalStream, 50, this.attributes);
         K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50, this.attributes);
+        K_ANONYMITY_STATS = new KAnonymityPrivacyCardinalityStats(this.originalStream, 50, this.attributes);
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
@@ -115,6 +117,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                         case SUPPRESSION_ONLY -> privacyScoreEmpty = 1.0;
                         case WEIGHTED_AVERAGE -> privacyScoreEmpty = W_SUPPRESSION;
                         case K_ANONYMITY -> privacyScoreEmpty = 0.0;
+                        case K_ANONYMITY_CARDINALITY_MAX -> privacyScoreEmpty = K_ANONYMITY_STATS.applyWithMax(this.originalStream, modifiedEvents);
+                        case K_ANONYMITY_CARDINALITY_Q99 -> privacyScoreEmpty = K_ANONYMITY_STATS.applyWithQuantile99(this.originalStream, modifiedEvents);
                         case K_ANONYMITY_CARDINALITY -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                         default -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                     }
@@ -144,8 +148,14 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                     case SUPPRESSION_ONLY:
                         finalPrivacyScore = SUPPRESSION_PRIVACY.apply(this.originalStream, modifiedEvents);
                         break;
+                    case K_ANONYMITY_CARDINALITY_MAX:
+                        finalPrivacyScore = K_ANONYMITY_STATS.applyWithMax(this.originalStream, modifiedEvents);
+                        break;
+                    case K_ANONYMITY_CARDINALITY_Q99:
+                        finalPrivacyScore = K_ANONYMITY_STATS.applyWithQuantile99(this.originalStream, modifiedEvents);
+                        break;
                     case K_ANONYMITY_CARDINALITY:
-                    default: // Default alla tua metrica più avanzata
+                    default:
                         finalPrivacyScore = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                         break;
                 }

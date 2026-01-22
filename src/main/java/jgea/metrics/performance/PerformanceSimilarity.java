@@ -63,7 +63,6 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
         // If the grammar is composed only by filters, the worst case is suppression
         final double TUPLE_WORST_CASE_ERROR = isFilterOnly ? 1.0 : 2.0;
         final double KEY_WORST_CASE_ERROR = 1.0;
-        final double GENERATION_FROM_ZERO_ERROR = 1.0;
 
         for (String streamName : originalProfile.streamNames()) {
             int[] tupleCounts = originalProfile.getTupleArray(streamName);
@@ -75,15 +74,20 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
                     // If data existed, the worst case is triplication
                     sumOfWorstCaseSquaredErrors += Math.pow(TUPLE_WORST_CASE_ERROR, 2);
                 } else {
-                    // If no data existed, the worst case is creating data from nothing
-                    sumOfWorstCaseSquaredErrors += Math.pow(GENERATION_FROM_ZERO_ERROR, 2);
+                    // If no data existed,no data can be created from nothing so we don't count it
+                    sumOfWorstCaseSquaredErrors += 0.0;
                 }
             }
 
             // Iterate through all time buckets for keys
             for (int originalCount : keyCounts) {
-                // For keys the worst case is suppression because the operators cannot create new keys
-                sumOfWorstCaseSquaredErrors += Math.pow(KEY_WORST_CASE_ERROR, 2);
+                if (originalCount > 0) {
+                    // Worst case: total suppression of keys
+                    sumOfWorstCaseSquaredErrors += Math.pow(KEY_WORST_CASE_ERROR, 2);
+                } else {
+                    // No keys existed, no worst case possible
+                    sumOfWorstCaseSquaredErrors += 0.0;
+                }
             }
         }
         return Math.sqrt(sumOfWorstCaseSquaredErrors);

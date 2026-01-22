@@ -13,5 +13,11 @@ public enum PrivacyMetricChoice {
     WEIGHTED_AVERAGE,
 
     // A simple metric measuring only the fraction of suppressed tuples
-    SUPPRESSION_ONLY
+    SUPPRESSION_ONLY,
+
+    // The k-anonymity metric with cardinality penalty, the privacy score is calculated with the maximum stddev
+    K_ANONYMITY_CARDINALITY_MAX,
+
+    // The k-anonymity metric with cardinality penalty, the privacy score is calculated with the q99 stddev
+    K_ANONYMITY_CARDINALITY_Q99
 }

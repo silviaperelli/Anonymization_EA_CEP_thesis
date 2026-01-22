@@ -89,8 +89,30 @@ public class KAnonymityPrivacyCardinalityStats
                         List<GenericEvent> modified) {
         // Compute raw statistics on standard deviations
         StdDevStats stats = applyWithStdDevStats(original, modified);
+        double cardinalityFactor = calculateCardinalityFactor(original, modified);
         // Convert mean standard deviation (privacy risk) into a score to maximize
-        return 1.0 / (1.0 + stats.mean);
+        double score = 1.0 / (1.0 + stats.mean);
+        return score * cardinalityFactor;
+    }
+
+    /**
+     * Calculate the privacy score based on the 99° percentile of the standard deviation
+     */
+    public Double applyWithQuantile99(List<GenericEvent> original, List<GenericEvent> modified) {
+        StdDevStats stats = applyWithStdDevStats(original, modified);
+        double cardinalityFactor = calculateCardinalityFactor(original, modified);
+        double score = 1.0 / (1.0 + stats.q99);
+        return score * cardinalityFactor;
+    }
+
+    /**
+     * Calculate the privacy score based on the maximum of the standard deviation
+     */
+    public Double applyWithMax(List<GenericEvent> original, List<GenericEvent> modified) {
+        StdDevStats stats = applyWithStdDevStats(original, modified);
+        double cardinalityFactor = calculateCardinalityFactor(original, modified);
+        double score = 1.0 / (1.0 + stats.max);
+        return score * cardinalityFactor;
     }
 
     /**
@@ -153,6 +175,16 @@ public class KAnonymityPrivacyCardinalityStats
         stats.q99 = stddevs.get((int) Math.floor(0.99 * (n - 1)));
 
         return stats;
+    }
+
+    private double calculateCardinalityFactor(List<GenericEvent> original, List<GenericEvent> modified) {
+        if (original == null || modified == null) return 0.0;
+        double nOrig = original.size();
+        double nMod = modified.size();
+        if (nOrig == 0) return (nMod == 0) ? 1.0 : 0.0;
+        if (nMod == 0) return 0.0;
+        double sizeRatio = nMod / nOrig;
+        return Math.min(sizeRatio, 1.0 / sizeRatio);
     }
 
     // Converts a GenericEvent into a normalized feature vector
