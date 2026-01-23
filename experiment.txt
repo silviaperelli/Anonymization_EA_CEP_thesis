@@ -9,7 +9,7 @@ ea.experiment(
         mapper = silvia.mapper.treeToQueryMapper()
       );
       problem = silvia.problem.anonymizationProblem(
-        inputCsvPath = "datasets/airQuality_withSensorID.csv";
+        inputCsvPath = "datasets/airQuality_parallel.csv";
         grammarPath = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf";
         privacyMetric = K_ANONYMITY_CARDINALITY;
         keyColumn = "SensorID"

@@ -9,7 +9,7 @@ ea.experiment(
         mapper = silvia.mapper.treeToQueryMapper()
       );
       problem = silvia.problem.anonymizationProblem2O(
-        inputCsvPath = "datasets/airQuality_parallel.csv";
+        inputCsvPath = "datasets/airQuality_withSensorID.csv";
         privacyMetric = K_ANONYMITY_CARDINALITY;
         keyColumn = "SensorID"
       )
