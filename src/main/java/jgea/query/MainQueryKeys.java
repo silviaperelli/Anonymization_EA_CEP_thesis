@@ -12,7 +12,6 @@ import event.GenericEvent;
 import query.Query;
 import jgea.metrics.performance.utils.StreamStatsWindow;
 
-import java.io.IOException;
 import java.util.*;
 
 public class MainQueryKeys {
@@ -20,23 +19,13 @@ public class MainQueryKeys {
     // Record to contain the final results events and the collected performance metrics
     public record QueryResult(List<GenericEvent> events, StreamStatsWindow statsWindow) {}
 
-    public static QueryResult process(List<GenericEvent> inputStream, String queryId) throws IOException {
+    public static QueryResult process(List<GenericEvent> inputStream, String queryId, long minTs, long maxTs) {
 
-        long minTs = 1078941600000L; // 2004-03-10 18:00:00 UTC
-        long maxTs = 1112623200000L; // 2005-04-04 14:00:00 UTC
-        long resolution = 3600000L;  // 1 hour
+        final long resolution = 3600000L;  // 1 hour
 
         StreamStatsWindow statsWindow = new StreamStatsWindow(
                 Set.of("sourceStream", "afterFilter1", "afterAggregate", "outputStream"),
                 minTs, maxTs, resolution);
-
-        if (inputStream == null || inputStream.isEmpty()) {
-            // Create an empty StreamStatsWindow
-            StreamStatsWindow emptyStats = new StreamStatsWindow(
-                    Set.of("sourceStream", "afterFilter1", "afterAggregate", "outputStream"),
-                    minTs, maxTs, resolution);
-            return new QueryResult(Collections.emptyList(), emptyStats);
-        }
 
         final List<GenericEvent> collectedEvents = Collections.synchronizedList(new ArrayList<>());
         Query query = new Query();
@@ -266,4 +255,5 @@ public class MainQueryKeys {
             return new AggregateWindow();
         }
     }
+
 }

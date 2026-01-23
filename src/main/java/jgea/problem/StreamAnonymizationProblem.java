@@ -44,8 +44,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final Distance<StreamStatsWindow> PERFORMANCE_SIMILARITY;
 
     private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY;
-    private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY_CARDINALITY;
-    private final KAnonymityPrivacyCardinalityStats K_ANONYMITY_STATS;
+    private final KAnonymityPrivacyCardinality K_ANONYMITY_PRIVACY_CARDINALITY;
     private final static Distance<List<GenericEvent>> SUPPRESSION_PRIVACY = new SuppressionPrivacy();
     private final static Distance<List<GenericEvent>> DUPLICATE_PRIVACY = new DuplicationPrivacy();
     private final ModificationPrivacy MODIFICATION_PRIVACY;
@@ -63,6 +62,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
     private final PrivacyMetricChoice privacyMetricChoice;
     private final List<String> attributes;
+    private final long minTs;
+    private final long maxTs;
 
     public StreamAnonymizationProblem(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric, boolean isFilterOnly) throws Exception {
         this.inputCsvPath = inputCsvPath;
@@ -73,16 +74,26 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         DataLoader.LoadResult result = loader.load();
 
         this.originalStream = result.events();
+
+        if (this.originalStream.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Empty input dataset: Problem cannot be initialized"
+            );
+        }
+
         this.attributes = result.numericAttributes();
         this.privacyMetricChoice = privacyMetric;
+        this.minTs = originalStream.stream().mapToLong(GenericEvent::getTimestamp).min().getAsLong();
+        this.maxTs = originalStream.stream().mapToLong(GenericEvent::getTimestamp).max().getAsLong();
+
+        System.out.println(String.format("Timestamp detected: minTs=%d, maxTs=%d", this.minTs, this.maxTs));
 
         K_ANONYMITY_PRIVACY = new KAnonymityPrivacy(this.originalStream, 50, this.attributes);
         K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50, this.attributes);
-        K_ANONYMITY_STATS = new KAnonymityPrivacyCardinalityStats(this.originalStream, 50, this.attributes);
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
-        MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original");
+        MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original", this.minTs, this.maxTs);
 
         this.originalResults = baselineOutcome.events();
         this.originalStats = baselineOutcome.statsWindow();
@@ -117,8 +128,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                         case SUPPRESSION_ONLY -> privacyScoreEmpty = 1.0;
                         case WEIGHTED_AVERAGE -> privacyScoreEmpty = W_SUPPRESSION;
                         case K_ANONYMITY -> privacyScoreEmpty = 0.0;
-                        case K_ANONYMITY_CARDINALITY_MAX -> privacyScoreEmpty = K_ANONYMITY_STATS.applyWithMax(this.originalStream, modifiedEvents);
-                        case K_ANONYMITY_CARDINALITY_Q99 -> privacyScoreEmpty = K_ANONYMITY_STATS.applyWithQuantile99(this.originalStream, modifiedEvents);
+                        case K_ANONYMITY_CARDINALITY_MAX -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.applyWithMax(this.originalStream, modifiedEvents);
+                        case K_ANONYMITY_CARDINALITY_Q99 -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.applyWithQuantile99(this.originalStream, modifiedEvents);
                         case K_ANONYMITY_CARDINALITY -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                         default -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                     }
@@ -149,10 +160,10 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                         finalPrivacyScore = SUPPRESSION_PRIVACY.apply(this.originalStream, modifiedEvents);
                         break;
                     case K_ANONYMITY_CARDINALITY_MAX:
-                        finalPrivacyScore = K_ANONYMITY_STATS.applyWithMax(this.originalStream, modifiedEvents);
+                        finalPrivacyScore = K_ANONYMITY_PRIVACY_CARDINALITY.applyWithMax(this.originalStream, modifiedEvents);
                         break;
                     case K_ANONYMITY_CARDINALITY_Q99:
-                        finalPrivacyScore = K_ANONYMITY_STATS.applyWithQuantile99(this.originalStream, modifiedEvents);
+                        finalPrivacyScore = K_ANONYMITY_PRIVACY_CARDINALITY.applyWithQuantile99(this.originalStream, modifiedEvents);
                         break;
                     case K_ANONYMITY_CARDINALITY:
                     default:
@@ -161,7 +172,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 }
 
                 // Execute the main query
-                MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId));
+                MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
 
                 StreamStatsWindow modifiedStats = modifiedOutcome.statsWindow();
                 qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalStats, modifiedStats));
