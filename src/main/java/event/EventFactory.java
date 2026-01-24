@@ -2,7 +2,16 @@ package event;
 
 import event.GenericEvent.EventType;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class EventFactory {
+
+    private static Set<String> numeric_attributes = Set.of();
+
+    public static void setNumericAttributes(Set<String> numericAttributes) {
+        numeric_attributes = new HashSet<>(numericAttributes);
+    }
 
     // Create a GenericEvent instance from a single CSV line
     public static GenericEvent createEventFromLine(
@@ -23,7 +32,7 @@ public class EventFactory {
             long tsInMillis = Long.parseLong(tokens[tsIndex].trim());
 
             // Determine the event key, if no key column is provided, use the sequential ID as a fallback
-            String key = keyColumnName.isEmpty() ? String.valueOf(idCounter) : tokens[keyIndex].trim();
+            String key = keyColumnName.isEmpty() ? "GLOBAL" : tokens[keyIndex].trim();
 
             GenericEvent event = new GenericEvent(tsInMillis, key);
 
@@ -51,10 +60,8 @@ public class EventFactory {
                     String attrName = headers[i];
 
                     // Skip non-numeric or structural columns
-                    if (attrName.equalsIgnoreCase("ID") ||
-                            attrName.equalsIgnoreCase("timestamp") ||
-                            attrName.equalsIgnoreCase("EventType")) {
-                        continue;
+                    if (!numeric_attributes.contains(attrName)) {
+                        continue; // identico al DataLoader
                     }
 
                     String rawValue = tokens[i].trim();
@@ -63,14 +70,7 @@ public class EventFactory {
                     if (rawValue.isEmpty() || rawValue.equalsIgnoreCase("NaN")) {
                         event.setAttribute(attrName, Double.NaN);
                     } else {
-                        try {
-                            // Parse numeric value using standard double parsing
-                            event.setAttribute(attrName, Double.parseDouble(rawValue));
-
-                        } catch (NumberFormatException e) {
-                            // Non-numeric values are mapped to NaN
-                            event.setAttribute(attrName, Double.NaN);
-                        }
+                        event.setAttribute(attrName, Double.parseDouble(rawValue));
                     }
                 }
             }

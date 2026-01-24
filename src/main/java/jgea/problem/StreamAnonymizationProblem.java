@@ -1,6 +1,7 @@
 package jgea.problem;
 
 import event.DataLoader;
+import event.EventFactory;
 import event.GenericEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
@@ -72,6 +73,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         // Load the original stream of events from the CSV file
         DataLoader loader = new DataLoader(inputCsvPath, keyColumn);
         DataLoader.LoadResult result = loader.load();
+        EventFactory.setNumericAttributes(new HashSet<>(result.numericAttributes()));
 
         this.originalStream = result.events();
 

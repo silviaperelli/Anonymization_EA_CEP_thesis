@@ -81,7 +81,7 @@ public class DataLoader {
             for (CSVRecord record : records) {
                 try {
                     long tsInMillis = Long.parseLong(record.get("timestamp"));
-                    String key = !this.keyColumn.isEmpty() ? record.get(this.keyColumn) : String.valueOf(idCounter);
+                    String key = !this.keyColumn.isEmpty() ? record.get(this.keyColumn) : "GLOBAL";
 
                     GenericEvent event = new GenericEvent(tsInMillis, key);
                     // Assign a sequential internal ID

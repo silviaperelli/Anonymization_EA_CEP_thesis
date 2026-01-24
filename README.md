@@ -10,66 +10,86 @@ The core idea is to find the best possible trade-offs between three competing ob
 The evolutionary process explores different anonymization pipelines to find a set of non-dominated solutions representing the best possible compromises between these objectives. The anonymization query can be composed of operators like `filter`, `map_noise`, `map_duplicate`, and `map_aggregate`.
 
 ## Project Structure
-Here is an overview of the key packages and classes:
+Here is a high-level overview of the project's structure:
 
-*   **/src/main/java/jgea/problem**:
-    *   `StreamAnonymizationProblem.java`: The core class that defines the 3-objective problem. It initializes the baseline, sets up the objectives and contains the `qualityFunction` responsible for evaluating the fitness of each candidate solution.
-    *   `AnonymizationProblem_2Objectives.java`: A simplified version of the problem for experiments focused only on 2 objectives, Privacy and Results Similarity.
+*   **/src/main/java/**: Contains all the Java source code, including the problem definition, metrics, query logic, and grammar generators.
 
-*   **/src/main/java/jgea/query**:
-    *   `MainQueryKeys.java`: Implements the fixed Liebre analysis query (`Q`) that is used to evaluate the quality of an anonymized stream. It captures performance statistics (tuple and key counts per time bucket) into a `StreamStatsWindow` object.
-    *   `LiebreAnonymizationQuery.java`: Translates an evolved phenotype (`QueryRepresentation`) into an executable Liebre query.
+*   **/src/main/resources/**: Contains all resource files
+    *  `datasets/`: Includes the datasets used for the experiments.
+    *  `grammars/`: Includes pre-generated grammar (.bnf) files for the available datasets.
 
-*   **/src/main/java/jgea/grammar**:
-    *    `GrammarGenerator*.java`: A set of classes to automatically generate the grammar file (`.bnf`). The different classes define grammars with different sets of operators (e.g., only filters, filters + maps, filters + map + aggregate).    
+*   **experiment.txt**: The main configuration file for a 3-objective experiment.
 
-*   **/src/main/java/jgea/metrics**:
-    *   This package and its sub-packages (`privacy`, `performance`, `results`) contain all the implementations of the metrics used for fitness evaluation.
-
-*   **/src/main/java/jgea/mappers**:
-    *   `QueryRepresentation.java`: Defines the phenotype, a structured representation of the query pipeline.
-    *   `Mapper.java`: The primary mapper class responsible for the actual transformation. It's invoked by the evolutionary algorithm to translate a genotype into a phenotype.
-    *   `TreeToRepresentation.java`: A component used by `Mapper.java` to translate the genotype (a Tree<String> derived from the grammar) into the phenotype (a query representation).
-
-*   **/src/main/java/jgea/builders**:
-    *   This package contains the builders classes that make custom components of this project (like problems and mappers) available to the JGEA experimenter framework.
-    *   `ProblemBuilder.java`: Makes the `StreamAnonymizationProblem` accessible from the experiment file using the `silvia.problem.anonymizationProblem(...)` or `silvia.problem.anonymizationProblem2O(...)` builder.
-    *   `MapperBuilder.java`: Makes the custom `Mapper` class accessible from the experiment file using the `silvia.mapper.treeToQueryMapper()` builder.
+*   **experiment_2objectives.txt**: A configuration file for a simplified 2-objective experiment.
 
 ## How to Run an Experiment
 
 This project is designed to be configured and run entirely from an experiment file (`.txt`) using the JGEA experimenter.
 
-### 1. Generate the Grammar
+### 1. Datasets
 
-Before running an experiment, you must generate the grammar file that defines the search space. Run the `main` method of the appropriate class to generate a grammar file for the example dataset **AirQuality**:
+The project includes two main sets of datasets located in `src/main/resources/datasets/`:
 
-*   `GrammarGeneratorOnlyFilters.java`: For experiments with filter operators only. 
-*   `GrammarGeneratorMap.java`: For experiments with filter and map operators.
-*   `GrammarGeneratorAggregate.java`: For experiments with filter, map, and aggregate operators.
+*   `airQuality_parallel.csv`, `airQuality_withSensorID.csv`
+*   `geolife_5mins.csv`, `geolife_60mins.csv`
 
-This will create/update the corresponding `.bnf` file in `src/main/resources`, where three grammar files for the example dataset are already provided (`generated-grammar-filters.bnf`, `generated-grammar-map.bnf`, `generated-grammar-aggregate.bnf`).
+**Using a Custom Dataset**
 
-### 2. Configure the Experiment File
+You can use your own dataset by following these conventions:
 
-The experiment file (e.g., experiment.txt) allows to configure the entire experiment. Here you define which problem, grammar, and metrics to use.
+1. **Format:** The file must be a standard CSV with a **comma (,)** as the delimiter and a **period (.)** as the decimal separator.
 
-For the example dataset **AirQuality**, the file `experiment.txt` is provided to run the problem with three objectives, while `experiment_2objectives.txt` is used to run it with two objectives.
+2. **Timestamp Column:** A column named exactly **`timestamp`** must be present. Its values must be Unix timestamps in **milliseconds**.
 
-In these files the `representation` block must point to the correct **grammar file** and the `problem` block must point to the correct **input file** and **grammar file** and must select the **privacy metric** to use.
+3. **Data Sorting:** The dataset should be sorted by the timestamp column in non-decreasing (ascending) order.
+
+4. **Key Column:** If your dataset has a column that identifies parallel streams (e.g., a user ID or sensor ID), you have to specify its name in the experiment file. This column will be used as the partitioning key and will be excluded from streaming operators
+
+### 2. Generate the Grammar
+
+Before running an experiment with your own dataset, you must generate the grammar file that defines the search space. Run the `main` method of the grammar generator classes found in `src/main/java/jgea/grammar/`. You need to configure
+`csvPath` (the path to the dataset), `keyColumn` (the name of the partitioning key column), `grammarPath` (the path where the generated .bnf file will be saved).
+
+**Provided Grammars**
+
+Pre-generated grammars are available:
+
+* For **AirQuality** in `src/main/resources/grammars/airQuality/`:
+
+        airQuality_generated-grammar-aggregate.bnf
+
+        airQuality_generated-grammar-filters.bnf
+
+        airQuality_generated-grammar-map.bnf
+
+* For **Geolife** in `src/main/resources/grammars/geolife/`:
+
+        geolife_generated-grammar-aggregate.bnf
+
+        geolife_generated-grammar-filters.bnf
+
+        geolife_generated-grammar-map.bnf
+
+### 3. Configure the Experiment File
+
+The experiment file (e.g., experiment.txt) allows to configure the entire experiment.
+
+The file `experiment.txt` is provided to run the problem with three objectives, while `experiment_2objectives.txt` is used to run it with two objectives (privacy and results similarity).
+
+In these files the `representation` block must point to the correct **grammar file** and the `problem` block must point to the correct **input file** and **grammar file** and must select the **privacy metric** to use and the **keyColumn**.
 
 **Example 1: 3-Objective Experiment `experiment.txt`**
 ```
 ...
-  representation = ea.r.cfgTree(
-    grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar-aggregate.bnf")
-  );
+  representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(
+    path = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf"));
 ...
-problem = silvia.problem.anonymizationProblem(
-  inputCsvPath = "datasets/airQuality_withSensorID.csv";
-  grammarPath = "src/main/resources/generated-grammar-aggregate.bnf";
-  privacyMetric = K_ANONYMITY_CARDINALITY
-)
+    problem = silvia.problem.anonymizationProblem(
+      inputCsvPath = "datasets/airQuality_parallel.csv";
+      grammarPath = "src/main/resources/generated-grammar-aggregate.bnf";
+      privacyMetric = K_ANONYMITY_CARDINALITY;
+      keyColumn = "SensorID"
+    )
 ```
 
 **Example 2: 2-Objective Experiment `experiment_2objectives.txt`**
@@ -77,27 +97,29 @@ problem = silvia.problem.anonymizationProblem(
 **Note**: In the 2-objective version, it is not necessary to specify the grammar path in the problem definition.
 ```
 ...
-  representation = ea.r.cfgTree(
-    grammar = ea.grammar.fromFile(path = "src/main/resources/generated-grammar-filters.bnf")
-  );
+   representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(
+            path = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf"));
 ...
-problem = silvia.problem.anonymizationProblem2O(
-  inputCsvPath = "datasets/airQuality_withSensorID.csv";
-  privacyMetric = SUPPRESSION_ONLY
-)
+    problem = silvia.problem.anonymizationProblem2O(
+      inputCsvPath = "datasets/airQuality_parallel.csv";
+      privacyMetric = K_ANONYMITY_CARDINALITY;
+      keyColumn = "SensorID"
+    )
 ```
 
 For **privacy evaluation**, the following metrics are available and can be selected in the experiment configuration `.txt` file as follows:
 * `K_ANONYMITY`: A k-anonymity metric based on the average standard deviation of the distances between quasi-identifiers.
 * `K_ANONYMITY_CARDINALITY`: An advanced metric that combines k-anonymity with a cardinality penalty.
+* `K_ANONYMITY_CARDINALITY_MAX`: The k_anonymity metric with a cardinality penalty, the privacy score is based on the maximum standard deviation found across all tuples.
+* `K_ANONYMITY_CARDINALITY_Q99`: The k_anonymity metric with a cardinality penalty, the privacy score is based on the 99th percentile of the standard deviation.
 * `WEIGHTED_AVERAGE`: A weighted average of suppression, duplication, and modification.
 * `SUPPRESSION_ONLY`: A simple metric measuring only the fraction of suppressed tuples.
 
 **Important Note**: 
-- When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While `K_ANONYMITY` and `K_ANONYMITY_CARDINALITY` may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
-- The **Performance Similarity** metric is based on event time, not wall-clock time. The `minTimestamp`, `maxTimestamp` and `resolution` are dataset-dependent and are currently hardcoded in `MainQueryKeys.java`. If you change the dataset, you must update these values to match the new time range.
+- When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While the k-anonymity metrics may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
+- The **Performance Similarity** metric is based on event time, not wall-clock time. The `minTimestamp`, `maxTimestamp` are determined automatically from the dataset. The `resolution` of the buckets is fixed at **1 hour** (**3600000L milliseconds**), a value suitable for the provided datasets. If a different granularity is needed for a specific dataset, this value can be changed directly in `MainQueryKeys.java`.
 
-### 3. Build the Project
+### 4. Build the Project
 
 Compile the project and package it into an executable JAR with all dependencies. Run from the project’s root directory:
 
@@ -108,9 +130,9 @@ mvn clean install
 **Java version**:
 **Java 21** is required to build and run the project due to compatibility constraints of the JGEA framework, which requires JDK 21.
 
-### 4. Run the Experiment
+### 5. Run the Experiment
 
-Execute the JAR from your terminal, pointing to your experiment file:
+Execute the JAR from the project’s root directory, pointing to your experiment file:
 
 ```
 java -jar target/Anonymization_EA_CEP_thesis-1.0-SNAPSHOT-jar-with-dependencies.jar -v -nt 10 -f experiment.txt
