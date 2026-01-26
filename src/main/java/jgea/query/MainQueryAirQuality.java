@@ -14,7 +14,7 @@ import jgea.metrics.performance.utils.StreamStatsWindow;
 
 import java.util.*;
 
-public class MainQueryKeys {
+public class MainQueryAirQuality {
 
     // Record to contain the final results events and the collected performance metrics
     public record QueryResult(List<GenericEvent> events, StreamStatsWindow statsWindow) {}

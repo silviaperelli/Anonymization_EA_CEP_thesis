@@ -1,9 +1,6 @@
 package jgea.metrics.performance.utils;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * StreamStatsWindow keeps lightweight statistics for a fixed set of streams
@@ -229,37 +226,6 @@ public final class StreamStatsWindow {
 
     public int[] getKeyArray(String stream) {
         return getArrayFor(keyCounts, stream);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("StreamStatsWindow {\n");
-        sb.append("  streams: ").append(streamNames).append("\n");
-        sb.append("  minTimestamp: ").append(minTimestamp)
-                .append(" (").append(java.time.Instant.ofEpochMilli(minTimestamp)).append(")\n");
-        sb.append("  maxTimestamp: ").append(maxTimestamp)
-                .append(" (").append(java.time.Instant.ofEpochMilli(maxTimestamp)).append(")\n");
-        sb.append("  resolutionMillis: ").append(resolutionMillis).append("\n");
-        sb.append("  size: ").append(size).append("\n");
-
-        for (String s : streamNames) {
-            sb.append("  stream '").append(s).append("':\n");
-
-            int[] tuples = tupleCounts.get(s);
-            int[] keys = keyCounts.get(s);
-
-            sb.append("    tuples[0..27]: ");
-            for (int i = 0; i < Math.min(10, tuples.length); i++) sb.append(tuples[i]).append(" ");
-            sb.append("...\n");
-
-            sb.append("    keys[0..27]:   ");
-            for (int i = 0; i < Math.min(10, keys.length); i++) sb.append(keys[i]).append(" ");
-            sb.append("...\n");
-        }
-
-        sb.append("}");
-        return sb.toString();
     }
 
 }

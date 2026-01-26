@@ -11,7 +11,8 @@ import jgea.metrics.privacy.*;
 import jgea.metrics.results.F1Score;
 import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
-import jgea.query.MainQueryKeys;
+import jgea.query.MainQueryAirQuality;
+import jgea.query.MainQueryGeoLife;
 import query.LiebreContext;
 import jgea.metrics.performance.utils.StreamStatsWindow;
 
@@ -95,7 +96,8 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
-        MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original", this.minTs, this.maxTs);
+        MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
+        //MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
 
         this.originalResults = baselineOutcome.events();
         this.originalStats = baselineOutcome.statsWindow();
@@ -174,12 +176,11 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                 }
 
                 // Execute the main query
-                MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                //MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
 
                 StreamStatsWindow modifiedStats = modifiedOutcome.statsWindow();
                 qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalStats, modifiedStats));
-
-                // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("privacy", finalPrivacyScore);
                 return qualities;

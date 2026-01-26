@@ -1,6 +1,7 @@
 package jgea.problem;
 
 import event.DataLoader;
+import event.EventFactory;
 import event.GenericEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 import io.github.ericmedvet.jgea.core.problem.SimpleMOProblem;
@@ -9,7 +10,8 @@ import jgea.metrics.privacy.*;
 import jgea.metrics.results.F1Score;
 import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
-import jgea.query.MainQueryKeys;
+import jgea.query.MainQueryAirQuality;
+import jgea.query.MainQueryGeoLife;
 import query.LiebreContext;
 
 import java.util.*;
@@ -67,6 +69,7 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
         // Load the original stream of events from the CSV file
         DataLoader loader = new DataLoader(inputCsvPath, keyColumn);
         DataLoader.LoadResult result = loader.load();
+        EventFactory.setNumericAttributes(new HashSet<>(result.numericAttributes()));
 
         this.originalStream = result.events();
 
@@ -89,7 +92,8 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
-        MainQueryKeys.QueryResult baselineOutcome = MainQueryKeys.process(this.originalStream, "original", this.minTs, this.maxTs);
+        MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
+        //MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
 
         this.originalResults = baselineOutcome.events();
 
@@ -159,9 +163,9 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
                 }
 
                 // Execute the main query
-                MainQueryKeys.QueryResult modifiedOutcome = MainQueryKeys.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                //MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
 
-                // Populate the results map with F1 score, Euclidean distance and privacy score
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("privacy", finalPrivacyScore);
                 return qualities;
