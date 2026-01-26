@@ -45,6 +45,33 @@ You can use your own dataset by following these conventions:
 
 4. **Key Column:** If your dataset has a column that identifies parallel streams (e.g., a user ID or sensor ID), you have to specify its name in the experiment file. This column will be used as the partitioning key and will be excluded from streaming operators
 
+**Analysis Queries**
+
+The evaluation of both Results Similarity and Performance Similarity is based on the execution of a fixed query (Q) over the original and modified data streams.
+
+For the datasets provided with this project, two queries are already implemented:
+
+- `/src/main/java/jgea/query/MainQueryAirQuality.java` for the **AirQuality** datasets
+- `/src/main/java/jgea/query/MainQueryGeoLife.java` for the **GeoLife** datasets
+
+The analysis query must be consistent with the dataset used in the experiment.
+Only one analysis query should be active at a time, and it is selected directly in the problem definition classes (`StreamAnonymizationProblem.java` and `StreamAnonymizationProblem_2Objectives.java`) by adapting the corresponding code sections.
+
+Baseline execution on the original stream from `StreamAnonymizationProblem.java`:
+
+    MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
+    // MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
+
+Execution on the modified stream from `StreamAnonymizationProblem.java`:
+
+    MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+    // MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+
+When using a **custom dataset**, a corresponding analysis query must be implemented by the user.
+
+This custom query should follow the same structure as the provided examples (`MainQueryAirQuality.java` and `MainQueryGeoLife.java`) 
+and must define the streaming operators relevant to the analysis, specify the temporal resolution for the performance metric, and collect performance statistics using key and tuple recorders.
+
 ### 2. Generate the Grammar
 
 Before running an experiment with your own dataset, you must generate the grammar file that defines the search space. Run the `main` method of the grammar generator classes found in `src/main/java/jgea/grammar/`. You need to configure
@@ -115,9 +142,9 @@ For **privacy evaluation**, the following metrics are available and can be selec
 * `WEIGHTED_AVERAGE`: A weighted average of suppression, duplication, and modification.
 * `SUPPRESSION_ONLY`: A simple metric measuring only the fraction of suppressed tuples.
 
-**Important Note**: 
-- When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While the k-anonymity metrics may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
-- The **Performance Similarity** metric is based on event time, not wall-clock time. The `minTimestamp`, `maxTimestamp` are determined automatically from the dataset. The `resolution` of the buckets is fixed at **1 hour** (**3600000L milliseconds**), a value suitable for the provided datasets. If a different granularity is needed for a specific dataset, this value can be changed directly in `MainQueryKeys.java`.
+**Important Note**:
+
+When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While the k-anonymity metrics may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
 
 ### 4. Build the Project
 
