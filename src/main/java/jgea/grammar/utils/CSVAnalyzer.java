@@ -59,7 +59,7 @@ public class CSVAnalyzer {
                         String[] parts = rawValue.split("\\.");
                         String intPartString = parts[0].replace("-", "");
                         // Determine the number of digits in the integer part
-                        int intDigits = intPartString.isEmpty() ? 0 : (intPartString.equals("0") ? 1 : intPartString.length());
+                        int intDigits = intPartString.length();
 
                         // Update statistics for this attribute
                         statsMap.compute(header, (k, current) -> {
