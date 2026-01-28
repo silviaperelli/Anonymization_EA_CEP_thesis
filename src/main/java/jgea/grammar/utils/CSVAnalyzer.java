@@ -40,8 +40,12 @@ public class CSVAnalyzer {
         CSVFormat format = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setTrim(true).build();
         Map<String, AttributeStats> statsMap = new HashMap<>();
 
-        try (InputStream is = CSVAnalyzer.class.getClassLoader().getResourceAsStream(resourcePath);
-             Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+        InputStream is = CSVAnalyzer.class.getClassLoader().getResourceAsStream(resourcePath);
+        if (is == null) {
+            throw new IOException("Resource not found in classpath: " + resourcePath);
+        }
+
+        try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
              CSVParser parser = new CSVParser(reader, format)) {
 
             for (CSVRecord record : parser) {

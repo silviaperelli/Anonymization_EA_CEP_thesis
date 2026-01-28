@@ -2,6 +2,10 @@ package jgea.grammar;
 
 import jgea.grammar.utils.CSVAnalyzer;
 import jgea.grammar.utils.CSVAnalyzer.AttributeStats;
+import jgea.grammar.utils.GrammarUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +15,7 @@ import java.util.StringJoiner;
 
 public class GrammarGeneratorOnlyFilters {
 
-    private static final int DECIMAL_PRECISION_DIGITS = 1;
+    private static final Logger logger = LoggerFactory.getLogger(GrammarGeneratorOnlyFilters.class);
 
     public static void main(String[] args) throws IOException {
 
@@ -57,7 +61,7 @@ public class GrammarGeneratorOnlyFilters {
         sb.append("<value> ::= ");
         StringJoiner valueJoiner = new StringJoiner(" | ");
         for (String attribute : attributes) {
-            String cleanAttr = cleanAttribute(attribute);
+            String cleanAttr = GrammarUtils.cleanAttribute(attribute);
             valueJoiner.add("<" + cleanAttr + "_value>");
         }
         sb.append(valueJoiner).append("\n");
@@ -67,15 +71,15 @@ public class GrammarGeneratorOnlyFilters {
             AttributeStats stats = statsMap.get(attribute);
             if (stats == null) continue;
 
-            String cleanAttr = cleanAttribute(attribute);
+            String cleanAttr = GrammarUtils.cleanAttribute(attribute);
 
             sb.append(String.format(
                     "<%s_value> ::= <%s_intPart> . <%s_fracPart>\n",
                     cleanAttr, cleanAttr, cleanAttr
             ));
 
-            generateIntegerRule(sb, "<" + cleanAttr + "_intPart>", stats);
-            generateFixedFractionRule(sb, "<" + cleanAttr + "_fracPart>");
+            GrammarUtils.generateIntegerRule(sb, "<" + cleanAttr + "_intPart>", stats);
+            GrammarUtils.generateFixedFractionRule(sb, "<" + cleanAttr + "_fracPart>");
         }
 
         sb.append("<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
@@ -83,46 +87,10 @@ public class GrammarGeneratorOnlyFilters {
 
         try (FileWriter fw = new FileWriter(filePath)) {
             fw.write(sb.toString());
-            System.out.println("Grammar generated successfully");
+            logger.info("Grammar generated successfully: {}", filePath);
         } catch (IOException e) {
-            System.err.println("Error writing grammar");
+            logger.error("Error writing grammar to {}", filePath, e);
+            throw new RuntimeException(e);
         }
-    }
-
-    // Generate a rule for the integer part with a number of digits between minIntDigits and maxIntDigits
-    private static void generateIntegerRule(StringBuilder sb, String ruleName, AttributeStats stats) {
-        sb.append(ruleName).append(" ::= ");
-        StringJoiner options = new StringJoiner(" | ");
-
-        for (int i = stats.minIntDigits(); i <= stats.maxIntDigits(); i++) {
-            StringJoiner digits = new StringJoiner(" ");
-            if (i > 1) {
-                digits.add("<non_zero_digit>");
-                for (int j = 1; j < i; j++) digits.add("<digit>");
-            } else {
-                digits.add("<digit>");
-            }
-            options.add(digits.toString());
-        }
-
-        sb.append(options).append("\n");
-    }
-
-    // Generate a rule for the fixed fractional part (4 digits)
-    private static void generateFixedFractionRule(StringBuilder sb, String ruleName) {
-        sb.append(ruleName).append(" ::= ");
-        StringJoiner digits = new StringJoiner(" ");
-        for (int i = 0; i < DECIMAL_PRECISION_DIGITS; i++) {
-            digits.add("<digit>");
-        }
-        sb.append(digits).append("\n");
-    }
-
-    // Helper method to clean an attribute name
-    private static String cleanAttribute(String attributeName) {
-        // Replace invalid character with an underscore
-        String cleaned = attributeName.replaceAll("[^a-zA-Z0-9]+", "_");
-        // Remove underscore at the end or at the beginning of the string
-        return cleaned.replaceAll("^_+|_+$", "");
     }
 }
