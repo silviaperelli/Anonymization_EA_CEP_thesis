@@ -1,6 +1,8 @@
 package jgea.mappers;
 
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -9,6 +11,8 @@ import static jgea.mappers.utils.TreeUtils.findFirstTerminal;
 // Class responsible for parsing the grammar derivation tree (genotype) and translating it
 // into a structured QueryRepresentation (phenotype)
 public class TreeToRepresentation {
+
+    private static final Logger logger = LoggerFactory.getLogger(TreeToRepresentation.class);
 
     // Parse a node <pipeline> recursively and add found operators to a list
     public void parsePipelineNode(Tree<String> pipelineNode, List<QueryRepresentation.OperatorNode> operators) {
@@ -39,7 +43,7 @@ public class TreeToRepresentation {
             case "<map_duplicate>" -> operator = parseMapDuplicateNode(specificOpNode);
             case "<map_noise>" -> operator = parseMapNoiseNode(specificOpNode);
             case "<map_aggregate>" -> operator = parseMapAggregateNode(specificOpNode);
-            default -> System.err.println("Unknown operator type found: " + specificOpNode.content());
+            default -> logger.warn("Unknown operator type found in grammar tree: {}", specificOpNode.content());
         }
 
         if (operator != null) {
@@ -83,7 +87,7 @@ public class TreeToRepresentation {
 
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.FILTER, args);
         } catch (Exception e) {
-            System.err.printf("Error parsing filter node: %s\n", e.getMessage());
+            logger.warn("Error parsing filter node", e);
             return null;
         }
     }
@@ -100,7 +104,7 @@ public class TreeToRepresentation {
 
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_DUPLICATE, args);
         } catch (Exception e) {
-            System.err.printf("Error parsing duplicate map node: %s\n", e.getMessage());
+            logger.warn("Error parsing duplicate map node", e);
             return null;
         }
     }
@@ -128,7 +132,7 @@ public class TreeToRepresentation {
             QueryRepresentation.MapNoiseArgs args = new QueryRepresentation.MapNoiseArgs(attribute, percentage);
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_NOISE, args);
         } catch (Exception e) {
-            System.err.printf("Error parsing noise map node: %s\n", e.getMessage());
+            logger.warn("Error parsing noise map node", e);
             return null;
         }
     }
@@ -152,7 +156,7 @@ public class TreeToRepresentation {
             QueryRepresentation.MapAggregateArgs args = new QueryRepresentation.MapAggregateArgs(attribute);
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_AGGREGATE, args);
         }catch (Exception e) {
-            System.err.printf("Error parsing aggregate map node: %s\n", e.getMessage());
+            logger.warn("Error parsing aggregate map node", e);
             return null;
         }
     }

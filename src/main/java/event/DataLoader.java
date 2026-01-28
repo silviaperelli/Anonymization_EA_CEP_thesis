@@ -3,6 +3,8 @@ package event;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,7 @@ import java.util.Set;
  */
 public class DataLoader {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
     public record LoadResult(List<GenericEvent> events, List<String> numericAttributes) {}
 
     private final String resourcePath;
@@ -58,8 +61,14 @@ public class DataLoader {
         List<GenericEvent> events = new ArrayList<>();
         Set<String> numericHeaders = new HashSet<>();
 
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-             Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+        InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+
+        if (is == null) {
+            logger.error("Resource not found in classpath: {}", resourcePath);
+            throw new IOException("Resource not found in classpath: " + resourcePath);
+        }
+
+        try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
              CSVParser parser = new CSVParser(reader, format)) {
 
             List<CSVRecord> records = parser.getRecords();
@@ -74,7 +83,7 @@ public class DataLoader {
                     numericHeaders.add(header);
                 }
             }
-            System.out.println("Detected numeric attributes: " + numericHeaders);
+            logger.info("Detected numeric attributes: {}", numericHeaders);
 
             long idCounter = 0;
             // Parse each CSV record into a GenericEvent
@@ -103,7 +112,7 @@ public class DataLoader {
 
                 } catch (Exception e) {
                     // Skip malformed records but keep processing
-                    System.err.println("Skipping record due to parsing error: " + e.getMessage());
+                    logger.warn("Skipping record due to parsing error", e);
                 }
             }
         }

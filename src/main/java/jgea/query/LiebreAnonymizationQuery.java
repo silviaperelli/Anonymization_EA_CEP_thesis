@@ -5,6 +5,8 @@ import event.EventFactory;
 import event.GenericEvent;
 import jgea.mappers.QueryRepresentation;
 import jgea.query.utils.MovingAverageMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import query.Query;
 import component.operator.Operator;
 import component.source.Source;
@@ -25,6 +27,8 @@ import static jgea.query.utils.OperatorUtils.*;
 // processes an input stream to produce a modified stream of events
 public class LiebreAnonymizationQuery {
 
+    private static final Logger logger = LoggerFactory.getLogger(LiebreAnonymizationQuery.class);
+
     private static final int MOVING_AVERAGE_WINDOW_SIZE = 3;
     private final Random random;
 
@@ -40,6 +44,7 @@ public class LiebreAnonymizationQuery {
         List<String> linesFromCsv;
         try (InputStream is = LiebreAnonymizationQuery.class.getClassLoader().getResourceAsStream(inputFile)) {
             if (is == null) {
+                logger.error("Input CSV resource not found: {}", inputFile);
                 throw new IOException("Resource not found: " + inputFile);
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {

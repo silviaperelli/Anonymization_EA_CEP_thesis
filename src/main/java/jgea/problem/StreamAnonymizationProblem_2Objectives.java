@@ -12,6 +12,8 @@ import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQueryAirQuality;
 import jgea.query.MainQueryGeoLife;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import query.LiebreContext;
 
 import java.util.*;
@@ -20,6 +22,8 @@ import java.util.function.Function;
 
 // Define the multi-objective optimization problem
 public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRepresentation, Double> {
+
+    private static final Logger logger = LoggerFactory.getLogger(StreamAnonymizationProblem_2Objectives.class);
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
@@ -85,7 +89,7 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
         this.minTs = originalStream.stream().mapToLong(GenericEvent::getTimestamp).min().getAsLong();
         this.maxTs = originalStream.stream().mapToLong(GenericEvent::getTimestamp).max().getAsLong();
 
-        System.out.println(String.format("Timestamp detected: minTs=%d, maxTs=%d", this.minTs, this.maxTs));
+        logger.info("Timestamp detected: minTs={}, maxTs={}", minTs, maxTs);
 
         K_ANONYMITY_PRIVACY = new KAnonymityPrivacy(this.originalStream, 50, this.attributes);
         K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50, this.attributes);
@@ -97,7 +101,7 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
 
         this.originalResults = baselineOutcome.events();
 
-        System.out.println("Ground Truth generated");
+        logger.info("Ground Truth generated");
     }
 
     @Override
@@ -171,8 +175,7 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
                 return qualities;
 
             } catch (Exception e) {
-                System.err.printf("Error during fitness evaluation: %s", e.getMessage());
-                e.printStackTrace();
+                logger.error("Error during fitness evaluation", e);
                 qualities.put("results-similarity", 0.0);
                 qualities.put("privacy", 0.0);
                 return qualities;

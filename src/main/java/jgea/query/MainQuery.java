@@ -12,6 +12,8 @@ import component.source.SourceFunction;
 
 import event.GenericEvent;
 import jgea.metrics.performance.utils.MetricsConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import query.LiebreContext;
 import query.Query;
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class MainQuery {
+
+    private static final Logger logger = LoggerFactory.getLogger(MainQuery.class);
 
     // Record to contain the performance metrics during a query run
     public record PerformanceMetrics(long afterFilter1, long beforeAggregate, long afterAggregate, long beforeFilter2,
@@ -39,7 +43,7 @@ public class MainQuery {
         try {
             Files.createDirectories(Paths.get(metricsFilePath));
         } catch (IOException e) {
-            System.err.println("Error while creating the metrics directories: " + metricsFilePath);
+            logger.error("Error while creating the metrics directories: {}", metricsFilePath, e);
             throw e;
         }
 

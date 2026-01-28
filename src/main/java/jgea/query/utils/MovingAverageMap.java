@@ -8,7 +8,7 @@ import java.util.Deque;
 
 /**
  * A stateful MapFunction that replaces an attribute's value with a moving average
- * The average is calculated over the last 3 valid (non-NaN) values encountered in the stream
+ * The average is calculated over the last N valid (non-NaN) values encountered in the stream
  *
  * This class is stateful and maintains an internal buffer of recent values
  */
