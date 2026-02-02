@@ -20,7 +20,9 @@ Here is a high-level overview of the project's structure:
 
 *   **experiment.txt**: The main configuration file for a 3-objective experiment.
 
-*   **experiment_2objectives.txt**: A configuration file for a simplified 2-objective experiment.
+*   **experiment_2objectives.txt**: A configuration file for a simplified 2-objective experiment: privacy and results similarity.
+
+*   **experiment_2objPerfPrivacy.txt**: A configuration file for a simplified 2-objective experiment: privacy and performance similarity.
 
 ## How to Run an Experiment
 
@@ -55,7 +57,7 @@ For the datasets provided with this project, two queries are already implemented
 - `/src/main/java/jgea/query/MainQueryGeoLife.java` for the **GeoLife** datasets
 
 The analysis query must be consistent with the dataset used in the experiment.
-Only one analysis query should be active at a time, and it is selected directly in the problem definition classes (`StreamAnonymizationProblem.java` and `StreamAnonymizationProblem_2Objectives.java`) by adapting the corresponding code sections.
+Only one analysis query should be active at a time, and it is selected directly in the problem definition classes (`StreamAnonymizationProblem.java`, `StreamAnonymizationProblem_2Objectives.java` and `StreamAnonymizationProblem_2ObjectivesPerf.java`) by adapting the corresponding code sections.
 
 Baseline execution on the original stream from `StreamAnonymizationProblem.java`:
 
@@ -101,7 +103,7 @@ Pre-generated grammars are available:
 
 The experiment file (e.g., experiment.txt) allows to configure the entire experiment.
 
-The file `experiment.txt` is provided to run the problem with three objectives, while `experiment_2objectives.txt` is used to run it with two objectives (privacy and results similarity).
+The file `experiment.txt` is provided to run the problem with three objectives. The file `experiment_2objectives.txt` is used for the two-objective configuration considering privacy and result similarity, while `experiment_2objPerfPrivacy.txt` is used for the two-objective configuration considering privacy and performance similarity.
 
 In these files the `representation` block must point to the correct **grammar file** and the `problem` block must point to the correct **input file** and **grammar file** and must select the **privacy metric** to use and the **keyColumn**.
 
@@ -114,21 +116,6 @@ In these files the `representation` block must point to the correct **grammar fi
     problem = silvia.problem.anonymizationProblem(
       inputCsvPath = "datasets/airQuality_parallel.csv";
       grammarPath = "src/main/resources/generated-grammar-aggregate.bnf";
-      privacyMetric = K_ANONYMITY_CARDINALITY;
-      keyColumn = "SensorID"
-    )
-```
-
-**Example 2: 2-Objective Experiment `experiment_2objectives.txt`**
-
-**Note**: In the 2-objective version, it is not necessary to specify the grammar path in the problem definition.
-```
-...
-   representation = ea.r.cfgTree(grammar = ea.grammar.fromFile(
-            path = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf"));
-...
-    problem = silvia.problem.anonymizationProblem2O(
-      inputCsvPath = "datasets/airQuality_parallel.csv";
       privacyMetric = K_ANONYMITY_CARDINALITY;
       keyColumn = "SensorID"
     )

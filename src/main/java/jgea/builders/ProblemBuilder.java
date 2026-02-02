@@ -33,6 +33,7 @@ public class ProblemBuilder {
     @Cacheable
     public static StreamAnonymizationProblem_2Objectives anonymizationProblem2O(
             @Param("inputCsvPath") String inputCsvPath,
+            @Param("grammarPath") String grammarPath,
             @Param(value = "privacyMetric", dS = "K_ANONYMITY_CARDINALITY") PrivacyMetricChoice privacyMetric,
             @Param(value = "keyColumn", dS = "") String keyColumn,
             @Param(value = "name", iS = "{inputCsvPath}") String name
