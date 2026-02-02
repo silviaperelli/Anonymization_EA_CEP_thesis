@@ -115,8 +115,8 @@ In these files the `representation` block must point to the correct **grammar fi
 ...
     problem = silvia.problem.anonymizationProblem(
       inputCsvPath = "datasets/airQuality_parallel.csv";
-      grammarPath = "src/main/resources/generated-grammar-aggregate.bnf";
-      privacyMetric = K_ANONYMITY_CARDINALITY;
+      grammarPath = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf";
+      privacyMetric = K_ANONYMITY_CARDINALITY_MAX;
       keyColumn = "SensorID"
     )
 ```

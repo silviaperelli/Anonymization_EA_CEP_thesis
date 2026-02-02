@@ -12,7 +12,7 @@ ea.experiment(
       problem = silvia.problem.anonymizationProblem2O(
         inputCsvPath = "datasets/airQuality_parallel.csv";
         grammarPath = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf";
-        privacyMetric = K_ANONYMITY_CARDINALITY;
+        privacyMetric = K_ANONYMITY_CARDINALITY_MAX;
         keyColumn = "SensorID"
       )
     )
