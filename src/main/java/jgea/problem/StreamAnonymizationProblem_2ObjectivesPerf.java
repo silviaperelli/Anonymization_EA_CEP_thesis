@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 // Define the multi-objective optimization problem
-public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresentation, Double> {
+public class StreamAnonymizationProblem_2ObjectivesPerf implements SimpleMOProblem<QueryRepresentation, Double> {
 
-    private static final Logger logger = LoggerFactory.getLogger(StreamAnonymizationProblem.class);
+    private static final Logger logger = LoggerFactory.getLogger(StreamAnonymizationProblem_2ObjectivesPerf.class);
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
@@ -42,11 +42,9 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final static SequencedMap<String, Comparator<Double>> OBJECTIVES = new TreeMap<>(
             Map.ofEntries(
                     Map.entry("privacy", ((Comparator<Double>) Double::compareTo).reversed()),
-                    Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed()),
                     Map.entry("performance-similarity", ((Comparator<Double>) Double::compareTo).reversed())
             ));
 
-    private final static Distance<List<GenericEvent>> RESULTS_SIMILARITY = new F1Score();
     private final Distance<StreamStatsWindow> PERFORMANCE_SIMILARITY;
 
     private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY;
@@ -63,7 +61,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final String inputCsvPath;
     private final String keyColumn;
     private final List<GenericEvent> originalStream;
-    private final List<GenericEvent> originalResults; // Ground truth results, calculated once in the constructor
     private final StreamStatsWindow originalStats;
 
     private final PrivacyMetricChoice privacyMetricChoice;
@@ -71,7 +68,7 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
     private final long minTs;
     private final long maxTs;
 
-    public StreamAnonymizationProblem(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric, boolean isFilterOnly) throws Exception {
+    public StreamAnonymizationProblem_2ObjectivesPerf(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric, boolean isFilterOnly) throws Exception {
         this.inputCsvPath = inputCsvPath;
         this.keyColumn = keyColumn;
 
@@ -103,7 +100,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
         MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
         //MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
 
-        this.originalResults = baselineOutcome.events();
         this.originalStats = baselineOutcome.statsWindow();
 
         PERFORMANCE_SIMILARITY = new PerformanceSimilarity(this.originalStats, isFilterOnly);
@@ -142,7 +138,6 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
                         default -> privacyScoreEmpty = K_ANONYMITY_PRIVACY_CARDINALITY.apply(this.originalStream, modifiedEvents);
                     }
                     qualities.put("privacy", privacyScoreEmpty);
-                    qualities.put("results-similarity", 0.0);
                     StreamStatsWindow emptyStats = new StreamStatsWindow(
                             originalStats.streamNames(),
                             originalStats.minTimestamp(),
@@ -185,13 +180,11 @@ public class StreamAnonymizationProblem implements SimpleMOProblem<QueryRepresen
 
                 StreamStatsWindow modifiedStats = modifiedOutcome.statsWindow();
                 qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalStats, modifiedStats));
-                qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("privacy", finalPrivacyScore);
                 return qualities;
 
             } catch (Exception e) {
                 logger.error("Error during fitness evaluation", e);
-                qualities.put("results-similarity", 0.0);
                 qualities.put("performance-similarity", 0.0);
                 qualities.put("privacy", 0.0);
                 return qualities;
