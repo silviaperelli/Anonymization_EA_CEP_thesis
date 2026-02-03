@@ -49,7 +49,7 @@ public class MainQueryGeoLife {
 
         // Operator to filter users whose aggregated position is within the center box
         Operator<GenericEvent, GenericEvent> filter = query.addFilterOperator(
-                "filter_beijing_center_" + queryId,
+                "filter_center_" + queryId,
                 tuple -> {
                     double x = tuple.getAttribute("avg_X");
                     double y = tuple.getAttribute("avg_Y");
