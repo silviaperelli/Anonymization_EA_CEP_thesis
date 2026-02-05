@@ -8,7 +8,6 @@
     <artifactId>Anonymization_EA_CEP_thesis</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <!-- Repository per scaricare le versioni SNAPSHOT di JGEA -->
     <repositories>
         <repository>
             <id>ossrh-snapshots</id>

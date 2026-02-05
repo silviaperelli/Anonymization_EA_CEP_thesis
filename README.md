@@ -126,12 +126,10 @@ For **privacy evaluation**, the following metrics are available and can be selec
 * `K_ANONYMITY_CARDINALITY`: An advanced metric that combines k-anonymity with a cardinality penalty.
 * `K_ANONYMITY_CARDINALITY_MAX`: The k_anonymity metric with a cardinality penalty, the privacy score is based on the maximum standard deviation found across all tuples.
 * `K_ANONYMITY_CARDINALITY_Q99`: The k_anonymity metric with a cardinality penalty, the privacy score is based on the 99th percentile of the standard deviation.
+
+In addition, two very simple metrics are provided and were used for illustrative examples and preliminary experiments.
 * `WEIGHTED_AVERAGE`: A weighted average of suppression, duplication, and modification.
 * `SUPPRESSION_ONLY`: A simple metric measuring only the fraction of suppressed tuples.
-
-**Important Note**:
-
-When running a **filters-only** experiment, it is recommended to set `privacyMetric = SUPPRESSION_ONLY` for consistency. While the k-anonymity metrics may still be selected, `WEIGHTED_AVERAGE` is not meaningful in this context.
 
 ### 4. Build the Project
 
