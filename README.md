@@ -3,7 +3,7 @@
 This project uses a **multi-objective evolutionary algorithm**, implemented with the **JGEA** framework, to automatically discover optimal "data modifiers". A data modifier is a streaming query that transforms an original data stream (`S`) into a modified, privacy-preserving stream (`S'`). The quality of each data modifier is determined by running a fixed Liebre analysis query (Q) on the modified stream (S') and evaluating its impact on the final results and the overall performance profile.
 
 The core idea is to find the best possible trade-offs between three competing objectives:
-1. **Privacy**: How well the data are anonymized or the modified data protects against re-identification.
+1. **Privacy**: How well the data are anonymized and how effectively the modified data protects against re-identification.
 2. **Results Similarity**: The fidelity of the results produced by a fixed analysis query when run on the modified stream versus the original stream.
 3. **Performance Similarity**: The fidelity of the performance profile (tuple/key counts over time) of the analysis query.
 
@@ -133,7 +133,26 @@ In addition, two very simple metrics are provided and were used for illustrative
 
 ### 4. Build the Project
 
-Compile the project and package it into an executable JAR with all dependencies. Run from the project’s root directory:
+Before building this project, it is required to locally build a customized version of the **Liebre** stream processing framework.
+
+#### Clone and build Liebre
+
+Clone the Liebre repository directly on the `rich_agg` branch:
+
+```
+git clone -b rich_agg https://github.com/vincenzo-gulisano/Liebre.git
+cd Liebre
+```
+
+Build Liebre locally and install it in your local Maven repository:
+
+```
+mvn clean install
+```
+
+#### Build this project
+
+Compile this project from its root directory:
 
 ```
 mvn clean install
