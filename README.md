@@ -78,6 +78,7 @@ and must define the streaming operators relevant to the analysis, specify the te
 
 Before running an experiment with your own dataset, you must generate the grammar file that defines the search space. Run the `main` method of the grammar generator classes found in `src/main/java/jgea/grammar/`. You need to configure
 `csvPath` (the path to the dataset), `keyColumn` (the name of the partitioning key column), `grammarPath` (the path where the generated .bnf file will be saved).
+Multiple grammar generator classes are provided, each enabling a different subset of operators in the search space (e.g., filter-only, filter + map, and filter + map + aggregate). Users should run the generator that matches the intended experimental configuration.
 
 **Provided Grammars**
 
