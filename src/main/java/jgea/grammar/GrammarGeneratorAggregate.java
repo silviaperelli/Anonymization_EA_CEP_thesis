@@ -21,7 +21,7 @@ public class GrammarGeneratorAggregate {
     public static void main(String[] args) throws IOException {
 
         final String grammarPath = "src/main/resources/grammars/airQuality/airQuality_generated-grammar-aggregate.bnf";
-        final String csvPath = "datasets/airQuality_withSensorID.csv";
+        final String csvPath = "datasets/airQuality_parallel.csv";
         final String keyColumn = "SensorID";
 
         List<String> excludedColumns = new ArrayList<>(List.of("timestamp", "ID"));

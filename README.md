@@ -37,11 +37,11 @@ The project includes two main sets of datasets located in `src/main/resources/da
 
 **Using a Custom Dataset**
 
-You can use your own dataset by following these conventions:
+You can use your own dataset by placing it inside the directory `src/main/resources/datasets/` and following these conventions:
 
 1. **Format:** The file must be a standard CSV with a **comma (,)** as the delimiter and a **period (.)** as the decimal separator.
 
-2. **Timestamp Column:** A column named exactly **`timestamp`** must be present. Its values must be Unix timestamps in **milliseconds**.
+2. **Timestamp Column:** A column named exactly `timestamp` must be present. Its values must be Unix timestamps in **milliseconds**.
 
 3. **Data Sorting:** The dataset should be sorted by the timestamp column in non-decreasing (ascending) order.
 
