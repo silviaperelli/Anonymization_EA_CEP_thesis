@@ -1,4 +1,4 @@
-package jgea.metrics.privacy.utils; // Mettilo nello stesso package delle metriche
+package jgea.metrics.privacy.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

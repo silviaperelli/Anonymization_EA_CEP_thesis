@@ -182,7 +182,6 @@ public class KAnonymityPrivacyCardinality
         stats.min = stddevs.get(0);
         stats.max = stddevs.get(n - 1);
 
-        // Calcolo corretto dei quantili
         stats.q95 = stddevs.get((int) Math.floor(0.95 * (n - 1)));
         stats.q99 = stddevs.get((int) Math.floor(0.99 * (n - 1)));
 

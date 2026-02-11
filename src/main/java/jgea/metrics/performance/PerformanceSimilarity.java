@@ -16,9 +16,6 @@ public class PerformanceSimilarity implements Distance<StreamStatsWindow> {
 
     private final double dMax;
 
-    /**
-     * Il costruttore calcola D_max una sola volta basandosi sul profilo originale.
-     */
     // Pre-calculates D_max, so it is computed once based on the timestamp represented on the original performance profile
     public PerformanceSimilarity(StreamStatsWindow originalProfile, boolean isFilterOnly) {
         if (originalProfile == null) {

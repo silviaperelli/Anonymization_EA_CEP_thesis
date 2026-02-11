@@ -96,10 +96,8 @@ public final class StreamStatsWindow {
         return arr;
     }
 
-    // ------------------------------------------------------------------------
-    // UPDATE METHODS (Assuming no two threads touch same (stream, timestamp))
-    // ------------------------------------------------------------------------
 
+    // UPDATE METHODS (Assuming no two threads touch same (stream, timestamp))
     /**
      * Increase tuple count for a given stream and timestamp.
      * Safe under the assumption of no concurrent updates to the same cell.
@@ -120,10 +118,7 @@ public final class StreamStatsWindow {
         arr[idx(timestamp)] += amount;
     }
 
-    // ------------------------------------------------------------------------
     // DIFFERENCE COMPUTATION
-    // ------------------------------------------------------------------------
-
     /**
      * Compute a per-cell difference between this object and another.
      * The two objects must have identical stream sets and timestamp windows.
@@ -200,10 +195,8 @@ public final class StreamStatsWindow {
         return relativeError * relativeError;
     }
 
-    // ------------------------------------------------------------------------
-    // GETTERS
-    // ------------------------------------------------------------------------
 
+    // GETTERS
     public Set<String> streamNames() {
         return streamNames;
     }

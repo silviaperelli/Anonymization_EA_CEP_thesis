@@ -71,7 +71,7 @@ public class GenericEvent extends BaseRichTuple {
         String attrs = attributes.entrySet().stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining(", "));
-        return String.format("GenericEvent{timestamp=%d, key=%s, type=%s, attributes={%s}}",
+        return String.format("Event{timestamp=%d, key=%s, type=%s, attributes={%s}}",
                 getTimestamp(), getKey(), eventType, attrs);
     }
 }
