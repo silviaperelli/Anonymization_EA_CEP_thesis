@@ -3,37 +3,63 @@ package jgea.metrics.results;
 import event.GenericEvent;
 import io.github.ericmedvet.jgea.core.distance.Distance;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class F1Score implements Distance<List<GenericEvent>> {
 
-    // Calculate the F1-score by comparing two sets of alert events, an event is a match if it has the same tuple ID
+    /**
+     * Computes the F1-score between ground truth and predicted output events.
+     *
+     * A True Positive (TP) is counted when:
+     *  - timestamp is identical
+     *  - key is identical
+     *  - all specified numeric attributes differ by no more than a fixed relative threshold
+     */
     @Override
     public Double apply(List<GenericEvent> groundTruth, List<GenericEvent> predictions) {
-        if (groundTruth == null || predictions == null) {
+
+        if (groundTruth == null || predictions == null || predictions.isEmpty()) {
             return 0.0;
         }
 
-        // Extract the unique tuple ID from both lists
-        Set<Long> groundTruthIds = groundTruth.stream()
-                .map(event -> event.getAttribute("ID").longValue())
-                .collect(Collectors.toSet());
+        // Index ground truth events by (timestamp, key)
+        Map<String, List<GenericEvent>> gtIndex = new HashMap<>();
 
-        Set<Long> predictionIds = predictions.stream()
-                .map(event -> event.getAttribute("ID").longValue())
-                .collect(Collectors.toSet());
+        for (GenericEvent gt : groundTruth) {
+            String compositeKey = buildKey(gt);
+            gtIndex.computeIfAbsent(compositeKey, k -> new ArrayList<>())
+                    .add(gt);
+        }
+        int truePositive = 0;
 
-        // Calculate True Positives (TP), ID that exist in both ground truth and predictions
-        Set<Long> intersection = new HashSet<>(groundTruthIds);
-        intersection.retainAll(predictionIds);
-        int truePositive = intersection.size();
+        // For each predicted event, attempt to find a matching ground truth event
+        for (GenericEvent pred : predictions) {
+            String compositeKey = buildKey(pred);
+            List<GenericEvent> candidates = gtIndex.get(compositeKey);
+
+            // No ground truth events with same (timestamp, key)
+            if (candidates == null || candidates.isEmpty()) {
+                continue;
+            }
+
+            Iterator<GenericEvent> iterator = candidates.iterator();
+
+            while (iterator.hasNext()) {
+                GenericEvent gt = iterator.next();
+
+                // Check value similarity under relative tolerance
+                if (valuesAreSimilar(pred, gt)) {
+                    truePositive++;
+                    // Remove matched ground truth event to enforce one-to-one matching
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
 
         // Calculate False Positives and False Negatives
-        int falsePositive = predictionIds.size() - truePositive;
-        int falseNegative = groundTruthIds.size() - truePositive;
+        int falsePositive = predictions.size() - truePositive;
+        int falseNegative = groundTruth.size() - truePositive;
 
         // Calculate Precision and Recall
         double precision = (truePositive + falsePositive > 0) ? (double) truePositive / (truePositive + falsePositive) : 0.0;
@@ -45,4 +71,58 @@ public class F1Score implements Distance<List<GenericEvent>> {
         }
         return 2 * (precision * recall) / (precision + recall);
     }
+
+    /**
+     * Builds a composite key based on timestamp and logical key.
+     */
+    private String buildKey(GenericEvent e) {
+        return e.getTimestamp() + "_" + e.getKey();
+    }
+
+    /**
+     * Verifies whether all specified numeric attributes are similar
+     * between two events within a fixed relative error threshold.
+     *
+     * The relative error is computed as:
+     *      |gt - pred| / |gt|
+     *
+     * A special case is handled when the ground truth value is near zero.
+     */
+    private boolean valuesAreSimilar(GenericEvent pred, GenericEvent gt) {
+
+        // Relative tolerance threshold
+        final double percentageThreshold = 0.05;
+        //final double percentageThreshold = 0.006;
+
+        // Attributes to compare (dataset-specific)
+        final List<String> valueAttributes = List.of("CO(GT)", "NO2(GT)");
+        //final List<String> valueAttributes = List.of("avg_X", "avg_Y");
+
+
+        for (String attr : valueAttributes) {
+
+            double predValue = pred.getAttribute(attr);
+            double gtValue = gt.getAttribute(attr);
+
+            // If either value is missing, events cannot match
+            if (Double.isNaN(predValue) || Double.isNaN(gtValue)) {
+                return false;
+            }
+
+            if (Math.abs(gtValue) < 1e-9) {
+                if (Math.abs(predValue) > 1e-9) {
+                    return false;
+                }
+            } else {
+                double relativeError =
+                        Math.abs(gtValue - predValue) / Math.abs(gtValue);
+
+                if (relativeError > percentageThreshold) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
+
