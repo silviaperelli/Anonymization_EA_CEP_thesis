@@ -52,7 +52,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForExp(
-      path = $basePath + "p075privacy-performance.svg";
+      path = $basePath + "p75privacy-performance.svg";
       plot = ea.plot.multi.xyExp(
         y = f.mapValue(key = "performance-similarity"; of = ea.f.quality(of = f.percentile(p = 75; of = ea.f.all(); by = f.mapValue(key = privacy; of = ea.f.quality()))))
       );
@@ -60,7 +60,7 @@ ea.experiment(
       type = svg
     );
     ea.l.savePlotForExp(
-      path = $basePath + "p075performance-privacy.svg";
+      path = $basePath + "p75performance-privacy.svg";
       plot = ea.plot.multi.xyExp(
         y = f.mapValue(key = "privacy"; of = ea.f.quality(of = f.percentile(p = 75; of = ea.f.all(); by = f.mapValue(key = "performance-similarity"; of = ea.f.quality()))))
       );

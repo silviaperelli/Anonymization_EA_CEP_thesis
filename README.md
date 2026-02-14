@@ -20,7 +20,7 @@ Here is a high-level overview of the project's structure:
 
 *   **experiment.txt**: The main configuration file for a 3-objective experiment.
 
-*   **experiment_2objectives.txt**: A configuration file for a simplified 2-objective experiment: privacy and results similarity.
+*   **experiment_2objResPrivacy.txt**: A configuration file for a simplified 2-objective experiment: privacy and results similarity.
 
 *   **experiment_2objPerfPrivacy.txt**: A configuration file for a simplified 2-objective experiment: privacy and performance similarity.
 
@@ -104,7 +104,7 @@ Pre-generated grammars are available:
 
 The experiment file (e.g., experiment.txt) allows to configure the entire experiment.
 
-The file `experiment.txt` is provided to run the problem with three objectives. The file `experiment_2objectives.txt` is used for the two-objective configuration considering privacy and result similarity, while `experiment_2objPerfPrivacy.txt` is used for the two-objective configuration considering privacy and performance similarity.
+The file `experiment.txt` is provided to run the problem with three objectives. The file `experiment_2objResPrivacy.txt` is used for the two-objective configuration considering privacy and result similarity, while `experiment_2objPerfPrivacy.txt` is used for the two-objective configuration considering privacy and performance similarity.
 
 In these files the `representation` block must point to the correct **grammar file** and the `problem` block must point to the correct **input file** and **grammar file** and must select the **privacy metric** to use and the **keyColumn**.
 

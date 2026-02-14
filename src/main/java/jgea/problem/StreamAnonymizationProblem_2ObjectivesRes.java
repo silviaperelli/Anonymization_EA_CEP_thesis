@@ -11,7 +11,6 @@ import jgea.metrics.results.F1Score;
 import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQueryAirQuality;
-import jgea.query.MainQueryGeoLife;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import query.LiebreContext;
@@ -21,9 +20,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 // Define the multi-objective optimization problem
-public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<QueryRepresentation, Double> {
+public class StreamAnonymizationProblem_2ObjectivesRes implements SimpleMOProblem<QueryRepresentation, Double> {
 
-    private static final Logger logger = LoggerFactory.getLogger(StreamAnonymizationProblem_2Objectives.class);
+    private static final Logger logger = LoggerFactory.getLogger(StreamAnonymizationProblem_2ObjectivesRes.class);
 
     // Define a static counter for unique query ID
     private static final AtomicLong queryCounter = new AtomicLong(0);
@@ -66,7 +65,7 @@ public class StreamAnonymizationProblem_2Objectives implements SimpleMOProblem<Q
     private final long minTs;
     private final long maxTs;
 
-    public StreamAnonymizationProblem_2Objectives(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric) throws Exception {
+    public StreamAnonymizationProblem_2ObjectivesRes(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric) throws Exception {
         this.inputCsvPath = inputCsvPath;
         this.keyColumn = keyColumn;
 
