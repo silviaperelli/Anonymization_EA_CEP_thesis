@@ -85,8 +85,6 @@ public class F1Score implements Distance<List<GenericEvent>> {
      *
      * The relative error is computed as:
      *      |gt - pred| / |gt|
-     *
-     * A special case is handled when the ground truth value is near zero.
      */
     private boolean valuesAreSimilar(GenericEvent pred, GenericEvent gt) {
 
