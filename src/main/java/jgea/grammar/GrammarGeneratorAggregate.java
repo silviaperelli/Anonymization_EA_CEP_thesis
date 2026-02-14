@@ -1,8 +1,6 @@
 package jgea.grammar;
 
 import jgea.grammar.utils.CSVAnalyzer;
-import jgea.grammar.utils.CSVAnalyzer.AttributeStats;
-import jgea.grammar.utils.GrammarUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 public class GrammarGeneratorAggregate {
@@ -29,18 +26,16 @@ public class GrammarGeneratorAggregate {
             excludedColumns.add(keyColumn);
         }
 
-        // Extract attributes and their numerical bounds from a CSV file
+        // Extract attributes from a CSV file
         List<String> attributes = CSVAnalyzer.extractAttributes(csvPath, excludedColumns);
-        Map<String, CSVAnalyzer.AttributeStats> statsMap = CSVAnalyzer.analyze(csvPath, attributes);
         // Grammar generation
-        generateGrammar(attributes, statsMap, grammarPath);
+        generateGrammar(attributes, grammarPath);
     }
 
     // Generate a grammar to define operators like filters as strings and save the grammar in a file
-    public static void generateGrammar(List<String> attributes, Map<String, AttributeStats> statsMap, String filePath) {
-        if (statsMap == null || statsMap.isEmpty()) {
-            throw new IllegalArgumentException("Cannot generate grammar: stats map is empty or null.");
-        }
+    public static void generateGrammar(List<String> attributes, String filePath) {
+        final int minWindow = 3;
+        final int maxWindow = 10;
 
         StringBuilder sb = new StringBuilder();
 
@@ -51,7 +46,7 @@ public class GrammarGeneratorAggregate {
         sb.append("<filter> ::= <attribute> <condition> <value>\n");
         sb.append("<map_duplicate> ::= <probability>\n");
         sb.append("<map_noise> ::= <attribute> <percentage>\n");
-        sb.append("<map_aggregate> ::= <attribute>\n");
+        sb.append("<map_aggregate> ::= <attribute> <agg_fun> <window_size>\n");
 
         sb.append("<attribute> ::= ");
         StringJoiner attrJoiner = new StringJoiner(" | ");
@@ -60,34 +55,18 @@ public class GrammarGeneratorAggregate {
         }
         sb.append(attrJoiner).append("\n");
 
-        sb.append("<condition> ::= lt | le | gt | ge\n");
+        sb.append("<condition> ::= lt | gt\n");
+        sb.append("<value> ::= <dig> . <dig> <dig> E <sign> <dig>\n");
+        sb.append("<dig> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
+        sb.append("<sign> ::= + | -\n");
 
-        sb.append("<value> ::= ");
-        StringJoiner valueJoiner = new StringJoiner(" | ");
-        for (String attribute : attributes) {
-            String cleanAttr = GrammarUtils.cleanAttribute(attribute);
-            valueJoiner.add("<" + cleanAttr + "_value>");
+        sb.append("<agg_fun> ::= min | avg | max\n");
+        sb.append("<window_size> ::= ");
+        StringJoiner wJoiner = new StringJoiner(" | ");
+        for (int w = minWindow; w <= maxWindow; w++) {
+            wJoiner.add(Integer.toString(w));
         }
-        sb.append(valueJoiner).append("\n");
-
-        // Specific attribute rules for the filter value
-        for (String attribute : attributes) {
-            AttributeStats stats = statsMap.get(attribute);
-            if (stats == null) continue;
-
-            String cleanAttr = GrammarUtils.cleanAttribute(attribute);
-
-            sb.append(String.format(
-                    "<%s_value> ::= <%s_intPart> . <%s_fracPart>\n",
-                    cleanAttr, cleanAttr, cleanAttr
-            ));
-
-            GrammarUtils.generateIntegerRule(sb, "<" + cleanAttr + "_intPart>", stats);
-            GrammarUtils.generateFixedFractionRule(sb, "<" + cleanAttr + "_fracPart>");
-        }
-
-        sb.append("<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
-        sb.append("<non_zero_digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
+        sb.append(wJoiner).append("\n");
 
         sb.append("<probability> ::= 0.1 | 0.2 | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | 1.0\n");
         sb.append("<percentage> ::= 0.01 | 0.05 | 0.10 | 0.25\n");

@@ -56,6 +56,7 @@ public class TreeToRepresentation {
         }
     }
 
+
     // Parse a single filter node
     private QueryRepresentation.OperatorNode parseFilterNode(Tree<String> filterNode) {
         String attribute = null;
@@ -82,7 +83,7 @@ public class TreeToRepresentation {
             double value = Double.parseDouble(valueString);
             attribute = attribute.replace("'", "");
             // Create the specific arguments object for a filter
-            QueryRepresentation.Condition condition = QueryRepresentation.fromString(conditionString);
+            QueryRepresentation.Condition condition = QueryRepresentation.Condition.fromString(conditionString);
             QueryRepresentation.FilterArgs args = new QueryRepresentation.FilterArgs(attribute, condition, value);
 
             return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.FILTER, args);
@@ -139,25 +140,45 @@ public class TreeToRepresentation {
 
     // Parse a single aggregate map node
     private QueryRepresentation.OperatorNode parseMapAggregateNode(Tree<String> mapNode) {
-        String attribute = null;
 
-        // Search for the child <attribute> in the node
+        String attribute = null;
+        String functionString = null;
+        String windowString = null;
+
+        // Search for the children in the node
         for (Tree<String> child : mapNode) {
-            if ("<attribute>".equals(child.content())) {
-                attribute = findFirstTerminal(child);
+            switch (child.content()) {
+                case "<attribute>" -> attribute = findFirstTerminal(child);
+                case "<agg_fun>" -> functionString = findFirstTerminal(child);
+                case "<window_size>" -> windowString = findFirstTerminal(child);
             }
         }
 
-        if (attribute == null) return null;
+        if (attribute == null || functionString == null || windowString == null) {
+            return null;
+        }
 
-        try{
+        try {
             attribute = attribute.replace("'", "");
-            // Create the specific arguments object for an aggregate map
-            QueryRepresentation.MapAggregateArgs args = new QueryRepresentation.MapAggregateArgs(attribute);
-            return new QueryRepresentation.OperatorNode(QueryRepresentation.Operator.MAP_AGGREGATE, args);
-        }catch (Exception e) {
+
+            QueryRepresentation.AggregationFunction function =
+                    QueryRepresentation.AggregationFunction.fromString(functionString);
+
+            int windowSize = Integer.parseInt(windowString);
+
+            // Create the specific arguments object for a map aggregate
+            QueryRepresentation.MapAggregateArgs args =
+                    new QueryRepresentation.MapAggregateArgs(attribute, function, windowSize);
+
+            return new QueryRepresentation.OperatorNode(
+                    QueryRepresentation.Operator.MAP_AGGREGATE,
+                    args
+            );
+
+        } catch (Exception e) {
             logger.warn("Error parsing aggregate map node", e);
             return null;
         }
     }
+
 }

@@ -4,7 +4,8 @@ import common.util.Util;
 import event.EventFactory;
 import event.GenericEvent;
 import jgea.mappers.QueryRepresentation;
-import jgea.query.utils.MovingAverageMap;
+import jgea.query.utils.MovingAggregateMap;
+import jgea.query.utils.OperatorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import query.Query;
@@ -29,7 +30,6 @@ public class LiebreAnonymizationQuery {
 
     private static final Logger logger = LoggerFactory.getLogger(LiebreAnonymizationQuery.class);
 
-    private static final int MOVING_AVERAGE_WINDOW_SIZE = 3;
     private final Random random;
 
     public LiebreAnonymizationQuery() {
@@ -82,14 +82,22 @@ public class LiebreAnonymizationQuery {
             // Build the correct Liebre operator based on the node's type
             switch (node.type()) {
                 case FILTER:
-                    QueryRepresentation.FilterArgs filterArgs = (QueryRepresentation.FilterArgs) node.arguments();
-                    Operator<GenericEvent, GenericEvent> filterOperator = query.addFilterOperator(
-                            operatorId,
-                            event -> evaluateCondition(event, filterArgs)
-                    );
+                    QueryRepresentation.FilterArgs filterArgs =
+                            (QueryRepresentation.FilterArgs) node.arguments();
+
+                    Operator<GenericEvent, GenericEvent> filterOperator =
+                            query.addFilterOperator(
+                                    operatorId,
+                                    event -> OperatorUtils.evaluateCondition(
+                                            event,
+                                            filterArgs
+                                    )
+                            );
+
                     query.connect(lastOperatorInChain, filterOperator);
                     lastOperatorInChain = filterOperator;
                     break;
+
 
                 case MAP_DUPLICATE:
                     QueryRepresentation.MapDuplicateArgs duplicateArgs = (QueryRepresentation.MapDuplicateArgs) node.arguments();
@@ -129,11 +137,15 @@ public class LiebreAnonymizationQuery {
                     break;
 
                 case MAP_AGGREGATE:
-                    QueryRepresentation.MapAggregateArgs aggregateArgs = (QueryRepresentation.MapAggregateArgs) node.arguments();
-                    Operator<GenericEvent, GenericEvent> aggregateOperator = query.addMapOperator(
-                            operatorId,
-                            new MovingAverageMap(aggregateArgs.attribute(), MOVING_AVERAGE_WINDOW_SIZE)
+                    QueryRepresentation.MapAggregateArgs aggregateArgs =
+                            (QueryRepresentation.MapAggregateArgs) node.arguments();
+
+                    Operator<GenericEvent, GenericEvent> aggregateOperator =
+                            query.addMapOperator(
+                                    operatorId,
+                                    new MovingAggregateMap(aggregateArgs.attribute(), aggregateArgs.function(), aggregateArgs.windowSize())
                             );
+
                     query.connect(lastOperatorInChain, aggregateOperator);
                     lastOperatorInChain = aggregateOperator;
                     break;

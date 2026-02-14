@@ -2,6 +2,7 @@ package jgea.query.utils;
 
 import component.operator.in1.map.MapFunction;
 import event.GenericEvent;
+import jgea.mappers.QueryRepresentation;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -12,14 +13,17 @@ import java.util.Deque;
  *
  * This class is stateful and maintains an internal buffer of recent values
  */
-public class MovingAverageMap implements MapFunction<GenericEvent, GenericEvent> {
+public class MovingAggregateMap implements MapFunction<GenericEvent, GenericEvent> {
 
     private final String attribute;
     private final int windowSize;
+    private final QueryRepresentation.AggregationFunction function;
+
     private final Deque<Double> windowBuffer = new ArrayDeque<>();
 
-    public MovingAverageMap(String attribute, int windowSize) {
+    public MovingAggregateMap(String attribute, QueryRepresentation.AggregationFunction function, int windowSize) {
         this.attribute = attribute;
+        this.function = function;
         this.windowSize = windowSize;
     }
 
@@ -46,16 +50,41 @@ public class MovingAverageMap implements MapFunction<GenericEvent, GenericEvent>
             windowBuffer.removeFirst();
         }
 
-        // Calculate the average of all values currently in the buffer
-        double currentSum = 0.0;
-        for(Double value : windowBuffer) {
-            currentSum += value;
-        }
-        double average = currentSum / windowBuffer.size();
+        double aggregatedValue;
 
-        // Create a copy of the event and set the calculated average on the corresponding attribute
+        // Choose the right function
+        switch (function) {
+            case AVG -> {
+                double sum = 0.0;
+                for (double v : windowBuffer) {
+                    sum += v;
+                }
+                aggregatedValue = sum / windowBuffer.size();
+            }
+            case MIN -> {
+                double min = Double.POSITIVE_INFINITY;
+                for (double v : windowBuffer) {
+                    if (v < min) {
+                        min = v;
+                    }
+                }
+                aggregatedValue = min;
+            }
+            case MAX -> {
+                double max = Double.NEGATIVE_INFINITY;
+                for (double v : windowBuffer) {
+                    if (v > max) {
+                        max = v;
+                    }
+                }
+                aggregatedValue = max;
+            }
+            default -> throw new IllegalStateException("Unexpected aggregation function: " + function);
+        }
+
+        // Create a copy of the event and set the calculated transformation on the corresponding attribute
         GenericEvent anonymizedEvent = new GenericEvent(currentEvent);
-        OperatorUtils.setAttributeValue(anonymizedEvent, attribute, average);
+        OperatorUtils.setAttributeValue(anonymizedEvent, attribute, aggregatedValue);
 
         return anonymizedEvent;
     }

@@ -2,13 +2,7 @@
 <operator> ::= <filter>
 <filter> ::= <attribute> <condition> <value>
 <attribute> ::= 'avg_X' | 'avg_Y'
-<condition> ::= lt | le | gt | ge
-<value> ::= <avg_X_value> | <avg_Y_value>
-<avg_X_value> ::= <avg_X_intPart> . <avg_X_fracPart>
-<avg_X_intPart> ::= <non_zero_digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> <digit> <digit> <digit>
-<avg_X_fracPart> ::= <digit>
-<avg_Y_value> ::= <avg_Y_intPart> . <avg_Y_fracPart>
-<avg_Y_intPart> ::= <non_zero_digit> <digit> | <non_zero_digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> <digit> | <non_zero_digit> <digit> <digit> <digit> <digit> <digit> <digit>
-<avg_Y_fracPart> ::= <digit>
-<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-<non_zero_digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<condition> ::= lt | gt
+<value> ::= <dig> . <dig> <dig> E <sign> <dig>
+<dig> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<sign> ::= + | -

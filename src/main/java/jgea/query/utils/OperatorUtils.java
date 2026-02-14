@@ -18,8 +18,6 @@ public class OperatorUtils {
         return switch (condition) {
             case LESS_THAN -> eventValue < conditionValue;
             case GREATER_THAN -> eventValue > conditionValue;
-            case LESS_OR_EQUAL -> eventValue <= conditionValue;
-            case GREATER_OR_EQUAL -> eventValue >= conditionValue;
         };
     }
 
@@ -43,5 +41,4 @@ public class OperatorUtils {
         if (event == null) return;
         event.setAttribute(attributeToSet, newValue);
     }
-
 }
