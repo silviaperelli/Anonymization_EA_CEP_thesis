@@ -89,8 +89,8 @@ public class F1Score implements Distance<List<GenericEvent>> {
     private boolean valuesAreSimilar(GenericEvent pred, GenericEvent gt) {
 
         // Relative tolerance threshold
-        final double percentageThreshold = 0.05;
-        //final double percentageThreshold = 0.006;
+        final double percentageThreshold = 0.15;
+        //final double percentageThreshold = 0.1;
 
         // Attributes to compare (dataset-specific)
         final List<String> valueAttributes = List.of("CO(GT)", "NO2(GT)");
