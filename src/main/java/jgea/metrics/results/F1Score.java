@@ -7,6 +7,14 @@ import java.util.*;
 
 public class F1Score implements Distance<List<GenericEvent>> {
 
+    private final double percentageThreshold;
+    private final List<String> valueAttributes;
+
+    public F1Score(double percentageThreshold, List<String> valueAttributes) {
+        this.percentageThreshold = percentageThreshold;
+        this.valueAttributes = valueAttributes;
+    }
+
     /**
      * Computes the F1-score between ground truth and predicted output events.
      *
@@ -87,15 +95,6 @@ public class F1Score implements Distance<List<GenericEvent>> {
      *      |gt - pred| / |gt|
      */
     private boolean valuesAreSimilar(GenericEvent pred, GenericEvent gt) {
-
-        // Relative tolerance threshold
-        final double percentageThreshold = 0.15;
-        //final double percentageThreshold = 0.1;
-
-        // Attributes to compare (dataset-specific)
-        final List<String> valueAttributes = List.of("CO(GT)", "NO2(GT)");
-        //final List<String> valueAttributes = List.of("avg_X", "avg_Y");
-
 
         for (String attr : valueAttributes) {
 

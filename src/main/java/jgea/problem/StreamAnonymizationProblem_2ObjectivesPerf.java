@@ -13,6 +13,7 @@ import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQueryAirQuality;
 import jgea.query.MainQueryGeoLife;
+import jgea.query.MainQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import query.LiebreContext;
@@ -67,10 +68,16 @@ public class StreamAnonymizationProblem_2ObjectivesPerf implements SimpleMOProbl
     private final List<String> attributes;
     private final long minTs;
     private final long maxTs;
+    private final boolean isGeoLife;
 
     public StreamAnonymizationProblem_2ObjectivesPerf(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric, boolean isFilterOnly) throws Exception {
         this.inputCsvPath = inputCsvPath;
         this.keyColumn = keyColumn;
+
+        String p = inputCsvPath.toLowerCase();
+        if (p.contains("geolife")) isGeoLife = true;
+        else if (p.contains("airquality")) isGeoLife = false;
+        else throw new IllegalArgumentException("Unknown dataset in path: " + inputCsvPath);
 
         // Load the original stream of events from the CSV file
         DataLoader loader = new DataLoader(inputCsvPath, keyColumn);
@@ -97,8 +104,9 @@ public class StreamAnonymizationProblem_2ObjectivesPerf implements SimpleMOProbl
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
         // Execute the main query
-        MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
-        //MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
+        MainQueryResult baselineOutcome = isGeoLife
+                ? MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs)
+                : MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
 
         this.originalStats = baselineOutcome.statsWindow();
 
@@ -175,8 +183,9 @@ public class StreamAnonymizationProblem_2ObjectivesPerf implements SimpleMOProbl
                 }
 
                 // Execute the main query
-                MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
-                //MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                MainQueryResult modifiedOutcome = isGeoLife
+                        ? MainQueryGeoLife.process(modifiedEvents, queryId, this.minTs, this.maxTs)
+                        : MainQueryAirQuality.process(modifiedEvents, queryId, this.minTs, this.maxTs);
 
                 StreamStatsWindow modifiedStats = modifiedOutcome.statsWindow();
                 qualities.put("performance-similarity", PERFORMANCE_SIMILARITY.apply(originalStats, modifiedStats));

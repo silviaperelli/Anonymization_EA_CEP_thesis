@@ -17,7 +17,7 @@ import java.util.*;
 public class MainQueryAirQuality {
 
     // Record to contain the final results events and the collected performance metrics
-    public record QueryResult(List<GenericEvent> events, StreamStatsWindow statsWindow) {}
+    public record QueryResult(List<GenericEvent> events, StreamStatsWindow statsWindow) implements MainQueryResult {}
 
     public static QueryResult process(List<GenericEvent> inputStream, String queryId, long minTs, long maxTs) {
 

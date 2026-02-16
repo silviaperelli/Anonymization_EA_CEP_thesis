@@ -12,6 +12,7 @@ import jgea.problem.utils.PrivacyMetricChoice;
 import jgea.query.LiebreAnonymizationQuery;
 import jgea.query.MainQueryAirQuality;
 import jgea.query.MainQueryGeoLife;
+import jgea.query.MainQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import query.LiebreContext;
@@ -43,7 +44,7 @@ public class StreamAnonymizationProblem_2ObjectivesRes implements SimpleMOProble
                     Map.entry("results-similarity", ((Comparator<Double>) Double::compareTo).reversed())
             ));
 
-    private final static Distance<List<GenericEvent>> RESULTS_SIMILARITY = new F1Score();
+    private final Distance<List<GenericEvent>> RESULTS_SIMILARITY;
 
     private final Distance<List<GenericEvent>> K_ANONYMITY_PRIVACY;
     private final KAnonymityPrivacyCardinality K_ANONYMITY_PRIVACY_CARDINALITY;
@@ -65,10 +66,16 @@ public class StreamAnonymizationProblem_2ObjectivesRes implements SimpleMOProble
     private final List<String> attributes;
     private final long minTs;
     private final long maxTs;
+    private final boolean isGeoLife;
 
     public StreamAnonymizationProblem_2ObjectivesRes(String inputCsvPath, String keyColumn, PrivacyMetricChoice privacyMetric) throws Exception {
         this.inputCsvPath = inputCsvPath;
         this.keyColumn = keyColumn;
+
+        String p = inputCsvPath.toLowerCase();
+        if (p.contains("geolife")) isGeoLife = true;
+        else if (p.contains("airquality")) isGeoLife = false;
+        else throw new IllegalArgumentException("Unknown dataset in path: " + inputCsvPath);
 
         // Load the original stream of events from the CSV file
         DataLoader loader = new DataLoader(inputCsvPath, keyColumn);
@@ -95,9 +102,16 @@ public class StreamAnonymizationProblem_2ObjectivesRes implements SimpleMOProble
         K_ANONYMITY_PRIVACY_CARDINALITY = new KAnonymityPrivacyCardinality(this.originalStream, 50, this.attributes);
         MODIFICATION_PRIVACY = new ModificationPrivacy(this.attributes);
 
+        if (isGeoLife) {
+            RESULTS_SIMILARITY = new F1Score(0.10, List.of("avg_X", "avg_Y"));
+        } else {
+            RESULTS_SIMILARITY = new F1Score(0.15, List.of("CO(GT)", "NO2(GT)"));
+        }
+
         // Execute the main query
-        MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
-        //MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
+        MainQueryResult baselineOutcome = isGeoLife
+                ? MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs)
+                : MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
 
         this.originalResults = baselineOutcome.events();
 
@@ -167,8 +181,9 @@ public class StreamAnonymizationProblem_2ObjectivesRes implements SimpleMOProble
                 }
 
                 // Execute the main query
-                MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
-                //MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
+                MainQueryResult modifiedOutcome = isGeoLife
+                        ? MainQueryGeoLife.process(modifiedEvents, queryId, this.minTs, this.maxTs)
+                        : MainQueryAirQuality.process(modifiedEvents, queryId, this.minTs, this.maxTs);
 
                 qualities.put("results-similarity", RESULTS_SIMILARITY.apply(originalResults, modifiedOutcome.events()));
                 qualities.put("privacy", finalPrivacyScore);
