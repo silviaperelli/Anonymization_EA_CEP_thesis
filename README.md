@@ -56,23 +56,29 @@ For the datasets provided with this project, two queries are already implemented
 - `/src/main/java/jgea/query/MainQueryAirQuality.java` for the **AirQuality** datasets
 - `/src/main/java/jgea/query/MainQueryGeoLife.java` for the **GeoLife** datasets
 
-The analysis query must be consistent with the dataset used in the experiment.
-Only one analysis query should be active at a time, and it is selected directly in the problem definition classes (`StreamAnonymizationProblem.java`, `StreamAnonymizationProblem_2Objectives.java` and `StreamAnonymizationProblem_2ObjectivesPerf.java`) by adapting the corresponding code sections.
+The appropriate query is automatically selected inside the problem definition classes based on the dataset path.
 
-Baseline execution on the original stream from `StreamAnonymizationProblem.java`:
-
-    MainQueryAirQuality.QueryResult baselineOutcome = MainQueryAirQuality.process(this.originalStream, "original", this.minTs, this.maxTs);
-    // MainQueryGeoLife.QueryResult baselineOutcome = MainQueryGeoLife.process(this.originalStream, "original", this.minTs, this.maxTs);
-
-Execution on the modified stream from `StreamAnonymizationProblem.java`:
-
-    MainQueryAirQuality.QueryResult modifiedOutcome = MainQueryAirQuality.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
-    // MainQueryGeoLife.QueryResult modifiedOutcome = MainQueryGeoLife.process(modifiedEvents, String.valueOf(queryId), this.minTs, this.maxTs);
-
-When using a **custom dataset**, a corresponding analysis query must be implemented by the user.
+When using a **custom dataset**, a corresponding analysis query must be implemented by the user and integrated into the problem definition classes (`StreamAnonymizationProblem.java`, `StreamAnonymizationProblem_2Objectives.java` and `StreamAnonymizationProblem_2ObjectivesPerf.java`).
 
 This custom query should follow the same structure as the provided examples (`MainQueryAirQuality.java` and `MainQueryGeoLife.java`) 
 and must define the streaming operators relevant to the analysis, specify the temporal resolution for the performance metric, and collect performance statistics using key and tuple recorders.
+
+**Results Similarity Configuration**
+
+The Results Similarity metric is implemented in the configurable class `F1Score.java`.
+When instantiating the problem definition classes (e.g., `StreamAnonymizationProblem.java`), the constructor of F1Score requires:
+
+* A list of numeric attributes to be compared.
+* A relative tolerance threshold expressed as a percentage.
+
+For example for the dataset AirQuality:
+
+```
+new F1Score(0.15, List.of("CO(GT)", "NO2(GT)"));
+```
+
+
+
 
 ### 2. Generate the Grammar
 
