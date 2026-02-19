@@ -11,7 +11,7 @@ import jgea.mappers.QueryRepresentation;
 import java.io.IOException;
 import java.util.*;
 
-// TestQuery for the pipeline: Pipeline { map_duplicate(probability=0.30) | map_aggregate(attribute=avg_Y, function=avg, window=7) |
+// TestQuery for the pipeline on GeoLife dataset: Pipeline { map_duplicate(probability=0.30) | map_aggregate(attribute=avg_Y, function=avg, window=7) |
 // filter(avg_X > 5.0200) | map_aggregate(attribute=avg_Y, function=min, window=6) | filter(avg_Y > 0.0000) }
 
 public class TestQuery {
